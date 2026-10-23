@@ -83,7 +83,7 @@ public class Popup : PopupBase
 
             m_textDetail.text = Data.result == resultType.win ? "YOU WIN" : "YOU LOSE";
 
-            m_btnNext.SetActive(Data.result == resultType.win); m_btnAds.SetActive(m_btnNext.active);
+            m_btnNext.SetActive(Data.result == resultType.win); m_btnAds.SetActive(m_btnNext.activeInHierarchy);
 
             m_btnRetry.SetActive(Data.result != resultType.win);
 
