@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: ArcCamLong
+  m_EditorClassIdentifier: 
+  Player:
+  - {fileID: 11400000, guid: 19d97da81105346df99c5a5ad33142ee, type: 2}
+  Enemy:
+  - {fileID: 11400000, guid: 7ebecdc2f249644f497e7c154a680423, type: 2}
+  Data:
+  - content: "\u0110\xF4ng Anh Chi B\u1EA3o - \u0110\u1EE9ng \u0111\u1EA7u Ng\u0169
+      H\u1ED3 - Tao l\xE0 C\u1EA7m Long H\u1ED5"
+    imgCharacter: {fileID: 21300000, guid: 4c163b0f8734e43c28c8dd39b5442b23, type: 3}
+  - content: "B\u1ECDn H\u1ED3ng H\u01B0ng c\u1EED s\xE1t th\u1EE7 L\u1EADp Hoa gi\u1EBFt
+      T\u1EE9 B\u1EA5t C\u1EEDu \u0110\xF4ng Anh l\xE0 Th\u1EE7y Linh"
+    imgCharacter: {fileID: 21300000, guid: 4c163b0f8734e43c28c8dd39b5442b23, type: 3}
+  - content: "Tao ph\u1EA3i gi\u1EBFt con \u0111\xE0n b\xE0 c\u1EE7a L\u1EADp Hoa
+      \u0111\u1EC3 tr\u1EA3 th\xF9"
+    imgCharacter: {fileID: 21300000, guid: 4c163b0f8734e43c28c8dd39b5442b23, type: 3}
+  - content: "C\u1EA7m Long \u0111\u1EA1i ca, d\xF9ng x\xE1c con \u0111\xE0n b\xE0
+      n\xE0y d\u1EE5 L\u1EADp Hoa \u0111\u1EBFn, ch\xFAng ta s\u1EBD ch\u01A1i t\xE0n
+      n\xF3"
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "B\xF4n L\xF4i H\u1ED5, C\u1EA7m Long H\u1ED5, L\u1EADp Hoa Ch\xE1nh
+      Nh\xE2n tao \u0111\u1EBFn r\u1ED3i \u0111\xE2y "
+    imgCharacter: {fileID: 21300000, guid: 67d87ff1d219d403784a248f0ed95d3f, type: 3}
+  - content: "Kh\xF4ng ng\u1EDD m\xE0y d\xE1m \u0111\u01A1n \u0111ao ph\xF3 h\u1ED9i "
+    imgCharacter: {fileID: 21300000, guid: 4c163b0f8734e43c28c8dd39b5442b23, type: 3}
+  - content: "Ng\u01B0\u1EDDi y\xEAu m\xE0y C\u1EEDu Mu\u1ED9i ra th\u1EBF n\xE0y
+      l\xE0 do tao b\u1EA3o C\u1EA7m Long l\xE0m \u0111\u1EA5y"
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "\u0110\u1EC3 b\u1ECDn tao xem m\xE0y c\xF3 b\u1EA3n l\u0129nh g\xEC
+      m\xE0 d\xE1m m\u1ED9t m\xECnh \u0111\u1EBFn \u0111\xE2y"
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "H\xF4m nay tao \u0111\u1EBFn b\xE1o th\xF9 cho C\u1EEDu Mu\u1ED9i"
+    imgCharacter: {fileID: 21300000, guid: 67d87ff1d219d403784a248f0ed95d3f, type: 3}
+  - content: "Xem m\u1ED9t m\xECnh tao gi\u1EBFt \u0111\u01B0\u1EE3c m\u1EA5y th\u1EB1ng"
+    imgCharacter: {fileID: 21300000, guid: 67d87ff1d219d403784a248f0ed95d3f, type: 3}
+  itemReward: {fileID: 11400000, guid: 2ac006dfc6fba4325a8d663f79ae375f, type: 2}

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "726532054518",
+    "project_id": "ntgh-66197",
+    "storage_bucket": "ntgh-66197.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:726532054518:android:1f84a1e19af9949055bbd7",
+        "android_client_info": {
+          "package_name": "com.NK.NTGH"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "726532054518-dqh61naguult4j76p5haufn1kebf612u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV28rFKe8YSZQXY0e8LsbluqNPyd-Ved4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "726532054518-dqh61naguult4j76p5haufn1kebf612u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

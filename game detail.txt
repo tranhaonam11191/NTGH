@@ -1,0 +1,9 @@
+Item in Game
+
+attack -> reduce health enemy * weapon
+health -> increase health player
+skill -> x2, x3 attack * weapon
+time > reduce time attack of enemy
+
+money -> buy weapon, buy character
+exp -> increase level -> unlock character, unlock weapon

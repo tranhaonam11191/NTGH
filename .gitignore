@@ -1,0 +1,17 @@
+Library
+Build
+Temp
+obj
+.vs
+.gradle
+.DS_Store
+*.csproj
+*.pidb
+*.sln
+*.unityproj
+*.userprefs
+*.apk
+*.aab
+ProjectVersion.txt
+spine-csharp.csproj.meta
+spine-csharp.sln.meta

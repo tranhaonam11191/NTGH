@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: ArcQuaDen
+  m_EditorClassIdentifier: 
+  Player:
+  - {fileID: 11400000, guid: 523e35afc9e881f4b8254d6bb22fdefd, type: 2}
+  Enemy:
+  - {fileID: 11400000, guid: 50dffe8bfcb32a54198572825a7c4c8c, type: 2}
+  Data:
+  - content: "Tr\u1EA7n H\u1EA1o Nam m\xE0y h\u1ED5 b\xE1o l\u1EAFm \xE0? C\xF3 gan
+      th\xEC ch\u01A1i v\u1EDBi Qu\u1EA1 \u0110en tao, \u0111\u1EC3 xem T\u1EE9 Nh\u1ECB
+      L\u1EE5c c\u1EE7a m\xE0y c\xF3 ph\u1EA3i l\xE0 d\xF9ng ti\u1EC1n mua v\u1EC1
+      hay kh\xF4ng?"
+    imgCharacter: {fileID: 21300000, guid: 95afcf84258c4df4ebb0f74279cff9d1, type: 3}
+  - content: "\u0110\xF4ng Anh b\u1ECDn m\xE0y chuy\u1EC7n x\u1EA5u g\xEC c\u0169ng
+      l\xE0m, h\u1EA1i ch\u1EBFt bao anh em H\u1ED3ng H\u01B0ng"
+    imgCharacter: {fileID: 21300000, guid: 121610ad7febfb14095cfd9f04938b81, type: 3}
+  - content: "H\xF4m nay tao tuy\u1EC7t kh\xF4ng tha cho m\xE0y"
+    imgCharacter: {fileID: 21300000, guid: 121610ad7febfb14095cfd9f04938b81, type: 3}
+  - content: "D\u1EF1a v\xE0o m\xE0y m\xE0 \u0111\xF2i x\xFAc tao, \u0103n c*t \u0111i"
+    imgCharacter: {fileID: 21300000, guid: 95afcf84258c4df4ebb0f74279cff9d1, type: 3}
+  itemReward: {fileID: 11400000, guid: 5aee603ac393c4bc5b0846b220106b37, type: 2}

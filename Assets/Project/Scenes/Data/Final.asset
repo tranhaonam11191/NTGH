@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Final
+  m_EditorClassIdentifier: 
+  Player:
+  - {fileID: 11400000, guid: b00a35d17840444099127f6cb4e0938d, type: 2}
+  Enemy:
+  - {fileID: 11400000, guid: a47a6e412e225ac4d921f7f38122f7cf, type: 2}
+  Data:
+  - content: "Sau tr\u1EADn chi\u1EBFn C\u1EA7m Long H\u1ED5 v\xE0 L\u1EADp Hoa Ch\xE1nh
+      Nh\xE2n, giang h\u1ED3 \u0111\u1ED3n r\u1EB1ng c\u1EA3 hai \u0111\u1EC1u \u0111\xE3
+      ch\u1EBFt trong bi\u1EC3n l\u1EEDa"
+    imgCharacter: {fileID: 0}
+  - content: "Ch\u1EC9 c\xF3 B\xF4n L\xF4i H\u1ED5 Di\u1EC7u D\u01B0\u01A1ng tho\xE1t
+      \u0111\u01B0\u1EE3c"
+    imgCharacter: {fileID: 0}
+  - content: "B\u1EA1n c\u1EE7a L\u1EADp Hoa l\xE0 Th\xE1i T\u1EED - H\u1ED3ng H\u01B0ng
+      n\u1ED5i c\u01A1n th\u1ECBnh n\u1ED9, huy \u0111\u1ED9ng ng\u01B0\u1EDDi ng\xE0y
+      \u0111\xEAm c\xE0n qu\xE9t \u0111\u1ECBa b\xE0n \u0110\xF4ng Anh"
+    imgCharacter: {fileID: 21300000, guid: 0cd6a35d77ad34ad0be7efee4f625986, type: 3}
+  - content: "Di\u1EC7u D\u01B0\u01A1ng c\u0169ng cho \u0111\xE0n em tr\u1EA3 \u0111\u0169a,
+      \u0111\u1EADp ph\xE1 qu\xE1n do H\u1ED3ng H\u01B0ng b\u1EA3o k\xEA"
+    imgCharacter: {fileID: 21300000, guid: 643fd59597c934010a7d43ffe78ca59d, type: 3}
+  - content: "Hai b\xEAn nh\u1EDD ng\u01B0\u1EDDi trung gian, h\u1EB9n ra \u0111\xE0m
+      ph\xE1n"
+    imgCharacter: {fileID: 21300000, guid: d21e21f141deb4b078ccd959e542bde2, type: 3}
+  - content: "Di\u1EC7u D\u01B0\u01A1ng, tao h\u1ECFi m\xE0y, m\xE0y gi\u1EBFt b\u1EA1n
+      tao, gi\u1EDD t\xEDnh sao \u0111\xE2y?"
+    imgCharacter: {fileID: 21300000, guid: 0cd6a35d77ad34ad0be7efee4f625986, type: 3}
+  - content: "B\xEAn tao c\u0169ng c\xF3 t\u1EED th\u01B0\u01A1ng, t\xEDnh th\u1EBF
+      n\xE0o c\u0169ng kh\xF4ng h\u1EBFt"
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "Nghe n\xF3i m\xE0y c\xF2n mu\u1ED1n x\xFAc h\u1EBFt \u0110\xF4ng Anh
+      Ng\u0169 H\u1ED5"
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "L\xE0 Th\xE1i T\u1EED tao n\xF3i"
+    imgCharacter: {fileID: 21300000, guid: 0cd6a35d77ad34ad0be7efee4f625986, type: 3}
+  - content: "C\u1EA3 \u0110\xF4ng Anh X\xE3 \u0110o\xE0n \u1EE7ng h\u1ED9 tao, 1
+      m\xECnh m\xE0y \u0111\xF2i x\xFAc?"
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "Tao l\xEAn ti\u1EBFng, c\u1EA3 H\u1ED3ng H\u01B0ng s\u1EBD ch\u01A1i
+      \u0111\u1EBFn c\xF9ng"
+    imgCharacter: {fileID: 21300000, guid: 0cd6a35d77ad34ad0be7efee4f625986, type: 3}
+  - content: "H\u1ED3ng H\u01B0ng m\xE0y g\u1ECDi \u0111\u01B0\u1EE3c bao nhi\xEAu
+      ng\u01B0\u1EDDi, m\xE0y ch\xE9m tao, tao \u0111\xE2m m\xE0y, c\u1EE9 ti\u1EBFp
+      t\u1EE5c nh\u01B0 v\u1EADy \u0111i "
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "Tao n\xF3i bao nhi\xEAu c\xF3 b\u1EA5y nhi\xEAu, m\xE0y c\xF3 d\xE1m
+      ch\u01A1i t\u1EDBi c\xF9ng"
+    imgCharacter: {fileID: 21300000, guid: 0cd6a35d77ad34ad0be7efee4f625986, type: 3}
+  - content: "M\xE0y k\xE9o bao nhi\xEAu th\u1EB1ng, tao ki\u1EBFm \u0111\u01B0\u1EE3c
+      b\u1EA5y nhi\xEAu t\xEAn"
+    imgCharacter: {fileID: 21300000, guid: f18eac545193a4fd3a1a53495cf3a80f, type: 3}
+  - content: "\u0110\u01B0\u1EE3c, m\u1ED7i b\xEAn 500 ng\u01B0\u1EDDi, t\xECm 1
+      n\u01A1i v\u1EAFng v\u1EBB ch\u01A1i l\u1EDBn, b\xEAn n\xE0o g\u1EE5c h\u1EBFt
+      m\u1EDBi th\xF4i"
+    imgCharacter: {fileID: 21300000, guid: 0cd6a35d77ad34ad0be7efee4f625986, type: 3}
+  - content: "Th\xE1i T\u1EED, tao ch\u01A1i ch\u1EBFt m\xE0y"
+    imgCharacter: {fileID: 21300000, guid: 643fd59597c934010a7d43ffe78ca59d, type: 3}
