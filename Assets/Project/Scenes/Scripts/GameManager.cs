@@ -1,9 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using SS.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class GameManager : MonoBehaviour
         if (instance == null)
         {
             instance = this;
+            Core.Init();
         }
         else
         {
@@ -129,32 +131,19 @@ public class GameManager : MonoBehaviour
     {
         this.data = data;
         this.sceneName = sceneName;
-        callback = coLoadScene;
-        fade(callback);
-
-    }
-
-    void coLoadScene()
-    {
-        SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+        Core.Load<Transform>(sceneName, LoadSceneMode.Single);
     }
 
     public void AddScene(string sceneName, object data = null)
     {
         this.data = data;
         this.sceneName = sceneName;
-        callback = coAddScene;
-        callback();
+        Core.Load<Transform>(sceneName, LoadSceneMode.Additive);
     }
 
-    void coAddScene()
+    public static void CloseScene(string sceneName = "")
     {
-        SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
-    }
-
-    public static void CloseScene(string sceneName)
-    {
-        SceneManager.UnloadScene(sceneName);
+        Core.Close();
     }
 
     void fade(callbackLoadScene callback)

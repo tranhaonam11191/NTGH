@@ -1,7 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using SS.UI;
 
 public class MainController : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class MainController : MonoBehaviour
         if(Input.GetMouseButtonUp(0))
         {
             GameManager.instance.PlayAudio("Click");
-            GameManager.instance.LoadScene("Home");
+            SS.UI.Core.Load<HomeController>("Home");
         }    
     }
 }

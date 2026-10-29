@@ -1,7 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using SS.UI;
 
 public class StoryController : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class StoryController : MonoBehaviour
         data = GameManager.instance.GetData();
         if(data == null)
         {
-            GameManager.instance.LoadScene("Continue");
+            SS.UI.Core.Load<ContinueScene>("Continue");
             return;
         }
         lstContent = data.Data;
@@ -44,8 +45,10 @@ public class StoryController : MonoBehaviour
         }    
         else
         {
-            GameManager.Data = new DataForSceneGame(data.Player[0].Character, data.Enemy[0].Character, data.itemReward.ItemReward);
-            GameManager.instance.LoadScene("Game", new DataForSceneGame(data.Player[0].Character, data.Enemy[0].Character, data.itemReward.ItemReward));
+            var gameData = new DataForSceneGame(data.Player[0].Character, data.Enemy[0].Character, data.itemReward.ItemReward);
+            GameManager.Data = gameData;
+            GameManager.instance.data = gameData;
+            SS.UI.Core.Load<GameController>("Game");
         }    
     }
 

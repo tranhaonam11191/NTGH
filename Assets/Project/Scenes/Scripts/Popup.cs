@@ -1,9 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using SS.UI;
 
 public enum resultType
 {
@@ -40,11 +41,11 @@ public class PopupBase : MonoBehaviour
         HomeController.instance.SetData();
         if (m_animation != null)
         {
-            m_animation.transform.DOScale(Vector3.zero, .5f).SetEase(Ease.InBack).OnComplete(() => GameManager.CloseScene(sceneName));
+            m_animation.transform.DOScale(Vector3.zero, .5f).SetEase(Ease.InBack).OnComplete(() => SS.UI.Core.Close());
         }
         else
         {
-            GameManager.CloseScene(sceneName);
+            SS.UI.Core.Close();
         }        
     }
 }
@@ -99,19 +100,19 @@ public class Popup : PopupBase
     public void OnCLickNext()
     {
         InCreaseValue();
-        GameManager.instance.LoadScene("Story");
+        SS.UI.Core.Load<StoryController>("Story");
 
     }
 
     public void OnClickRetry()
     {
-        GameManager.instance.LoadScene("Story");
+        SS.UI.Core.Load<StoryController>("Story");
     }
 
     public void OnClickHome()
     {
         InCreaseValue();
-        GameManager.instance.LoadScene("Home");
+        SS.UI.Core.Load<HomeController>("Home");
     }
 
     void InCreaseValue(int coefficient = 1)

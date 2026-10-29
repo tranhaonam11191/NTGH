@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +7,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using SS.UI;
 
 public delegate void callback();
 
@@ -106,16 +107,14 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        if(GameManager.instance == null)
+        if(GameManager.instance != null)
         {
-            SceneManager.LoadScene("Main");
-            yield return null;
+            Data = (DataForSceneGame)GameManager.instance.data;
         }
-        Data = (DataForSceneGame)GameManager.instance.data;
+        
         if (Data == null)
         {
-            SceneManager.LoadScene("Main");
-            yield return null;
+            Data = new DataForSceneGame(new Character(), new Character(), null);
         }
 
         canClick = true;
@@ -191,7 +190,8 @@ public class GameController : MonoBehaviour
                 if (!endGame)
                 {
                     endGame = true;
-                    GameManager.instance.AddScene("Popup", new PopupData(resultType.lose, gold, Exp));                    
+                    GameManager.instance.data = new PopupData(resultType.lose, gold, Exp);
+                    SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive);                    
                 }
             }
             Enemy.m_timeToAttack.fillAmount = 1;
@@ -471,7 +471,8 @@ public class GameController : MonoBehaviour
             {
                 endGame = true;
                 Debug.Log("Gold Win: " + gold);
-                GameManager.instance.AddScene("Popup", new PopupData(resultType.win, gold, Exp));
+                GameManager.instance.data = new PopupData(resultType.win, gold, Exp);
+                SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive);
 
                 if(AdsController.instance.checkReward() && Data.itemReward != null)
                 {
@@ -485,7 +486,8 @@ public class GameController : MonoBehaviour
     {
         yield return new WaitForSeconds(.25f);
         Debug.Log("Item Name: " + Data.itemReward.Name);
-        GameManager.instance.AddScene("PopupReward", Data.itemReward);
+        GameManager.instance.data = Data.itemReward;
+        SS.UI.Core.Load<PopupReward>("PopupReward", LoadSceneMode.Additive);
     }
 
     [SerializeField] string _increaseAudio;

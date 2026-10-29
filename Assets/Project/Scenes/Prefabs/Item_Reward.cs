@@ -1,8 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using SS.UI;
 
 public class Item_Reward : MonoBehaviour
 {
@@ -59,7 +61,8 @@ public class Item_Reward : MonoBehaviour
         {
             if (itemReward != null)
             {                
-                GameManager.instance.AddScene("PopupYesNo", itemReward);
+                GameManager.instance.data = itemReward;
+                SS.UI.Core.Load<PopupYesNo>("PopupYesNo", LoadSceneMode.Additive);
             }
         }
         else

@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using SS.UI;
 
 
 public enum ItemMode
@@ -56,6 +57,6 @@ public class PopupReward : PopupBase
 
     public void OnClickHome()
     {
-        GameManager.instance.LoadScene("Home");
+        SS.UI.Core.Load<HomeController>("Home");
     }
 }

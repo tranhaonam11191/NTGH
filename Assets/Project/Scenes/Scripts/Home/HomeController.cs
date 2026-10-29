@@ -1,7 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using SS.UI;
 
 public class HomeController : MonoBehaviour
 {
@@ -29,12 +31,12 @@ public class HomeController : MonoBehaviour
 
     public void onCLickPlay()
     {        
-        GameManager.instance.LoadScene("Story");
+        SS.UI.Core.Load<StoryController>("Story");
     }
 
     public void OnClickWeapon()
     {        
-        GameManager.instance.AddScene("ShopWeapon");
+        SS.UI.Core.Load<ShopWeapon>("ShopWeapon", LoadSceneMode.Additive);
     }
 
     public void OnClickMap()

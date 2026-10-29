@@ -1,8 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using SS.UI;
 
 public class PopupYesNo : PopupBase
 {
@@ -49,6 +51,6 @@ public class PopupYesNo : PopupBase
 
     void buySucced()
     {
-        GameManager.instance.AddScene("SceneComplete");
+        SS.UI.Core.Load<SceneComplete>("SceneComplete", LoadSceneMode.Additive);
     }
 }
