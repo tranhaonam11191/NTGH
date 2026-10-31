@@ -16,10 +16,10 @@ public class ButtonAudio : MonoBehaviour
     void Play()
     {
         Debug.Log("Play");
-        if (GameManager.instance != null)
+        if (SOManager.instance != null)
         {
             Debug.Log("GameManager.instance != null");
-            GameManager.instance.PlayAudio("Click");            
+            SOManager.instance.PlayAudio("Click");            
         }
     }
 }

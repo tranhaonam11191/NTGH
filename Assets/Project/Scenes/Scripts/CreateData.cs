@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/StoryData", order = 1)]
-public class CreateData : ScriptableObject
+public class LevelData : ScriptableObject
 {
     public List<CreateDataCharacter> Player = new List<CreateDataCharacter>();
 

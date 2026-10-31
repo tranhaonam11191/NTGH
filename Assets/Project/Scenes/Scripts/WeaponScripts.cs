@@ -42,7 +42,7 @@ public class WeaponScripts : MonoBehaviour
             {
                 rotate = false;
                 m_effEnd.Play();
-                GameManager.instance.PlayAudio("Hit");
+                SOManager.instance.PlayAudio("Hit");
                 //m_imgWeapon.SetActive(false);
                 StartCoroutine(coEndMove());
             });

@@ -72,15 +72,11 @@ public class Popup : PopupBase
         }
     }
 
-    public override void Start()
-    {
-        base.Start();
-
+    public void Setup(PopupData data)
+    {        
         m_btnAds.GetComponent<Button>().interactable = AdsController.instance.checkReward();
-
-        if (GameManager.instance.data != null)
-        {
-            Data = (PopupData)GameManager.instance.data;
+        
+            Data = data;
 
             m_textDetail.text = Data.result == resultType.win ? "YOU WIN" : "YOU LOSE";
 
@@ -92,8 +88,7 @@ public class Popup : PopupBase
 
             m_textEXP.text = "EXP: " + Data.Exp.ToString();
 
-            m_textGOLD.text = "Money: " + Data.Gold.ToString();
-        }
+            m_textGOLD.text = "Money: " + Data.Gold.ToString();        
     }
 
 
@@ -117,9 +112,9 @@ public class Popup : PopupBase
 
     void InCreaseValue(int coefficient = 1)
     {
-        GameManager.story_num++;        
-        Debug.Log("story_num: " + GameManager.story_num);
-        PlayerPrefs.SetInt(Const.NUM_STORY, GameManager.story_num);
+        SOManager.story_num++;        
+        Debug.Log("story_num: " + SOManager.story_num);
+        PlayerPrefs.SetInt(Const.NUM_STORY, SOManager.story_num);
 
         int valueEXP = PlayerPrefs.GetInt(Const.EXP) + (Data.Exp * coefficient);
         PlayerPrefs.SetInt(Const.EXP, valueEXP);

@@ -10,7 +10,7 @@ public class MainController : MonoBehaviour
     {
         if(Input.GetMouseButtonUp(0))
         {
-            GameManager.instance.PlayAudio("Click");
+            SOManager.instance.PlayAudio("Click");
             SS.UI.Core.Load<HomeController>("Home");
         }    
     }

@@ -19,9 +19,9 @@ public class PopupYesNo : PopupBase
 
     [SerializeField] Button m_btnMoney, m_btnAds;
 
-    private void Start()
+    public void Setup(CreateItemReward data)
     {
-        Data = (CreateItemReward)GameManager.instance.data;
+        Data = data;
 
         m_btnMoney.interactable = Data.ItemReward.Price <= PlayerPrefs.GetInt(Const.GOLD);
 

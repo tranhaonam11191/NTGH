@@ -12,7 +12,7 @@ public class StoryController : MonoBehaviour
 
     [SerializeField] Conversation m_conversation;
 
-    CreateData data;
+    LevelData data;
 
     public static int numConversation;
     private void Awake()
@@ -23,7 +23,7 @@ public class StoryController : MonoBehaviour
     private void Start()
     {
         Debug.Log("Start");
-        data = GameManager.instance.GetData();
+        data = SOManager.instance.CurrentLevelData;
         if(data == null)
         {
             SS.UI.Core.Load<ContinueScene>("Continue");
@@ -44,10 +44,7 @@ public class StoryController : MonoBehaviour
             numConversation++;
         }    
         else
-        {
-            var gameData = new DataForSceneGame(data.Player[0].Character, data.Enemy[0].Character, data.itemReward.ItemReward);
-            GameManager.Data = gameData;
-            GameManager.instance.data = gameData;
+        {            
             SS.UI.Core.Load<GameController>("Game");
         }    
     }

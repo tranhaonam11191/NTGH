@@ -87,7 +87,7 @@ public class GameController : MonoBehaviour
 
     bool GameOver;
 
-    DataForSceneGame Data;
+    LevelData Data;
 
     [SerializeField] CharacterOnGame Player, Enemy;
 
@@ -107,14 +107,14 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     IEnumerator Start()
     {
-        if(GameManager.instance != null)
+        if(SOManager.instance != null)
         {
-            Data = (DataForSceneGame)GameManager.instance.data;
+            Data = SOManager.instance.CurrentLevelData;
         }
-        
-        if (Data == null)
-        {
-            Data = new DataForSceneGame(new Character(), new Character(), null);
+
+        if(Data == null)
+        {            
+            yield break;
         }
 
         canClick = true;
@@ -140,7 +140,7 @@ public class GameController : MonoBehaviour
 
     void SetupWeapon()
     {
-        weapon = GameManager.instance.GetWeapon();
+        weapon = SOManager.instance.GetWeapon();
         if(weapon != null)
         {
             m_WeaponImage.sprite = weapon.ItemReward.Sprite;
@@ -185,13 +185,12 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            if(Attack(Player, Data.character_Enemy.attack, enemyWeapon, Data.character_Enemy.health))
+            if(Attack(Player, Data.Enemy[0].Character.attack, enemyWeapon, Data.Enemy[0].Character.health))
             {
                 if (!endGame)
                 {
-                    endGame = true;
-                    GameManager.instance.data = new PopupData(resultType.lose, gold, Exp);
-                    SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive);                    
+                    endGame = true;                    
+                    SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive, (popup) => popup.Setup(new PopupData(resultType.lose, gold, Exp)));                    
                 }
             }
             Enemy.m_timeToAttack.fillAmount = 1;
@@ -228,9 +227,9 @@ public class GameController : MonoBehaviour
 
     void SetupCharacter()
     {
-        Player.Setup(Data.character_User);
+        Player.Setup(Data.Player[0].Character);
 
-        Enemy.Setup(Data.character_Enemy);
+        Enemy.Setup(Data.Enemy[0].Character);
     }
 
     public List<GameItem> lstOK = new List<GameItem>();
@@ -465,14 +464,13 @@ public class GameController : MonoBehaviour
     #region PlayerAction
     public void PlayerAttack(bool specialAttack = false)
     {
-        if(Attack(Enemy, Data.character_User.attack, playerWeapon, Data.character_User.health, specialAttack))
+        if(Attack(Enemy, Data.Player[0].Character.attack, playerWeapon, Data.Player[0].Character.health, specialAttack))
         {
             if(!endGame)
             {
                 endGame = true;
-                Debug.Log("Gold Win: " + gold);
-                GameManager.instance.data = new PopupData(resultType.win, gold, Exp);
-                SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive);
+                Debug.Log("Gold Win: " + gold);                
+                SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive, onSceneLoaded: (popup) => popup.Setup(new PopupData(resultType.win, gold, Exp)));
 
                 if(AdsController.instance.checkReward() && Data.itemReward != null)
                 {
@@ -484,9 +482,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator coPopupReward()
     {
-        yield return new WaitForSeconds(.25f);
-        Debug.Log("Item Name: " + Data.itemReward.Name);
-        GameManager.instance.data = Data.itemReward;
+        yield return new WaitForSeconds(.25f);        
         SS.UI.Core.Load<PopupReward>("PopupReward", LoadSceneMode.Additive);
     }
 

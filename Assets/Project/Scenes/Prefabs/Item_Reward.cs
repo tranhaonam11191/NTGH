@@ -60,9 +60,8 @@ public class Item_Reward : MonoBehaviour
         if (!isUnlock)
         {
             if (itemReward != null)
-            {                
-                GameManager.instance.data = itemReward;
-                SS.UI.Core.Load<PopupYesNo>("PopupYesNo", LoadSceneMode.Additive);
+            {                                
+                SS.UI.Core.Load<PopupYesNo>("PopupYesNo", LoadSceneMode.Additive, (popup) => popup.Setup(itemReward));
             }
         }
         else

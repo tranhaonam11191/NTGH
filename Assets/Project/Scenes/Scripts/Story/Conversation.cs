@@ -59,7 +59,7 @@ public class Conversation : MonoBehaviour
 
     public void OnClickContent()
     {
-        GameManager.instance.PlayAudio("Click2");
+        SOManager.instance.PlayAudio("Click2");
         StoryController.instance.SetConversation();
     }    
 }

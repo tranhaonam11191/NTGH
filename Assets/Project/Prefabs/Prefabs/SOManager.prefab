@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2116789525376175194}
   - component: {fileID: 4013585663928880380}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: SOManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46,13 +46,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d6203f05fd9cc349b0e370dfb90fcc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  allDataStory: {fileID: 11400000, guid: 00a38bf3ce2cf0f42b0f1b097a095488, type: 2}
+  allDataStory:
+  - {fileID: 11400000, guid: 8b1098426f4f2b5449e095b4afb09bec, type: 2}
+  - {fileID: 11400000, guid: 276db8a6bae55a2499f002614deaf72d, type: 2}
   itemRewards:
   - {fileID: 11400000, guid: 5aee603ac393c4bc5b0846b220106b37, type: 2}
   - {fileID: 11400000, guid: b7781be4c5bc246f1a3e931e9f52d303, type: 2}
   m_audioSource: {fileID: 6020146002141508088}
   m_imgFade: {fileID: 4720993061650786778}
-  sceneName: 
 --- !u!1 &5424722394473701495
 GameObject:
   m_ObjectHideFlags: 0

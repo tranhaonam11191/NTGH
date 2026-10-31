@@ -35,10 +35,9 @@ public class PopupReward : PopupBase
 
     ItemReward data;
 
-    public override void Start()
-    {
-        base.Start();
-        data = (ItemReward)GameManager.instance.data;
+    public void Setup(ItemReward data)
+    {        
+        this.data = data;
         m_textName.text = data.Name;
         m_img.sprite = data.Sprite;
     }
