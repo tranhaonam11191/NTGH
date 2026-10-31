@@ -15,8 +15,7 @@ public class ShapesManager : MonoBehaviour
 
     private int score;
 
-    public readonly Vector2 BottomRight = new Vector2(-2.37f, -4.27f);
-    public readonly Vector2 CandySize = new Vector2(0.7f, 0.7f);
+    public Vector2 BottomRight {get; private set;}    
 
     private GameState state = GameState.None;
     private GameObject hitGo = null;
@@ -34,6 +33,9 @@ public class ShapesManager : MonoBehaviour
     void Awake()
     {
         DebugText.enabled = ShowDebugInfo;
+
+        BottomRight = new Vector2(Constants.ItemSize.x * -1 * ((Constants.Columns - 1) / 2 ),Constants.ItemSize.y * -1 * ((Constants.Rows - 1) / 2 ));
+        Debug.Log("BottomRight: " + BottomRight);
     }
 
     // Use this for initialization
@@ -44,6 +46,7 @@ public class ShapesManager : MonoBehaviour
         InitializeCandyAndSpawnPositions();
 
         StartCheckForPotentialMatches();
+                      
     }
 
     /// <summary>
@@ -141,10 +144,11 @@ public class ShapesManager : MonoBehaviour
 
     private void InstantiateAndPlaceNewCandy(int row, int column, GameObject newCandy)
     {
+        Vector2 pos = BottomRight + new Vector2(column * Constants.ItemSize.x, row * Constants.ItemSize.y);
         GameObject go = Instantiate(newCandy,
-            BottomRight + new Vector2(column * CandySize.x, row * CandySize.y), Quaternion.identity)
+            pos , Quaternion.identity)
             as GameObject;
-
+        Debug.Log("InstantiateAndPlaceNewCandy: " + go.name + " row: " + row + " column: " + column + " pos: " + pos);        
         //assign the specific properties
         go.GetComponent<Shape>().Assign(newCandy.GetComponent<Shape>().Type, row, column);
         shapes[row, column] = go;
@@ -156,7 +160,7 @@ public class ShapesManager : MonoBehaviour
         for (int column = 0; column < Constants.Columns; column++)
         {
             SpawnPositions[column] = BottomRight
-                + new Vector2(column * CandySize.x, Constants.Rows * CandySize.y);
+                + new Vector2(column * Constants.ItemSize.x, Constants.Rows * Constants.ItemSize.y);
         }
     }
 
@@ -354,8 +358,8 @@ public class ShapesManager : MonoBehaviour
     private void CreateBonus(Shape hitGoCache)
     {
         GameObject Bonus = Instantiate(GetBonusFromType(hitGoCache.Type), BottomRight
-            + new Vector2(hitGoCache.Column * CandySize.x,
-                hitGoCache.Row * CandySize.y), Quaternion.identity)
+            + new Vector2(hitGoCache.Column * Constants.ItemSize.x,
+                hitGoCache.Row * Constants.ItemSize.y), Quaternion.identity)
             as GameObject;
         shapes[hitGoCache.Row, hitGoCache.Column] = Bonus;
         var BonusShape = Bonus.GetComponent<Shape>();
@@ -408,7 +412,7 @@ public class ShapesManager : MonoBehaviour
         foreach (var item in movedGameObjects)
         {
             item.transform.positionTo(Constants.MoveAnimationMinDuration * distance, BottomRight +
-                new Vector2(item.GetComponent<Shape>().Column * CandySize.x, item.GetComponent<Shape>().Row * CandySize.y));
+                new Vector2(item.GetComponent<Shape>().Column * Constants.ItemSize.x, item.GetComponent<Shape>().Row * Constants.ItemSize.y));
         }
     }
 
