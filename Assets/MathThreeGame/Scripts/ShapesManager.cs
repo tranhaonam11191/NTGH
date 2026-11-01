@@ -34,7 +34,7 @@ public class ShapesManager : MonoBehaviour
     {
         DebugText.enabled = ShowDebugInfo;
 
-        BottomRight = new Vector2(Constants.ItemSize.x * -1 * ((Constants.Columns - 1) / 2 ),Constants.ItemSize.y * -1 * ((Constants.Rows - 1) / 2 ));
+        BottomRight = new Vector2(Constants.ItemSize.x * -1 * ((Constants.Columns - 1) / 2 ),Constants.ItemSize.y * -1 * ((float)(Constants.Rows - 1) / 2 ));
         Debug.Log("BottomRight: " + BottomRight);
     }
 
