@@ -94,7 +94,7 @@ public class Shape : MonoBehaviour
                 gameController.PlayerInCreaseGold();
                 break;
             case typeShape.Exp:
-                GetComponent<GoldItem>().InCreaseValue();
+                //GetComponent<GoldItem>().InCreaseValue();
                 gameController.PlayerInCreaseEXP();
                 break;
         }

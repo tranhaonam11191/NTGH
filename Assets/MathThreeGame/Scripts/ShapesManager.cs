@@ -357,7 +357,7 @@ public class ShapesManager : MonoBehaviour
     /// <param name="hitGoCache"></param>
     private void CreateBonus(Shape hitGoCache)
     {
-        GameObject Bonus = Instantiate(GetBonusFromType(hitGoCache.Type), BottomRight
+        GameObject Bonus = Instantiate(GetBonusFromType(hitGoCache.typeShape), BottomRight
             + new Vector2(hitGoCache.Column * Constants.ItemSize.x,
                 hitGoCache.Row * Constants.ItemSize.y), Quaternion.identity)
             as GameObject;
@@ -468,12 +468,11 @@ public class ShapesManager : MonoBehaviour
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    private GameObject GetBonusFromType(string type)
-    {
-        string color = type.Split('_')[1].Trim();
+    private GameObject GetBonusFromType(typeShape type)
+    {        
         foreach (var item in BonusPrefabs)
         {
-            if (item.GetComponent<Shape>().Type.Contains(color))
+            if (item.GetComponent<Shape>().typeShape == type)
                 return item;
         }
         throw new System.Exception("Wrong type");
