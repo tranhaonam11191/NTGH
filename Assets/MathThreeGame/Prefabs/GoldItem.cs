@@ -11,7 +11,10 @@ public class GoldItem : MonoBehaviour
 
     private void Awake()
     {
-        Text.SetActive(false);
+        if(Text != null)
+        {
+            Text.SetActive(false);   
+        }        
     }
 
     public void InCreaseValue()
@@ -19,7 +22,7 @@ public class GoldItem : MonoBehaviour
         Text.transform.localPosition = Vector3.zero;
         Text.transform.localScale = Vector3.one;
         Text.transform.parent = null;
-        Text.SetActive(true);
+        //Text.SetActive(true);
         Text.transform.DOMoveY(2f, 1f).OnComplete(() => Destroy(Text));
     }
 }
