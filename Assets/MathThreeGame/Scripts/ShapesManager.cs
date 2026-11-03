@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class ShapesManager : MonoBehaviour
 {
+    [SerializeField] GameObject _content;
     public Text DebugText, ScoreText;
     public bool ShowDebugInfo = false;
     //candy graphics taken from http://opengameart.org/content/candy-pack-1
@@ -34,10 +35,12 @@ public class ShapesManager : MonoBehaviour
     {
         DebugText.enabled = ShowDebugInfo;
 
-        BottomRight = new Vector2(Constants.ItemSize.x * -1 * ((Constants.Columns - 1) / 2 ),Constants.ItemSize.y * -1 * ((float)(Constants.Rows - 1) / 2 ));
-        Debug.Log("BottomRight: " + BottomRight);
-    }
-
+        BottomRight = new Vector2(Constants.ItemSize.x * -1 * ((Constants.Columns - 1) / 2 ),Constants.ItemSize.y * -1 * ((float)(Constants.Rows - 1) / 2 ) - 2);        
+    }    
+    void resetMapFollowOffset()
+    {
+        
+    }     
     // Use this for initialization
     void Start()
     {
@@ -148,6 +151,7 @@ public class ShapesManager : MonoBehaviour
         GameObject go = Instantiate(newCandy,
             pos , Quaternion.identity)
             as GameObject;
+            go.transform.SetParent(_content.transform);            
         Debug.Log("InstantiateAndPlaceNewCandy: " + go.name + " row: " + row + " column: " + column + " pos: " + pos);        
         //assign the specific properties
         go.GetComponent<Shape>().Assign(newCandy.GetComponent<Shape>().Type, row, column);
@@ -361,6 +365,7 @@ public class ShapesManager : MonoBehaviour
             + new Vector2(hitGoCache.Column * Constants.ItemSize.x,
                 hitGoCache.Row * Constants.ItemSize.y), Quaternion.identity)
             as GameObject;
+            Bonus.transform.SetParent(_content.transform);
         shapes[hitGoCache.Row, hitGoCache.Column] = Bonus;
         var BonusShape = Bonus.GetComponent<Shape>();
         //will have the same type as the "normal" candy

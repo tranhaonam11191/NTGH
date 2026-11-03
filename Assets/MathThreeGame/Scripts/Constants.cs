@@ -7,9 +7,9 @@ using UnityEngine;
 
 public static class Constants
     {
-        public static Vector2 ItemSize = new Vector2(1.15f, 1.15f);
-        public static readonly int Rows = 8;
-        public static readonly int Columns = 5;
+        public static Vector2 ItemSize = new Vector2(.9f, .9f);
+        public static readonly int Rows = 5;
+        public static readonly int Columns = 7;
         public static readonly float AnimationDuration =  0.2f;
 
         public static readonly float MoveAnimationMinDuration = 0.05f;
