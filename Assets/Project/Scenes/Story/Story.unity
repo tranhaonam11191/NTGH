@@ -148,6 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c272b447d382a343864733b0c11b482, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StoryController
+  _scrollView: {fileID: 301801597}
   _storyPanel: {fileID: 2095644461}
   _playerConversation: {fileID: 3882719544604388946, guid: f2ebf9502f363fe468fa33a0e07f9d4d, type: 3}
   _enemyConversation: {fileID: 497555073298613285, guid: 0a3744e661edea842a86ec9c32ae270b, type: 3}
@@ -687,7 +688,7 @@ MonoBehaviour:
     m_Left: 20
     m_Right: 20
     m_Top: 0
-    m_Bottom: 0
+    m_Bottom: 200
   m_ChildAlignment: 3
   m_Spacing: 200
   m_ChildForceExpandWidth: 1

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using SS.UI;
 using System.Linq;
+using UnityEngine.UI;
 
 public class StoryController : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class StoryController : MonoBehaviour
     List<ConversationData> _conversations = new List<ConversationData>();
     int _numConversation;
 
+    [SerializeField] ScrollRect _scrollView;
     [SerializeField] GameObject _storyPanel;
     [SerializeField] Conversation _playerConversation;
     [SerializeField] Conversation _enemyConversation;
@@ -50,6 +52,23 @@ public class StoryController : MonoBehaviour
         }
         conversation.Setup(conversationData);
         _currentConversation = conversation;
+        StartCoroutine(ScrollToLatestConversation());
+    }
+
+    IEnumerator ScrollToLatestConversation()
+    {
+        // Wait for the new conversation to participate in the UI layout.
+        yield return null;
+
+        if (_scrollView == null || _scrollView.content == null)
+        {
+            yield break;
+        }
+
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_scrollView.content);
+        _scrollView.StopMovement();
+        _scrollView.verticalNormalizedPosition = 0f;
     }
     bool isStartGoToGame;
     void Update()
