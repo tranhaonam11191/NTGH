@@ -1,0 +1,369 @@
+ARC: ĐẦU BỰ — CÁI GIÁ CỦA TÌNH NGHĨA
+KỊCH BẢN THOẠI CHI TIẾT — 9 LEVEL
+
+Nguồn chuyển thể: Vol05_QuaDen_TieuDienHo_Chap149_219.txt
+Thể loại: Puzzle RPG.
+Nhân vật trung tâm: Đầu Bự.
+
+QUY ƯỚC
+- Mỗi câu đánh số tương ứng một hộp thoại.
+- Nội dung trong ngoặc vuông là chỉ dẫn hình ảnh, không đọc thành lời.
+- Số thứ tự bắt đầu lại ở mỗi đoạn thoại.
+- Lời thoại được viết mới theo bản chuyển thể; các trận đánh được gộp hoặc điều chỉnh để Đầu Bự là nhân vật người chơi điều khiển.
+- Hân Hân là người yêu Đầu Bự, được giới thiệu từ level 1, xuất hiện trực tiếp ở level 4–5 và đoạn kết.
+- Thoại mở màn thường giữ trong khoảng 3–5 lượt; tiết lộ và cảm xúc được chia sang giữa hoặc cuối trận.
+
+======================================================================
+LEVEL 1 — SẠP BÁO TRONG LỬA
+======================================================================
+
+Bối cảnh: Sạp báo lúc sáng sớm. Đầu Bự xếp báo; A Dũng đứng cạnh, tập vài động tác đấm.
+
+THOẠI MỞ MÀN — 5 LƯỢT
+1. A Dũng: “Mai mốt tao đoạt đai quyền vương, mày khỏi phải dậy giao báo nữa.”
+2. Đầu Bự: “Lo giao hết chồng này trước đi. Bà ngoại đang chờ tao về ăn sáng.”
+3. A Dũng: “Bà ngoại, rồi Hân Hân… Mày không tính gì cho mình à?”
+4. Đầu Bự: “Bà khỏe, Hân Hân ở cạnh tao. Vậy cũng tốt rồi.”
+5. Tên đầu xoăn: “Tâm sự đủ chưa? Dọn sạp đi. Chỗ này bọn tao lấy!”
+
+MỤC TIÊU: Đẩy lui nhóm côn đồ.
+
+THOẠI VÀO TRẬN — 1 LƯỢT
+1. Đầu Bự: “Báo thì tao bán. Sạp thì không.”
+
+CẢNH SAU TRẬN
+[Nhóm côn đồ rút lui. Chuyển cảnh đêm: chúng quay lại đốt sạp rồi bỏ chạy. Sáng hôm sau, Đầu Bự nhặt những tờ báo cháy dở.]
+
+THOẠI KẾT — 4 LƯỢT
+1. A Dũng: “Tao nhờ anh Quạ Đen xử bọn nó rồi. Chúng không dám quay lại đâu.”
+2. Đầu Bự: “Ông ta giúp mày… rồi muốn gì?”
+3. A Dũng: “Ảnh cho tao một con đường. Từ mai tao nghỉ giao báo.”
+4. Đầu Bự: “Đi đâu thì đi. Có chuyện vẫn tìm tao.”
+
+[Đầu Bự đưa A Dũng phần tiền giao báo cuối cùng. A Dũng nhận, quay đi.]
+
+======================================================================
+LEVEL 2 — NGƯỜI BẠN ĐỨNG BÊN KIA CỬA
+======================================================================
+
+Bối cảnh: Trước Hắc Hổ Quyền Quán. Đầu Bự đến tìm A Dũng sau khi nghe tin anh trai mình bị giữ.
+
+THOẠI MỞ MÀN — 5 LƯỢT
+1. Đầu Bự: “A Dũng! Tao nghe người của Quạ Đen bắt anh Phúc đến đây.”
+2. A Dũng: “Anh mày thiếu tiền. Đến hạn thì phải trả.”
+3. Đầu Bự: “Cho tao gặp ảnh. Chuyện tiền bạc mình tính sau.”
+4. A Dũng: “Mày vẫn tưởng tao đứng đây để giúp mày à?”
+5. A Phúc: “Đầu Bự… đừng xin nó. Chính nó đánh anh!”
+
+[Đầu Bự nhìn qua cửa. A Phúc bị giữ trong góc phòng. A Dũng không tránh ánh mắt bạn.]
+
+TWIST 1: A Dũng trực tiếp tham gia hành hạ A Phúc.
+
+CHUYỂN CẢNH NGẮN — 3 LƯỢT
+[Đầu Bự tìm đến Trần Hạo Nam.]
+1. Đầu Bự: “Anh Nam… em cần anh giúp cứu anh trai.”
+2. Hạo Nam: “Năm đó mày ngồi tù thay tao. Bây giờ có chuyện, sao còn đứng ngoài cửa?”
+3. Đầu Bự: “Em từng nghĩ mình sẽ không phải quay lại nữa.”
+
+[Hạo Nam đứng dậy, khoác áo. Cắt về quyền quán.]
+
+MỤC TIÊU: Đánh bại A Lạc và nhóm canh giữ, giải cứu A Phúc.
+
+THOẠI KẾT — 3 LƯỢT
+1. A Dũng: “Mang người Hồng Hưng tới… Mày chọn bên rồi đấy.”
+2. Đầu Bự: “Tao tới đưa anh tao về. Chính mày bắt tao phải đánh.”
+3. Hạo Nam: “Đưa A Phúc đi chữa trước. Chuyện còn lại có anh em.”
+
+[Đầu Bự dìu A Phúc bước qua A Dũng. Hai người bạn không nhìn lại.]
+
+======================================================================
+LEVEL 3 — ĐÔI GĂNG CỦA HỒNG HƯNG
+======================================================================
+
+Bối cảnh: Thái Tử Quyền Quán. Không khí nặng nề sau cái chết của Cường Lông Vàng và A Kiên.
+
+THOẠI MỞ MÀN — 5 LƯỢT
+1. Hạo Nam: “Cường Lông Vàng với A Kiên mất rồi. Suất thi đấu của Hồng Hưng đang bỏ trống.”
+2. Đầu Bự: “Cho em lên đài.”
+3. Thái Tử: “Đây không phải đánh nhau ngoài phố. Mày chịu nổi không?”
+4. Đầu Bự: “Anh cứ dạy. Em sẽ tập.”
+5. Thái Tử: “Đeo găng vào. Để tao xem mày giữ lời được bao lâu.”
+
+MỤC TIÊU: Hoàn thành phần luyện tập, sau đó đánh bại Lang Khánh.
+
+CHUYỂN TỪ LUYỆN TẬP SANG GIẢI ĐẤU — 2 LƯỢT
+[Chuỗi hình ảnh ngắn: quấn băng tay, tập đòn, chạy bộ. Chuyển sang võ đài.]
+1. Thái Tử: “Lang Khánh sẽ ép mày đánh theo nhịp của hắn. Đừng nóng.”
+2. Đầu Bự: “Em chờ được.”
+
+THOẠI KẾT — 4 LƯỢT
+[Đầu Bự thắng trận. Sau đó, tại võ quán, Hạo Nam mang tin mới tới.]
+1. Hạo Nam: “Lương Hoa rút lui. Mày vào chung kết rồi.”
+2. Đầu Bự: “Vậy người bên kia là…”
+3. Thái Tử: “A Dũng.”
+4. Thiên Thu: “Ta đã nói rồi. Dương Thiêm có tướng vô địch.”
+
+[Thiên Thu mỉm cười. Đại Phi nhìn ông ta, không hưởng ứng.]
+
+CẢNH KẾT KHÔNG THOẠI
+[Đầu Bự về nhà. Bà ngoại đặt bát mì trước mặt anh, nhẹ chạm vào bàn tay quấn băng.]
+
+======================================================================
+LEVEL 4 — ÂN ĐOẠN NGHĨA TUYỆT
+======================================================================
+
+Bối cảnh: Nhà Đầu Bự. Hân Hân trở về, trên mặt có vết thương.
+
+THOẠI MỞ MÀN — 5 LƯỢT
+1. Đầu Bự: “Hân Hân… mặt em sao thế?”
+2. Hân Hân: “A Dũng tới chỗ em làm. Hắn muốn ép em đi theo.”
+3. Đầu Bự: “Nó dám đánh em?”
+4. Hân Hân: “Chị Hạt Tiêu tới kịp. Em về được rồi.”
+5. Hân Hân: “Nhìn em này. Đừng vì hắn mà anh cũng không trở về.”
+
+[Đầu Bự nắm chặt tay rồi chậm rãi thả ra. Chuyển sang võ quán.]
+
+THOẠI TRƯỚC TRẬN TẬP — 2 LƯỢT
+1. Thái Tử: “Mày đang nhìn tao, hay đang nhìn thấy A Dũng?”
+2. Đầu Bự: “Anh đánh đi. Em cần tỉnh lại.”
+
+MỤC TIÊU: Hoàn thành trận tập cuối với Thái Tử; ưu tiên phòng thủ và phản công.
+
+THOẠI SAU TRẬN — 2 LƯỢT
+1. Thái Tử: “Cứ lao vào như thế, mày sẽ gục trước khi chạm được nó.”
+2. Đầu Bự: “Làm lại. Lần này em sẽ nhìn đòn.”
+
+CẢNH KẾT — HỌP BÁO TRƯỚC CHUNG KẾT, 3 LƯỢT
+1. A Dũng: “Hân Hân có tới xem không? Bảo cô ấy nhìn cho kỹ lúc mày ngã.”
+2. Đầu Bự: “Đừng nhắc tên cô ấy.”
+3. Thiên Thu: “Để dành sức trên đài. Ta vẫn đặt niềm tin vào Dương Thiêm.”
+
+[Thiên Thu vỗ vai Đầu Bự. Cắt sang một bàn tay ghi cược vào cửa A Dũng.]
+
+======================================================================
+LEVEL 5 — TRẬN CHUNG KẾT ĐÃ ĐƯỢC ĐỊNH ĐOẠT
+======================================================================
+
+Bối cảnh: Nhà thi đấu. Đầu Bự và A Dũng đứng ở hai góc võ đài.
+
+THOẠI MỞ MÀN — 4 LƯỢT
+1. A Dũng: “Hồi giao báo, mày có nghĩ sẽ đứng đây với tao không?”
+2. Đầu Bự: “Có. Nhưng tao tưởng mình sẽ đứng dưới cổ vũ mày.”
+3. A Dũng: “Tiếc thật. Đêm nay chỉ một thằng được nâng cúp.”
+4. Hạo Nam: “Đầu Bự. Nhìn đối thủ, giữ mình.”
+
+MỤC TIÊU CHẶNG 1: Áp đảo A Dũng.
+
+THOẠI GIỮA TRẬN — 2 LƯỢT
+[A Dũng bị thương nặng ở vai, phải dựa vào dây đài.]
+1. Đầu Bự: “Vai mày hỏng rồi. Dừng đi!”
+2. A Dũng: “Tao mà thua… mày tưởng chúng để tao yên sao?”
+
+[Quạ Đen đứng dưới đài, lạnh lùng nhìn A Dũng.]
+
+BIẾN CỐ — 4 LƯỢT
+[Màn hình nhà thi đấu chuyển sang bản tin cháy tại Bắc Giác. Đầu Bự nhận ra căn nhà.]
+1. Đầu Bự: “Khoan… đó là nhà tao.”
+2. Bản tin: “Một cụ bà đã tử vong khi tìm cách thoát khỏi đám cháy…”
+3. Đầu Bự: “Bà… cháu bảo bà chờ cháu về mà.”
+4. Hạo Nam: “Đầu Bự! Nhìn anh! Đừng đứng yên!”
+
+[Cắt nhanh: xích khóa ngoài cửa, can xăng, Tiếu Diện Hổ và Nghiêm Phong rời đi. Thiên Thu vắng mặt ở ghế khách mời.]
+
+TWIST 2: Đầu Bự đang thắng trên võ đài, nhưng đối phương đã ra tay với gia đình anh để đảo ngược kết quả.
+
+MỤC TIÊU CHẶNG 2: Trụ vững qua đợt tấn công cuối.
+
+THOẠI KẾT TRẬN — 3 LƯỢT
+1. Hân Hân: “Anh Nam… đưa anh ấy xuống đi!”
+2. Thái Tử: “Đợi đã! Nó còn đánh được!”
+3. Hạo Nam: “Đủ rồi. Tao đưa nó về.”
+
+[Khăn trắng được ném lên. A Dũng giành chức vô địch. Âm thanh khán đài nhỏ dần rồi tắt.]
+
+CẢNH KẾT — 1 LƯỢT
+[Tại nhà xác, Đầu Bự đứng cạnh bà ngoại.]
+1. Đầu Bự: “Cháu về rồi.”
+
+[Giữ một nhịp lặng, chuyển màn. Hoàn thành mục tiêu sống sót vẫn được tính là vượt level.]
+
+======================================================================
+LEVEL 6 — CHIẾC CÚP VỠ
+======================================================================
+
+Cảnh dẫn không tương tác: Hắc Hổ Quyền Quán, sau giải đấu.
+
+THOẠI DẪN — 3 LƯỢT
+1. A Dũng: “Anh hứa chia tiền cho em. Em thắng rồi mà!”
+2. Quạ Đen: “Cái vai đó còn đánh được cho tao trận nào nữa?”
+3. A Dũng: “Vậy trả chiếc cúp đây. Nó là của em.”
+
+[Hoa Liễu cầm cúp bước tới. Cắt cảnh trước cú đánh; tiếng kim loại rơi xuống nền. Chuyển thời gian bằng màn đen ngắn.]
+
+THOẠI MỞ MÀN — 4 LƯỢT
+Bối cảnh: Đầu Bự và Đại Thiên Nhị đang đi mua đồ sửa quán. Một học sinh bị chặn trong hẻm.
+1. Học sinh: “Em chỉ còn tiền đi xe về thôi…”
+2. Đầu Bự: “Bỏ thằng bé ra.”
+3. A Dũng: “Mày…”
+4. Đầu Bự: “Đến mức này rồi mà mày vẫn đi hại người khác?”
+
+MỤC TIÊU: Khống chế A Dũng.
+
+[Đối đầu ngắn. A Dũng yếu, chân bị thương; trọng tâm là cảnh sau trận.]
+
+THOẠI KẾT — 5 LƯỢT
+1. A Dũng: “Đánh tiếp đi. Mày vẫn muốn trả thù mà.”
+2. Đầu Bự: “Quạ Đen làm chân mày ra thế này?”
+3. A Dũng: “Chúng dùng cái cúp… Tao thắng rồi mà vẫn chẳng có gì.”
+4. Đầu Bự: “Tao không quên chuyện mày làm.”
+5. Đầu Bự: “Nhưng đứng dậy đi. Đừng cướp tiền trẻ con nữa.”
+
+[Đầu Bự chìa tay. A Dũng cúi đầu khóc.]
+
+CẢNH TẠI TÂN KHỔNG TƯỚC — 3 LƯỢT
+1. Đầu Bự: “Anh Nam, cho nó một việc. Em sẽ trông chừng.”
+2. Hạo Nam: “Mày tha được. Anh em khác chưa chắc tha được. Tao không nhận.”
+3. A Dũng: “Đừng xin nữa… Lần này tao tự chịu.”
+
+[A Dũng rời đi. Đầu Bự không ngăn.]
+
+======================================================================
+LEVEL 7 — GIỎ HOA TỪ ĐÀI LOAN
+======================================================================
+
+Bối cảnh: Tân Khổng Tước đang sửa sang. Đầu Bự cùng Đại Thiên Nhị khiêng đồ vào quán.
+
+THOẠI MỞ MÀN — 4 LƯỢT
+1. Đại Thiên Nhị: “Xong chỗ này là khai trương được. Mày xem còn thiếu gì không?”
+2. Đầu Bự: “Cửa sau chưa chắc. Để em sửa nốt.”
+3. Đàn em Hồng Hưng: “Anh Nhị! Bọn Cửu Ca chặn người giao hàng bên kia đường!”
+4. Đại Thiên Nhị: “Đi. Ra hỏi xem chúng muốn gì.”
+
+MỤC TIÊU: Đánh lui Cửu Ca và nhóm Đông Anh.
+
+THOẠI TRƯỚC ĐỢT CUỐI — 2 LƯỢT
+1. Cửu Ca: “Quán đối diện có người chống lưng rồi. Hồng Hưng đừng hòng đụng vào!”
+2. Đầu Bự: “Vậy bảo người đó ra nói chuyện!”
+
+CẢNH CHUYỂN TIẾP
+[Đông Anh rút lui. Đêm đó, khi mọi người vắng mặt, Quạ Đen dẫn quân phá quán. Sáng hôm sau, Đầu Bự trở lại giữa bàn ghế đổ nát.]
+
+THOẠI LỘ DIỆN — 5 LƯỢT
+1. Đầu Bự: “Đêm qua còn nguyên…”
+2. Người giao hoa: “Hoa chúc mừng khai trương. Người gửi là Gà Rừng, Đài Loan.”
+3. Hạo Nam: “Gà Rừng?”
+4. Gà Rừng: “Lâu rồi không gặp, anh Nam.”
+5. Hạo Nam: “Quán bên kia… là của mày?”
+
+[Đoàn xe đỗ phía đối diện. Thiên Thu đứng cạnh Gà Rừng; Quạ Đen bước ra chào.]
+
+TWIST 3: Người đứng sau cơ sở đối đầu Hồng Hưng là Gà Rừng, người anh em cũ của Hạo Nam.
+
+THOẠI CHỐT — 3 LƯỢT
+1. Gà Rừng: “Tôi thuê Đông Anh bảo kê. Chuyện làm ăn thôi.”
+2. Đầu Bự: “Bọn chúng vừa phá quán của anh em anh đấy.”
+3. Thiên Thu: “Nói chuyện cẩn thận. Đây là ông chủ của ta.”
+
+CẢNH DÀNH RIÊNG CHO NGƯỜI CHƠI — 1 LƯỢT
+[Cắt sang cuộc gặp kín. Thiên Thu đặt một chiếc cặp trước mặt Gà Rừng.]
+1. Thiên Thu: “Tiền thắng cược giải quyền. Phần của anh.”
+
+[Không thêm lời khẳng định Gà Rừng đã ra lệnh đốt nhà Đầu Bự.]
+
+======================================================================
+LEVEL 8 — TRỞ LẠI HẮC HỔ
+======================================================================
+
+Bối cảnh: Nhóm Đại Phi đã bắt được Hoa Liễu, chuẩn bị tiến vào Hắc Hổ Quyền Quán.
+
+THOẠI MỞ MÀN — 5 LƯỢT
+1. Đại Phi: “Ảnh dùng để uy hiếp Phương Đình. Mày giấu ở đâu?”
+2. Hoa Liễu: “Hắc Hổ Quyền Quán… Tôi dẫn các anh tới!”
+3. Đại Thiên Nhị: “Quạ Đen đến người của Gà Rừng cũng dám đụng. Hắn hết đường lui rồi.”
+4. Đầu Bự: “Hết đường lui thì hắn càng kéo người khác xuống cùng.”
+5. Đại Phi: “Vậy lấy lại ảnh trước khi hắn kịp làm gì nữa.”
+
+MỤC TIÊU: Phá vòng vây tại quyền quán, thu hồi ảnh dùng để uy hiếp Phương Đình.
+
+THOẠI GIỮA TRẬN — 3 LƯỢT
+[Cửa đóng sập. Quân Đông Anh tràn ra.]
+1. Hoa Liễu: “Tôi không biết có mai phục! Tôi không biết!”
+2. Đại Thiên Nhị: “Hơn hai chục đứa. Đầu Bự, giữ bên trái!”
+3. Đầu Bự: “Rõ. Đừng để chúng mang đồ chạy mất.”
+
+THOẠI KẾT — 4 LƯỢT
+[Nhóm thu hồi được ảnh. Đầu Bự nhìn thấy tủ kính vỡ và một phần chiếc cúp còn sót lại.]
+1. Đại Thiên Nhị: “Mày nhìn gì thế?”
+2. Đầu Bự: “A Dũng từng nghĩ ở đây sẽ có tương lai.”
+3. Đại Phi: “Đi thôi. Lấy được đồ rồi.”
+4. Đàn em Hồng Hưng, qua điện thoại: “Anh Phi! Quạ Đen bắt chị Hoa Oa rồi!”
+
+[Đại Phi khựng lại. Đầu Bự lập tức quay ra cửa.]
+
+======================================================================
+LEVEL 9 — NGƯỜI CÒN ĐỨNG LẠI
+======================================================================
+
+Bối cảnh: Lưu Phù Sơn, trời mưa. Hàn Tân và Đầu Bự chốt chặn đường thoát của Quạ Đen.
+
+THOẠI MỞ MÀN — 4 LƯỢT
+1. Hàn Tân: “Anh Nam với Thái Tử đang truy đuổi. Mình giữ đường này.”
+2. Đầu Bự: “Còn chị Hoa Oa?”
+3. Hàn Tân: “Bên Đại Phi đang lo. Tập trung… Có người phía trước.”
+4. Đầu Bự: “Cúi xuống!”
+
+[Súng nổ từ chỗ phục kích. Hai người lao vào chỗ nấp.]
+
+MỤC TIÊU CHẶNG 1: Vượt qua các đợt phục kích.
+
+THOẠI GIỮA TRẬN — 3 LƯỢT
+[Hàn Tân trúng đạn vào tay.]
+1. Đầu Bự: “Anh Tân! Tay anh…”
+2. Hàn Tân: “Còn cử động được. Thằng bên phải đang vòng ra sau mày!”
+3. Đầu Bự: “Em giữ nó. Anh tìm chỗ nấp!”
+
+MỤC TIÊU CHẶNG 2: Hạ sát thủ cuối cùng, giữ cả hai sống sót.
+
+THOẠI SAU TRẬN — 3 LƯỢT
+1. Đại Thiên Nhị, qua bộ đàm: “Anh Phi bị thương nặng! Đang đưa vào viện!”
+2. Hàn Tân: “Đầu Bự, đi được không?”
+3. Đầu Bự: “Được. Để em dìu anh.”
+
+CINEMATIC KHÉP CUỘC TRUY SÁT — 4 LƯỢT, XEN HÌNH ẢNH
+[Tại bến tàu, Thái Tử đánh bại Tiếu Diện Hổ. Tiếu Diện Hổ chạy trốn và bị Thiên Thu chặn lại.]
+1. Tiếu Diện Hổ: “Thiên Thu! Chúng ta cùng một phe mà!”
+2. Thiên Thu: “Ngươi hết đường rồi.”
+
+[Cắt cảnh, thể hiện kết cục Tiếu Diện Hổ bằng bóng đổ. Ở nơi khác, Hạo Nam kiệt sức sau trận đấu với Quạ Đen. Gà Rừng bước tới.]
+3. Quạ Đen: “Mày muốn gì tao cũng nhường! Để tao đi!”
+4. Gà Rừng: “Muộn rồi.”
+
+[Quạ Đen bị truy sát, chạy xuống thuyền rồi chìm ngoài biển. Gà Rừng trở lại đỡ Hạo Nam. Chuyển cảnh bệnh viện.]
+
+THOẠI TẠI BỆNH VIỆN — 3 LƯỢT
+1. Hạo Nam: “Đại Phi qua cơn nguy rồi. Tay anh Tân thế nào?”
+2. Đầu Bự: “Bác sĩ đang xử lý. Anh cũng ngồi xuống đi.”
+3. Hạo Nam: “Ừ. Đêm nay… đủ rồi.”
+
+[Đầu Bự ngồi xuống. Hân Hân đến cạnh, nắm bàn tay bầm tím của anh. Không cần thoại.]
+
+CẢNH KHÉP ARC — 3 LƯỢT
+[Ngày hôm sau. Đầu Bự đặt đôi găng bên di ảnh bà ngoại. Hân Hân đứng chờ gần cửa.]
+1. Đầu Bự: “Cháu không mang được cúp về cho bà.”
+2. Hân Hân: “Anh về được rồi.”
+3. Đầu Bự: “Ừ… Về rồi.”
+
+[Đầu Bự thắp hương. Máy quay dừng ở đôi găng bên di ảnh, rồi tối màn hình.]
+
+======================================================================
+NHỊP CẢM XÚC XUYÊN SUỐT
+======================================================================
+
+Level 1: Cho người chơi quý tình bạn.
+Level 2: Phá vỡ lòng tin — twist về sự biến chất của A Dũng.
+Level 3: Tạo hy vọng.
+Level 4: Đẩy mâu thuẫn cá nhân, làm rõ vai trò Hân Hân.
+Level 5: Lấy đi điều Đầu Bự muốn bảo vệ — twist về trận chung kết.
+Level 6: Cho Đầu Bự lựa chọn tha thứ.
+Level 7: Mở rộng âm mưu — twist về sự xuất hiện của Gà Rừng.
+Level 8–9: Đầu Bự chủ động bảo vệ những người còn lại.
