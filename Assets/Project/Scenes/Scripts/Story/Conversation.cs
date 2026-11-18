@@ -116,6 +116,27 @@ public class Conversation : MonoBehaviour
         }
     }
 
+    public void ResetForPool()
+    {
+        StopAllCoroutines();
+        IsComplete = true;
+        m_visibleCharacterCount = 0f;
+        m_data = null;
+        _conversationData = null;
+
+        if (m_textContent != null)
+        {
+            m_textContent.text = string.Empty;
+            m_textContent.maxVisibleCharacters = 0;
+        }
+
+        if (m_imgCharacter != null)
+        {
+            m_imgCharacter.sprite = null;
+            m_imgCharacter.color = new Color(1f, 1f, 1f, 0f);
+        }
+    }
+
     void OnDisable()
     {
         CompleteTyping();

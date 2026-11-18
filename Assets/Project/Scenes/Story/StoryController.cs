@@ -18,8 +18,15 @@ public class StoryController : MonoBehaviour
     [SerializeField] Conversation _enemyConversation;
 
     Conversation _currentConversation;
+    ConversationPool _conversationPool;
+    readonly List<Conversation> _activeConversations = new List<Conversation>();
+
     public void Setup(StoryConversations storyConversations)
     {
+        StopAllCoroutines();
+        ReturnConversations();
+        isStartGoToGame = false;
+        _conversationPool = ConversationPool.Instance;
         _storyConversations = storyConversations;
         _conversations = _storyConversations.conversations.ToList();
         _numConversation = 0;
@@ -41,18 +48,32 @@ public class StoryController : MonoBehaviour
         ConversationData conversationData = _conversations[0];
         _conversations.RemoveAt(0);
 
-        Conversation conversation = null;
-        if (conversationData.isPlayer)
-        {
-            conversation = Instantiate(_playerConversation, _storyPanel.transform);
-        }
-        else
-        {
-            conversation = Instantiate(_enemyConversation, _storyPanel.transform);
-        }
+        Conversation prefab = conversationData.isPlayer ? _playerConversation : _enemyConversation;
+        Conversation conversation = _conversationPool.Rent(prefab, _storyPanel.transform);
+        _activeConversations.Add(conversation);
         conversation.Setup(conversationData);
         _currentConversation = conversation;
         StartCoroutine(ScrollToLatestConversation());
+    }
+
+    void ReturnConversations()
+    {
+        if (_conversationPool != null)
+        {
+            foreach (Conversation conversation in _activeConversations)
+            {
+                _conversationPool.Return(conversation);
+            }
+        }
+
+        _activeConversations.Clear();
+        _currentConversation = null;
+    }
+
+    void OnDisable()
+    {
+        StopAllCoroutines();
+        ReturnConversations();
     }
 
     IEnumerator ScrollToLatestConversation()
@@ -93,6 +114,7 @@ public class StoryController : MonoBehaviour
             IEnumerator GoToGame()
             {
                 yield return new WaitForSeconds(1f);
+                ReturnConversations();
                 SS.UI.Core.Load<GameController>(GameController.SCENE_NAME);
             }
         }
