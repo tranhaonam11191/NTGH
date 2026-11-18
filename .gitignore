@@ -1,6 +1,7 @@
 Library
 Build
 Temp
+Logs/
 obj
 .vs
 .gradle
