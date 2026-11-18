@@ -28,10 +28,13 @@ public class HomeController : MonoBehaviour
 
         m_textGold.text = PlayerPrefs.HasKey(Const.EXP) ? PlayerPrefs.GetInt(Const.GOLD).ToString() : "0";
     }
-
+    [SerializeField] StoryConversations _testStory;
     public void onCLickPlay()
     {        
-        SS.UI.Core.Load<StoryController>("Story");
+        SS.UI.Core.Load<StoryController>("Story", LoadSceneMode.Additive, (storyController) =>
+        {
+            storyController.Setup(_testStory);
+        });
     }
 
     public void OnClickWeapon()

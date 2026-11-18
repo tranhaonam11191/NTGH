@@ -57,6 +57,7 @@ public class CharacterOnGame
 
 public class GameController : MonoBehaviour
 {
+    public const string SCENE_NAME = "Game";     
     public static GameController instance;
 
     [SerializeField] float speedMove;
