@@ -68,6 +68,9 @@ public class Conversation : MonoBehaviour
         {
             m_imgCharacter.color = Color.white;
             m_imgCharacter.sprite = _conversationData.imgCharacter;
+            m_imgCharacter.SetNativeSize();
+
+            m_imgCharacter.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.WidthControlsHeight;
         }
         else
         {

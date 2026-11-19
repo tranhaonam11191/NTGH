@@ -14,17 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StoryConversations
   conversations:
   - content: abcxyz
-    imgCharacter: {fileID: -7555047100128604054, guid: 0250d57a96c937741a4550a1c50b5ca9, type: 3}
+    imgCharacter: {fileID: 21300000, guid: 0250d57a96c937741a4550a1c50b5ca9, type: 3}
     isPlayer: 1
   - content: abcxyzzz
-    imgCharacter: {fileID: -7555047100128604054, guid: 0250d57a96c937741a4550a1c50b5ca9, type: 3}
+    imgCharacter: {fileID: 21300000, guid: 0250d57a96c937741a4550a1c50b5ca9, type: 3}
     isPlayer: 1
   - content: 111222333
-    imgCharacter: {fileID: 2427713747519867809, guid: 9364fa68948686243a4106d55c914ef1, type: 3}
+    imgCharacter: {fileID: 21300000, guid: 9364fa68948686243a4106d55c914ef1, type: 3}
     isPlayer: 0
   - content: 444555666
-    imgCharacter: {fileID: -7555047100128604054, guid: 0250d57a96c937741a4550a1c50b5ca9, type: 3}
+    imgCharacter: {fileID: 21300000, guid: 0250d57a96c937741a4550a1c50b5ca9, type: 3}
     isPlayer: 1
   - content: bbbbb
-    imgCharacter: {fileID: 2427713747519867809, guid: 9364fa68948686243a4106d55c914ef1, type: 3}
+    imgCharacter: {fileID: 21300000, guid: 9364fa68948686243a4106d55c914ef1, type: 3}
     isPlayer: 0
