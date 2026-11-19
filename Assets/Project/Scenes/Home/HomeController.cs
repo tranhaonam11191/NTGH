@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -28,13 +26,9 @@ public class HomeController : MonoBehaviour
 
         m_textGold.text = PlayerPrefs.HasKey(Const.EXP) ? PlayerPrefs.GetInt(Const.GOLD).ToString() : "0";
     }
-    [SerializeField] StoryConversations _testStory;
     public void onCLickPlay()
-    {        
-        SS.UI.Core.Load<StoryController>("Story", LoadSceneMode.Additive, (storyController) =>
-        {
-            storyController.Setup(_testStory);
-        });
+    {
+        SOManager.instance.PlayCurrentLevel();
     }
 
     public void OnClickWeapon()

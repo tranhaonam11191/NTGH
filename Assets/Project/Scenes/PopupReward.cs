@@ -54,6 +54,11 @@ public class PopupReward : PopupBase
         OnClickClose();
     }
 
+    public override void OnClickClose()
+    {
+        UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(gameObject.scene);
+    }
+
     public void OnClickHome()
     {
         SS.UI.Core.Load<HomeController>("Home");

@@ -1,4 +1,4 @@
-﻿using DG.Tweening;
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -75,7 +75,7 @@ public class GameItem : MonoBehaviour
     public void OnClick()
     {
 
-        if (GameController.canClick)
+        if (GameController.canClick && !GameController.instance.BlocksBoard)
         {
             if (GameController.CurrentItem1 == null)
             {

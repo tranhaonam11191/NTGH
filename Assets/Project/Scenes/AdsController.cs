@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using GoogleMobileAds.Api;
 using System;
 
@@ -158,7 +158,7 @@ public class AdsController : MonoBehaviour
         if (this.callback != null) callback();
     }
 
-    public bool checkReward() => this.rewardedAd.IsLoaded();
+    public bool checkReward() => rewardedAd != null && rewardedAd.IsLoaded();
 
     callback callback;
 

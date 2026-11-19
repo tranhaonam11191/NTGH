@@ -22801,6 +22801,7 @@ MonoBehaviour:
   m_textGold: {fileID: 959494556}
   m_textEXP: {fileID: 741917022}
   m_textLEVEL: {fileID: 1284363451}
+  m_StageTitle: {fileID: 990000013}
   m_effAttack: {fileID: 1442257714}
   m_effHealth: {fileID: 1458392186}
   m_effExp: {fileID: 932080684}

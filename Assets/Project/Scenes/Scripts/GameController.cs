@@ -2,7 +2,6 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,22 +9,6 @@ using UnityEngine.UI;
 using SS.UI;
 
 public delegate void callback();
-
-public class DataForSceneGame
-{
-    public Character character_User;
-
-    public Character character_Enemy;
-
-    public ItemReward itemReward;
-
-    public DataForSceneGame(Character character_User, Character character_Enemy, ItemReward itemReward)
-    {
-        this.character_Enemy = character_Enemy;
-        this.character_User = character_User;
-        this.itemReward = itemReward;
-    }
-}
 
 [Serializable]
 public class CharacterOnGame
@@ -45,6 +28,7 @@ public class CharacterOnGame
     public void Setup(Character character)
     {
         m_imgAvatar.sprite = character.avatar;
+        m_Health.fillAmount = 1f;
 
         m_Skill.fillAmount = 0;
 
@@ -65,6 +49,7 @@ public class GameController : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        Core.Init();
     }
     [SerializeField] GameItem gameItemBase;
     public Item[] arrGameItem;
@@ -94,6 +79,8 @@ public class GameController : MonoBehaviour
 
     [SerializeField] TextMeshProUGUI m_textGold, m_textEXP, m_textLEVEL;
 
+    [SerializeField] TextMeshProUGUI m_StageTitle;
+
     //Effect
     [Header("Effect")]
     [SerializeField] ParticleSystem m_effAttack;
@@ -105,38 +92,106 @@ public class GameController : MonoBehaviour
     [SerializeField] Image m_WeaponImage;
     CreateItemReward weapon;
     
-    // Start is called before the first frame update
+    readonly HashSet<LevelConversation> m_Played = new HashSet<LevelConversation>();
+    readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
+    bool m_ShowingStory;
+    float m_PreviousTimeScale;
+    float m_PlayerHp, m_EnemyHp;
+    bool m_HasClicked;
+    float m_SecondsSinceFirstClick;
+    resultType m_Result;
+    bool m_ResultShown;
+
+    public bool BlocksBoard => Data == null || endGame || m_ShowingStory || m_PendingLines.Count > 0;
+
     IEnumerator Start()
     {
-        if(SOManager.instance != null)
+        // SS supplies the level in its load callback. Also support opening Game directly.
+        yield return null;
+        if (Data == null && SOManager.instance != null)
+            Setup(SOManager.instance.CurrentLevelData);
+    }
+
+    public void Setup(LevelData level)
+    {
+        if (Data != null) return;
+        if (level == null || !level.HasCombatants)
         {
-            Data = SOManager.instance.CurrentLevelData;
+            Debug.LogError("Cannot start battle without a level and valid combatants.", this);
+            return;
         }
-
-        if(Data == null)
-        {            
-            yield break;
-        }
-
+        Data = level;
+        m_PlayerHp = Data.defaultPlayer.Character.health;
+        m_EnemyHp = Data.enemy.Character.health;
         canClick = true;
         moving = false;
 
         SpecialAttack.SetActive(false);
         Gun.SetActive(false);
-        //Setup();
+        m_StageTitle.text = $"STAGE {SOManager.instance.CurrentLevelNumber}\n{Data.displayName}";
         SetupCharacter();
         SetupLevel();
         SetupGold();
         SetupWeapon();
-        yield return new WaitForSeconds(.5f);
-        FindObjectOfType<GridLayoutGroup>().enabled = false;
-        checkAll();
+        QueueConversations(ConversationTrigger.Start);
+        StartCoroutine(PrepareBoard());
+    }
 
-        //foreach (GameItem item in lstGameItem)
-        //{
-        //    item.CheckItemComplete();
-        //}
-        //StartCoroutine(fallingItem(1f));        
+    IEnumerator PrepareBoard()
+    {
+        yield return new WaitForSeconds(.5f);
+        var grid = FindObjectOfType<GridLayoutGroup>();
+        if (grid != null) grid.enabled = false;
+        checkAll();
+    }
+
+    void QueueConversations(ConversationTrigger moment, float previous = 0, float current = 0)
+    {
+        foreach (var group in Data.conversations)
+        {
+            if (group == null || !group.Matches(moment, previous, current) || !m_Played.Add(group)) continue;
+            m_PendingLines.AddRange(group.lines);
+        }
+    }
+
+    void LateUpdate()
+    {
+        if (m_ShowingStory) return;
+        if (m_PendingLines.Count > 0)
+        {
+            var lines = m_PendingLines.ToArray();
+            m_PendingLines.Clear();
+            m_ShowingStory = true;
+            m_PreviousTimeScale = Time.timeScale;
+            Time.timeScale = 0;
+            Core.Load<StoryController>("Story", LoadSceneMode.Additive,
+                story => story.Setup(lines, ResumeBattle));
+        }
+        else if (endGame && !m_ResultShown)
+        {
+            m_ResultShown = true;
+            Core.Load<Popup>("Popup", LoadSceneMode.Additive, popup =>
+            {
+                popup.Setup(new PopupData(m_Result, gold, Exp));
+                if (m_Result == resultType.win && Data.itemReward != null &&
+                    AdsController.instance != null && AdsController.instance.checkReward())
+                    StartCoroutine(coPopupReward());
+            });
+        }
+    }
+
+    void ResumeBattle()
+    {
+        if (!m_ShowingStory) return;
+        Time.timeScale = m_PreviousTimeScale;
+        m_ShowingStory = false;
+    }
+
+    void OnDestroy()
+    {
+        ResumeBattle();
+        Player.m_Health?.DOKill();
+        Enemy.m_Health?.DOKill();
     }
 
     void SetupWeapon()
@@ -166,13 +221,17 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
-        if(!endGame)
-        {
-            if (Data != null)
-            {
-                EnemyAttack();
-            }                
-        }        
+        if (BlocksBoard) return;
+
+        if (m_HasClicked)
+            m_SecondsSinceFirstClick += Time.deltaTime;
+        else
+            m_HasClicked = Input.GetMouseButtonDown(0);
+
+        if (m_HasClicked)
+            QueueConversations(ConversationTrigger.TimeAfterFirstClick, current: m_SecondsSinceFirstClick);
+
+        if (!BlocksBoard) EnemyAttack();
     }
 
     [SerializeField] WeaponScripts enemyWeapon, playerWeapon;
@@ -186,14 +245,8 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            if(Attack(Player, Data.Enemy[0].Character.attack, enemyWeapon, Data.Enemy[0].Character.health))
-            {
-                if (!endGame)
-                {
-                    endGame = true;                    
-                    SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive, (popup) => popup.Setup(new PopupData(resultType.lose, gold, Exp)));                    
-                }
-            }
+            Attack(Player, ref m_PlayerHp, Data.defaultPlayer.Character.health,
+                Data.enemy.Character.attack, enemyWeapon, ConversationTrigger.PlayerHealth);
             Enemy.m_timeToAttack.fillAmount = 1;
         }
     }
@@ -228,9 +281,9 @@ public class GameController : MonoBehaviour
 
     void SetupCharacter()
     {
-        Player.Setup(Data.Player[0].Character);
+        Player.Setup(Data.defaultPlayer.Character);
 
-        Enemy.Setup(Data.Enemy[0].Character);
+        Enemy.Setup(Data.enemy.Character);
     }
 
     public List<GameItem> lstOK = new List<GameItem>();
@@ -443,19 +496,27 @@ public class GameController : MonoBehaviour
     #endregion
     [SerializeField] string _attackAudio;
 
-    public bool Attack(CharacterOnGame character, int damage, WeaponScripts weapon, int health, bool SpecialEff = false)
+    void Attack(CharacterOnGame target, ref float hp, int maxHp, int damage, WeaponScripts weapon,
+        ConversationTrigger trigger, bool special = false)
     {
-        if(!SpecialEff)
+        if (endGame) return;
+        if (!special)
         {
             m_effAttack.Play();
-            SoundManager.instance.PlaySfx(_attackAudio);            
-        }        
+            SoundManager.instance.PlaySfx(_attackAudio);
+        }
+        weapon.Move(target.m_imgAvatar.transform.position);
+        float previous = hp;
+        hp = Mathf.Clamp(hp - damage, 0, maxHp);
+        target.m_Health.DOKill();
+        target.m_Health.DOFillAmount(hp / maxHp, 1f);
+        QueueConversations(trigger, previous / maxHp, hp / maxHp);
+        if (hp > 0) return;
 
-        weapon.Move(character.m_imgAvatar.transform.position);
-
-        character.m_Health.DOFillAmount(character.m_Health.fillAmount - (damage * (1 / (float)health)), 1f);
-
-        return character.m_Health.fillAmount <= 0;
+        endGame = true;
+        m_Result = target == Enemy ? resultType.win : resultType.lose;
+        if (m_Result == resultType.win) SOManager.instance.AdvanceAfterWin(Data);
+        QueueConversations(ConversationTrigger.End);
     }
 
     int Gold, Exp;
@@ -465,26 +526,15 @@ public class GameController : MonoBehaviour
     #region PlayerAction
     public void PlayerAttack(bool specialAttack = false)
     {
-        if(Attack(Enemy, Data.Player[0].Character.attack, playerWeapon, Data.Player[0].Character.health, specialAttack))
-        {
-            if(!endGame)
-            {
-                endGame = true;
-                Debug.Log("Gold Win: " + gold);                
-                SS.UI.Core.Load<Popup>("Popup", LoadSceneMode.Additive, onSceneLoaded: (popup) => popup.Setup(new PopupData(resultType.win, gold, Exp)));
-
-                if(AdsController.instance.checkReward() && Data.itemReward != null)
-                {
-                    StartCoroutine(coPopupReward());
-                }                
-            }            
-        }
+        if (Data == null) return;
+        Attack(Enemy, ref m_EnemyHp, Data.enemy.Character.health,
+            Data.defaultPlayer.Character.attack, playerWeapon, ConversationTrigger.EnemyHealth, specialAttack);
     }
 
     IEnumerator coPopupReward()
     {
         yield return new WaitForSeconds(.25f);        
-        SS.UI.Core.Load<PopupReward>("PopupReward", LoadSceneMode.Additive);
+        SS.UI.Core.Load<PopupReward>("PopupReward", LoadSceneMode.Additive, popup => popup.Setup(Data.itemReward.ItemReward));
     }
 
     [SerializeField] string _increaseAudio;
@@ -494,7 +544,10 @@ public class GameController : MonoBehaviour
         {
             m_effHealth.Play();
             SoundManager.instance.PlaySfx(_increaseAudio);            
-            Player.m_Health.DOFillAmount(Player.m_Health.fillAmount + .01f, 1f);
+            int maxHp = Data.defaultPlayer.Character.health;
+            m_PlayerHp = Mathf.Min(maxHp, m_PlayerHp + maxHp * .01f);
+            Player.m_Health.DOKill();
+            Player.m_Health.DOFillAmount(m_PlayerHp / maxHp, 1f);
         }        
     }
 

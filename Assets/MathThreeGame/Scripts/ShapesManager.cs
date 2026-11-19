@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
@@ -189,6 +189,8 @@ public class ShapesManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (GameController.instance != null && GameController.instance.BlocksBoard) return;
+
         if (ShowDebugInfo)
             DebugText.text = DebugUtilities.GetArrayContents(shapes);
 

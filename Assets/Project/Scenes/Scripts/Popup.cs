@@ -74,7 +74,7 @@ public class Popup : PopupBase
 
     public void Setup(PopupData data)
     {        
-        m_btnAds.GetComponent<Button>().interactable = AdsController.instance.checkReward();
+        m_btnAds.GetComponent<Button>().interactable = AdsController.instance != null && AdsController.instance.checkReward();
         
             Data = data;
 
@@ -95,13 +95,13 @@ public class Popup : PopupBase
     public void OnCLickNext()
     {
         InCreaseValue();
-        SS.UI.Core.Load<StoryController>("Story");
+        SOManager.instance.PlayCurrentLevel();
 
     }
 
     public void OnClickRetry()
     {
-        SS.UI.Core.Load<StoryController>("Story");
+        SOManager.instance.PlayCurrentLevel();
     }
 
     public void OnClickHome()
@@ -112,10 +112,6 @@ public class Popup : PopupBase
 
     void InCreaseValue(int coefficient = 1)
     {
-        SOManager.story_num++;        
-        Debug.Log("story_num: " + SOManager.story_num);
-        PlayerPrefs.SetInt(Const.NUM_STORY, SOManager.story_num);
-
         int valueEXP = PlayerPrefs.GetInt(Const.EXP) + (Data.Exp * coefficient);
         PlayerPrefs.SetInt(Const.EXP, valueEXP);
 

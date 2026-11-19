@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using DG.Tweening;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using SS.UI;
 
@@ -10,40 +7,56 @@ public class SOManager : MonoBehaviour
 {
     public static SOManager instance;
 
-    public List<LevelData> allDataStory;
+    [SerializeField] ArcsData m_ArcsData;
+    List<LevelData> m_Levels;
+    int m_LevelIndex;
+    bool m_Loading;
 
-    public static DataForSceneGame Data;
-
-    public static int story_num;
-
-    public static string Level;
+    public LevelData CurrentLevelData => m_Levels.Count == 0 ? null : m_Levels[m_LevelIndex];
+    public int CurrentLevelNumber => m_LevelIndex + 1;
 
     [SerializeField] CreateItemReward[] itemRewards;
 
     [SerializeField] AudioSource m_audioSource;
 
-    LevelData _currentLevelData;
-
-    public LevelData CurrentLevelData
+    void Awake()
     {
-        get { return _currentLevelData; }
-        set { _currentLevelData = value; }
-    }
-
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-        else
+        if (instance != null && instance != this)
         {
             Destroy(gameObject);
+            return;
+        }
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+        m_Levels = m_ArcsData != null ? m_ArcsData.GetOrderedLevels() : new List<LevelData>();
+        if (m_Levels.Count > 0)
+            m_LevelIndex = Mathf.Max(0, PlayerPrefs.GetInt(Const.NUM_STORY, 0)) % m_Levels.Count;
+    }
+
+    public void PlayCurrentLevel()
+    {
+        var level = CurrentLevelData;
+        if (m_Loading) return;
+        if (level == null || !level.HasCombatants)
+        {
+            Debug.LogError("Assign a level with two characters and positive HP in ArcsData.", this);
+            return;
         }
 
-        story_num = PlayerPrefs.GetInt(Const.NUM_STORY, 0);
-        Level = PlayerPrefs.GetString(Const.LEVEL, string.Empty);
-        _currentLevelData = allDataStory[story_num];
+        m_Loading = true;
+        Core.Load<GameController>(GameController.SCENE_NAME, onSceneLoaded: game =>
+        {
+            m_Loading = false;
+            game.Setup(level);
+        });
+    }
+
+    public void AdvanceAfterWin(LevelData completed)
+    {
+        if (completed == null || completed != CurrentLevelData) return;
+        m_LevelIndex = (m_LevelIndex + 1) % m_Levels.Count;
+        PlayerPrefs.SetInt(Const.NUM_STORY, m_LevelIndex);
+        PlayerPrefs.Save();
     }
 
     public void PlayAudio(string fileName)
@@ -54,7 +67,6 @@ public class SOManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        DontDestroyOnLoad(gameObject);
         m_imgFade.color = new Color(0, 0, 0, 0);
     }
 

@@ -1,16 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using SS.UI;
-using System.Linq;
 using UnityEngine.UI;
 
 public class StoryController : MonoBehaviour
 {
-    StoryConversations _storyConversations;
-    List<ConversationData> _conversations = new List<ConversationData>();
-    int _numConversation;
+    readonly Queue<ConversationData> m_Lines = new Queue<ConversationData>();
+    System.Action m_OnClosed;
+    bool m_Closing;
 
     [SerializeField] ScrollRect _scrollView;
     [SerializeField] GameObject _storyPanel;
@@ -21,33 +18,27 @@ public class StoryController : MonoBehaviour
     ConversationPool _conversationPool;
     readonly List<Conversation> _activeConversations = new List<Conversation>();
 
-    public void Setup(StoryConversations storyConversations)
+    public void Setup(IEnumerable<ConversationData> lines, System.Action onClosed)
     {
-        StopAllCoroutines();
-        ReturnConversations();
-        isStartGoToGame = false;
+        m_OnClosed = onClosed;
         _conversationPool = ConversationPool.Instance;
-        _storyConversations = storyConversations;
-        _conversations = _storyConversations.conversations.ToList();
-        _numConversation = 0;
-
+        foreach (var line in lines)
+        {
+            if (line != null) m_Lines.Enqueue(line);
+        }
         ShowConversation();
     }
+
     void ShowConversation()
     {
-        if (_conversations.Count == 0)
+        if (m_Lines.Count == 0)
         {
+            m_Closing = true;
+            StartCoroutine(CloseStory());
             return;
         }
 
-        if (_currentConversation != null && !_currentConversation.IsComplete)
-        {
-            return;
-        }
-
-        ConversationData conversationData = _conversations[0];
-        _conversations.RemoveAt(0);
-
+        var conversationData = m_Lines.Dequeue();
         Conversation prefab = conversationData.isPlayer ? _playerConversation : _enemyConversation;
         Conversation conversation = _conversationPool.Rent(prefab, _storyPanel.transform);
         _activeConversations.Add(conversation);
@@ -91,34 +82,25 @@ public class StoryController : MonoBehaviour
         _scrollView.StopMovement();
         _scrollView.verticalNormalizedPosition = 0f;
     }
-    bool isStartGoToGame;
     void Update()
     {
-        if (!isStartGoToGame && _conversations != null && _conversations.Count == 0 && _currentConversation != null && _currentConversation.IsComplete)
-        {
-            isStartGoToGame = true;
-            OnStartGoToGame();
-        }
-
+        if (m_Closing || _currentConversation == null) return;
         if (Input.GetMouseButtonDown(0))
         {
-            if (_currentConversation != null && _currentConversation.IsComplete)
-            {
-                _currentConversation.SkipTyping();
-                ShowConversation();
-            }
+            if (!_currentConversation.IsComplete) _currentConversation.SkipTyping();
+            else ShowConversation();
         }
-        void OnStartGoToGame()
+        else if (m_Lines.Count == 0 && _currentConversation.IsComplete)
         {
-            StartCoroutine(GoToGame());
-            IEnumerator GoToGame()
-            {
-                yield return new WaitForSeconds(1f);
-                ReturnConversations();
-                SS.UI.Core.Load<GameController>(GameController.SCENE_NAME);
-            }
+            ShowConversation();
         }
     }
+
+    IEnumerator CloseStory()
+    {
+        yield return new WaitForSecondsRealtime(1f);
+        ReturnConversations();
+        var onClosed = m_OnClosed;
+        UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(gameObject.scene).completed += _ => onClosed?.Invoke();
+    }
 }
-
-

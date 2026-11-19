@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -70,7 +70,9 @@ public class Conversation : MonoBehaviour
             m_imgCharacter.sprite = _conversationData.imgCharacter;
             m_imgCharacter.SetNativeSize();
 
-            m_imgCharacter.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.WidthControlsHeight;
+            var fitter = m_imgCharacter.GetComponent<AspectRatioFitter>();
+            if (fitter == null) fitter = m_imgCharacter.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.WidthControlsHeight;
         }
         else
         {

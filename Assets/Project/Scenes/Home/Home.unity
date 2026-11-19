@@ -1777,7 +1777,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_textGold: {fileID: 395536308}
   m_textExp: {fileID: 441756607}
-  _testStory: {fileID: 11400000, guid: 5807ed04f85833b40a59e9f41e190cfa, type: 2}
   _soundSettings: {fileID: 2045623383}
 --- !u!1 &1156927006
 GameObject:
