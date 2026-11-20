@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level04
+  m_EditorClassIdentifier:
+  displayName: "Ân đoạn nghĩa tuyệt"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: b00a35d17840444099127f6cb4e0938d, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Hân Hân… mặt em sao thế?"
+      imgCharacter: {fileID: 21300000, guid: d66db8c8a8317d4429e5f9486a6f7d10, type: 3}
+      isPlayer: 1
+    - content: "Hân Hân: A Dũng tới chỗ em làm. Hắn muốn ép em đi theo."
+      imgCharacter: {fileID: 21300000, guid: 7b9d4e66d6560994d89153d51544c3d3, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Nó dám đánh em?"
+      imgCharacter: {fileID: 21300000, guid: d66db8c8a8317d4429e5f9486a6f7d10, type: 3}
+      isPlayer: 1
+    - content: "Hân Hân: Chị Hạt Tiêu tới kịp. Em về được rồi."
+      imgCharacter: {fileID: 21300000, guid: 7b9d4e66d6560994d89153d51544c3d3, type: 3}
+      isPlayer: 1
+    - content: "Hân Hân: Nhìn em này. Đừng vì hắn mà anh cũng không trở về."
+      imgCharacter: {fileID: 21300000, guid: 7b9d4e66d6560994d89153d51544c3d3, type: 3}
+      isPlayer: 1
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Tại võ quán Thái Tử."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Thái Tử: Mày đang nhìn tao, hay đang nhìn thấy A Dũng?"
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Anh đánh đi. Em cần tỉnh lại."
+      imgCharacter: {fileID: 21300000, guid: d66db8c8a8317d4429e5f9486a6f7d10, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Thái Tử: Cứ lao vào như thế, mày sẽ gục trước khi chạm được nó."
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Làm lại. Lần này em sẽ nhìn đòn."
+      imgCharacter: {fileID: 21300000, guid: d66db8c8a8317d4429e5f9486a6f7d10, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Buổi họp báo trước trận chung kết."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "A Dũng: Hân Hân có tới xem không? Bảo cô ấy nhìn cho kỹ lúc mày ngã."
+      imgCharacter: {fileID: 21300000, guid: 09ea906cf3b3eab479aa801ac95e719c, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Đừng nhắc tên cô ấy."
+      imgCharacter: {fileID: 21300000, guid: d66db8c8a8317d4429e5f9486a6f7d10, type: 3}
+      isPlayer: 1
+    - content: "Thiên Thu: Để dành sức trên đài. Ta vẫn đặt niềm tin vào Dương Thiêm."
+      imgCharacter: {fileID: 21300000, guid: 8517eb9381a852446bc0d5337744310e, type: 3}
+      isPlayer: 0
+    - content: "Thiên Thu vỗ vai Đầu Bự. Dưới hàng ghế khách, có người lặng lẽ ghi cược vào cửa A Dũng."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Em lại hở bên trái rồi, phải không anh?"
+      imgCharacter: {fileID: 21300000, guid: d66db8c8a8317d4429e5f9486a6f7d10, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Em nghe đây. Anh ra đòn nữa đi."
+      imgCharacter: {fileID: 21300000, guid: d66db8c8a8317d4429e5f9486a6f7d10, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Thái Tử: Được. Lần này mày nhìn thấy đòn rồi."
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Thái Tử: Lúc nãy mà nóng đầu thì mày đã bỏ lỡ nhịp đó."
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+  itemReward: {fileID: 0}

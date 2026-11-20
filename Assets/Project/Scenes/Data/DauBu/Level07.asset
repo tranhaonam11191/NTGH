@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level07
+  m_EditorClassIdentifier:
+  displayName: "Giỏ hoa từ Đài Loan"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: c4798a07b0d74bc096aa167b4b7fe3bc, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đại Thiên Nhị: Xong chỗ này là khai trương được. Mày xem còn thiếu gì không?"
+      imgCharacter: {fileID: 21300000, guid: 02b5a0e692c8f784d9778bd94a4525b4, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Cửa sau chưa chắc. Để em sửa nốt."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "Đàn em Hồng Hưng: Anh Nhị! Bọn Cửu Ca chặn người giao hàng bên kia đường!"
+      imgCharacter: {fileID: 0}
+      isPlayer: 1
+    - content: "Đại Thiên Nhị: Đi. Ra hỏi xem chúng muốn gì."
+      imgCharacter: {fileID: 21300000, guid: 02b5a0e692c8f784d9778bd94a4525b4, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Cửu Ca: Có giỏi thì qua bên kia đường mà hỏi!"
+      imgCharacter: {fileID: 21300000, guid: 2f80d18c5cacd6b4681dd2b30679748e, type: 3}
+      isPlayer: 0
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Cửu Ca: Quán đối diện có người chống lưng rồi. Hồng Hưng đừng hòng đụng vào!"
+      imgCharacter: {fileID: 21300000, guid: 2f80d18c5cacd6b4681dd2b30679748e, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Vậy bảo người đó ra nói chuyện!"
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Sáng hôm sau, bàn ghế trong quán nằm ngổn ngang."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Đầu Bự: Đêm qua còn nguyên…"
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "Người giao hoa: Hoa chúc mừng khai trương. Người gửi là Gà Rừng, Đài Loan."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Hạo Nam: Gà Rừng?"
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+    - content: "Gà Rừng: Lâu rồi không gặp, anh Nam."
+      imgCharacter: {fileID: 21300000, guid: 3ccb08a3093d37e4b99d5c5be33043fa, type: 3}
+      isPlayer: 0
+    - content: "Hạo Nam: Quán bên kia… là của mày?"
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Gà Rừng: Tôi thuê Đông Anh bảo kê. Chuyện làm ăn thôi."
+      imgCharacter: {fileID: 21300000, guid: 3ccb08a3093d37e4b99d5c5be33043fa, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Bọn chúng vừa phá quán của anh em anh đấy."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "Thiên Thu: Nói chuyện cẩn thận. Đây là ông chủ của ta."
+      imgCharacter: {fileID: 21300000, guid: 8517eb9381a852446bc0d5337744310e, type: 3}
+      isPlayer: 0
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Sau cuộc gặp, Thiên Thu đưa riêng cho Gà Rừng một chiếc cặp."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Thiên Thu: Tiền thắng cược giải quyền. Phần của anh."
+      imgCharacter: {fileID: 21300000, guid: 8517eb9381a852446bc0d5337744310e, type: 3}
+      isPlayer: 0
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Anh Nhị, né mấy thùng hàng ra!"
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Cái cửa sau em còn sửa dở. Em chưa nằm đây đâu."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  itemReward: {fileID: 0}

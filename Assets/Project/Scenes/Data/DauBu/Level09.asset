@@ -1,0 +1,137 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level09
+  m_EditorClassIdentifier:
+  displayName: "Người còn đứng lại"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: 932450b96a1a4060bd098bef4a7e7f5b, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Hàn Tân: Anh Nam với Thái Tử đang truy đuổi. Mình giữ đường này."
+      imgCharacter: {fileID: 21300000, guid: d346eb31ae9bfed4b8087173bc0ec659, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Còn chị Hoa Oa?"
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+    - content: "Hàn Tân: Bên Đại Phi đang lo. Tập trung… Có người phía trước."
+      imgCharacter: {fileID: 21300000, guid: d346eb31ae9bfed4b8087173bc0ec659, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Cúi xuống!"
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Anh Tân! Tay anh…"
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+    - content: "Hàn Tân: Còn cử động được. Thằng bên phải đang vòng ra sau mày!"
+      imgCharacter: {fileID: 21300000, guid: 27c570115d1303043af72fc3a95558a4, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Em giữ nó. Anh tìm chỗ nấp!"
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đại Thiên Nhị, qua bộ đàm: Anh Phi bị thương nặng! Đang đưa vào viện!"
+      imgCharacter: {fileID: 21300000, guid: 02b5a0e692c8f784d9778bd94a4525b4, type: 3}
+      isPlayer: 1
+    - content: "Hàn Tân: Đầu Bự, đi được không?"
+      imgCharacter: {fileID: 21300000, guid: 27c570115d1303043af72fc3a95558a4, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Được. Để em dìu anh."
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Ở bến tàu, Thiên Thu chặn đường Tiếu Diện Hổ."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Tiếu Diện Hổ: Thiên Thu! Chúng ta cùng một phe mà!"
+      imgCharacter: {fileID: 21300000, guid: 10449e6a0a872694384072cbfb97cb8e, type: 3}
+      isPlayer: 0
+    - content: "Thiên Thu: Ngươi hết đường rồi."
+      imgCharacter: {fileID: 21300000, guid: 4f793161e6ac9ec4aa5fdbefc87aab6a, type: 3}
+      isPlayer: 0
+    - content: "Bên chiếc thuyền, Gà Rừng bắt kịp Quạ Đen."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Quạ Đen: Mày muốn gì tao cũng nhường! Để tao đi!"
+      imgCharacter: {fileID: 21300000, guid: 5597d1fc591ab58448258f851e9f4716, type: 3}
+      isPlayer: 0
+    - content: "Gà Rừng: Muộn rồi."
+      imgCharacter: {fileID: 21300000, guid: 6fb74dfa675bcaa44bfebabae76aa6b3, type: 3}
+      isPlayer: 0
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Quạ Đen mất hút ngoài biển. Gà Rừng đưa Hạo Nam về. Tại bệnh viện…"
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Hạo Nam: Đại Phi qua cơn nguy rồi. Tay anh Tân thế nào?"
+      imgCharacter: {fileID: 21300000, guid: a8b3356d50f06ba47812b68fba327372, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Bác sĩ đang xử lý. Anh cũng ngồi xuống đi."
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+    - content: "Hạo Nam: Ừ. Đêm nay… đủ rồi."
+      imgCharacter: {fileID: 21300000, guid: a8b3356d50f06ba47812b68fba327372, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Sáng hôm sau, Đầu Bự đặt đôi găng bên di ảnh bà ngoại."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Đầu Bự: Cháu không mang được cúp về cho bà."
+      imgCharacter: {fileID: 21300000, guid: cca9ccb178c2fdc4d944281087bac17b, type: 3}
+      isPlayer: 1
+    - content: "Hân Hân: Anh về được rồi."
+      imgCharacter: {fileID: 21300000, guid: a4421fd92378cc244b6d2f2a5a71214c, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Ừ… Về rồi."
+      imgCharacter: {fileID: 21300000, guid: cca9ccb178c2fdc4d944281087bac17b, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Anh Tân, nghe tiếng em thì cứ ở yên đó."
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Em đây… anh đừng bước ra tìm em!"
+      imgCharacter: {fileID: 21300000, guid: e6f9caaca9f9f8e4c9ef977dd6df786d, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Sát thủ: Mưa thế này… tao chẳng thấy thuyền đâu nữa."
+      imgCharacter: {fileID: 21300000, guid: 4d729960156dc234193297df47bfb030, type: 3}
+      isPlayer: 0
+  itemReward: {fileID: 0}

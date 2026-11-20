@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level02
+  m_EditorClassIdentifier:
+  displayName: "Người bạn đứng bên kia cửa"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: a63f1f66235d4a688592dbee9411af23, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: A Dũng! Tao nghe người của Quạ Đen bắt anh Phúc đến đây."
+      imgCharacter: {fileID: 21300000, guid: 1cf0daee054ac654baf34f09e2597105, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Anh mày thiếu tiền. Đến hạn thì phải trả."
+      imgCharacter: {fileID: 21300000, guid: bcd187ef4ad8d9946827c9b10da944bf, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Cho tao gặp ảnh. Chuyện tiền bạc mình tính sau."
+      imgCharacter: {fileID: 21300000, guid: 1cf0daee054ac654baf34f09e2597105, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Mày vẫn tưởng tao đứng đây để giúp mày à?"
+      imgCharacter: {fileID: 21300000, guid: bcd187ef4ad8d9946827c9b10da944bf, type: 3}
+      isPlayer: 0
+    - content: "A Phúc: Đầu Bự… đừng xin nó. Chính nó đánh anh!"
+      imgCharacter: {fileID: 21300000, guid: d28a2aa1898654f48a6cbfe7a07b52a3, type: 3}
+      isPlayer: 1
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Trước nhà Hạo Nam."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Đầu Bự: Anh Nam… em cần anh giúp cứu anh trai."
+      imgCharacter: {fileID: 21300000, guid: 1cf0daee054ac654baf34f09e2597105, type: 3}
+      isPlayer: 1
+    - content: "Hạo Nam: Năm đó mày ngồi tù thay tao. Bây giờ có chuyện, sao còn đứng ngoài cửa?"
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Em từng nghĩ mình sẽ không phải quay lại nữa."
+      imgCharacter: {fileID: 21300000, guid: 1cf0daee054ac654baf34f09e2597105, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "A Dũng: Mang người Hồng Hưng tới… Mày chọn bên rồi đấy."
+      imgCharacter: {fileID: 21300000, guid: bcd187ef4ad8d9946827c9b10da944bf, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Tao tới đưa anh tao về. Chính mày bắt tao phải đánh."
+      imgCharacter: {fileID: 21300000, guid: 1cf0daee054ac654baf34f09e2597105, type: 3}
+      isPlayer: 1
+    - content: "Hạo Nam: Đưa A Phúc đi chữa trước. Chuyện còn lại có anh em."
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Anh Phúc, em còn ở đây!"
+      imgCharacter: {fileID: 21300000, guid: 1cf0daee054ac654baf34f09e2597105, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Cánh cửa mở rồi… anh bám lấy em."
+      imgCharacter: {fileID: 21300000, guid: 1cf0daee054ac654baf34f09e2597105, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "A Lạc: Mày dẫn cả Hồng Hưng tới thật à?"
+      imgCharacter: {fileID: 21300000, guid: 08aef3051f5cb4149bf543f5eac6e62e, type: 3}
+      isPlayer: 0
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "A Lạc: Thằng Phúc ở trong. Tự vào mà đón!"
+      imgCharacter: {fileID: 21300000, guid: 08aef3051f5cb4149bf543f5eac6e62e, type: 3}
+      isPlayer: 0
+  itemReward: {fileID: 0}

@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level08
+  m_EditorClassIdentifier:
+  displayName: "Trở lại Hắc Hổ"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: a63f1f66235d4a688592dbee9411af23, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đại Phi: Ảnh dùng để uy hiếp Phương Đình. Mày giấu ở đâu?"
+      imgCharacter: {fileID: 21300000, guid: c0e097b6ef183804c930f3e968e9edf1, type: 3}
+      isPlayer: 1
+    - content: "Hoa Liễu: Hắc Hổ Quyền Quán… Tôi dẫn các anh tới!"
+      imgCharacter: {fileID: 21300000, guid: a12cc5830b6f29d49bf2d18d311313cf, type: 3}
+      isPlayer: 0
+    - content: "Đại Thiên Nhị: Quạ Đen đến người của Gà Rừng cũng dám đụng. Hắn hết đường lui rồi."
+      imgCharacter: {fileID: 21300000, guid: 6c17ddd5e31f8e9498b2715bb5798de7, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Hết đường lui thì hắn càng kéo người khác xuống cùng."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "Đại Phi: Vậy lấy lại ảnh trước khi hắn kịp làm gì nữa."
+      imgCharacter: {fileID: 21300000, guid: c0e097b6ef183804c930f3e968e9edf1, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Hoa Liễu: Tôi không biết có mai phục! Tôi không biết!"
+      imgCharacter: {fileID: 21300000, guid: a12cc5830b6f29d49bf2d18d311313cf, type: 3}
+      isPlayer: 0
+    - content: "Đại Thiên Nhị: Hơn hai chục đứa. Đầu Bự, giữ bên trái!"
+      imgCharacter: {fileID: 21300000, guid: 6c17ddd5e31f8e9498b2715bb5798de7, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Rõ. Đừng để chúng mang đồ chạy mất."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đại Thiên Nhị: Mày nhìn gì thế?"
+      imgCharacter: {fileID: 21300000, guid: 6c17ddd5e31f8e9498b2715bb5798de7, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: A Dũng từng nghĩ ở đây sẽ có tương lai."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "Đại Phi: Đi thôi. Lấy được đồ rồi."
+      imgCharacter: {fileID: 21300000, guid: c0e097b6ef183804c930f3e968e9edf1, type: 3}
+      isPlayer: 1
+    - content: "Đàn em Hồng Hưng, qua điện thoại: Anh Phi! Quạ Đen bắt chị Hoa Oa rồi!"
+      imgCharacter: {fileID: 0}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Anh Phi, em còn giữ được cửa!"
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Ảnh còn trong quán. Em đi sau cùng."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "A Lạc: Cái tủ kính… Đứa nào lấy chìa khóa rồi?"
+      imgCharacter: {fileID: 21300000, guid: 08aef3051f5cb4149bf543f5eac6e62e, type: 3}
+      isPlayer: 0
+  itemReward: {fileID: 0}

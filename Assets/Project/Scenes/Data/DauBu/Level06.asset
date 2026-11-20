@@ -1,0 +1,118 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level06
+  m_EditorClassIdentifier:
+  displayName: "Chiếc cúp vỡ"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: 49b04ce71c7a42a78332a232dd845ad4, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "A Dũng: Anh hứa chia tiền cho em. Em thắng rồi mà!"
+      imgCharacter: {fileID: 21300000, guid: 8f4a46cee70e755498b086e6662dfa5a, type: 3}
+      isPlayer: 0
+    - content: "Quạ Đen: Cái vai đó còn đánh được cho tao trận nào nữa?"
+      imgCharacter: {fileID: 21300000, guid: e9f7f72d4ab68134faf49fe3a80f16a8, type: 3}
+      isPlayer: 0
+    - content: "A Dũng: Vậy trả chiếc cúp đây. Nó là của em."
+      imgCharacter: {fileID: 21300000, guid: 8f4a46cee70e755498b086e6662dfa5a, type: 3}
+      isPlayer: 0
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Hoa Liễu bước tới, chiếc cúp trong tay. Tiếng kim loại rơi xuống nền võ quán."
+      imgCharacter: {fileID: 21300000, guid: 2e9dd57415ff7d54babbda177a0d4fdc, type: 3}
+      isPlayer: 0
+    - content: "Ít lâu sau, trong con hẻm gần Tân Khổng Tước."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Học sinh: Em chỉ còn tiền đi xe về thôi…"
+      imgCharacter: {fileID: 21300000, guid: 01a205e172559a141a8fa42c27c9f2dd, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Bỏ thằng bé ra."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Mày…"
+      imgCharacter: {fileID: 21300000, guid: 7256e2e29f0df5d449cdf2cea1a3fc46, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Đến mức này rồi mà mày vẫn đi hại người khác?"
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "A Dũng: Đánh tiếp đi. Mày vẫn muốn trả thù mà."
+      imgCharacter: {fileID: 21300000, guid: 7256e2e29f0df5d449cdf2cea1a3fc46, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Quạ Đen làm chân mày ra thế này?"
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Chúng dùng cái cúp… Tao thắng rồi mà vẫn chẳng có gì."
+      imgCharacter: {fileID: 21300000, guid: 7256e2e29f0df5d449cdf2cea1a3fc46, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Tao không quên chuyện mày làm."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Nhưng đứng dậy đi. Đừng cướp tiền trẻ con nữa."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Tại Tân Khổng Tước."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Đầu Bự: Anh Nam, cho nó một việc. Em sẽ trông chừng."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+    - content: "Hạo Nam: Mày tha được. Anh em khác chưa chắc tha được. Tao không nhận."
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Đừng xin nữa… Lần này tao tự chịu."
+      imgCharacter: {fileID: 21300000, guid: 7256e2e29f0df5d449cdf2cea1a3fc46, type: 3}
+      isPlayer: 0
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Tao không đến để đánh mày què thêm, Dũng."
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Thằng bé đi khỏi hẻm chưa?"
+      imgCharacter: {fileID: 21300000, guid: 460287ae9726a4d41affaa8cb9e454ba, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "A Dũng: Mày nhìn chân tao làm gì?"
+      imgCharacter: {fileID: 21300000, guid: 7256e2e29f0df5d449cdf2cea1a3fc46, type: 3}
+      isPlayer: 0
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "A Dũng: Đừng gọi thằng bé lại. Tao trả tiền cho nó."
+      imgCharacter: {fileID: 21300000, guid: 7256e2e29f0df5d449cdf2cea1a3fc46, type: 3}
+      isPlayer: 0
+  itemReward: {fileID: 0}

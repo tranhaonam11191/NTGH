@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level05
+  m_EditorClassIdentifier:
+  displayName: "Trận chung kết đã được định đoạt"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: a6f021a60c6c44f8b9af617bdd7622e5, type: 2}
+  finalStandEnemyHealth: 0.3
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "A Dũng: Hồi giao báo, mày có nghĩ sẽ đứng đây với tao không?"
+      imgCharacter: {fileID: 21300000, guid: 346ead0fe9a464a4983c52de28b80153, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Có. Nhưng tao tưởng mình sẽ đứng dưới cổ vũ mày."
+      imgCharacter: {fileID: 21300000, guid: b1b4bd6f6fe697541882237b2758fe5f, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Tiếc thật. Đêm nay chỉ một thằng được nâng cúp."
+      imgCharacter: {fileID: 21300000, guid: 346ead0fe9a464a4983c52de28b80153, type: 3}
+      isPlayer: 0
+    - content: "Hạo Nam: Đầu Bự. Nhìn đối thủ, giữ mình."
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Vai mày hỏng rồi. Dừng đi!"
+      imgCharacter: {fileID: 21300000, guid: b1b4bd6f6fe697541882237b2758fe5f, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Tao mà thua… mày tưởng chúng để tao yên sao?"
+      imgCharacter: {fileID: 21300000, guid: b496540625159ef4a9100233954415f9, type: 3}
+      isPlayer: 0
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Trên màn hình nhà thi đấu hiện lên bản tin từ Bắc Giác."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Đầu Bự: Khoan… đó là nhà tao."
+      imgCharacter: {fileID: 21300000, guid: 8c3cc8eb245ab2e4d8b1c0389efcebd6, type: 3}
+      isPlayer: 1
+    - content: "Bản tin: Một cụ bà đã tử vong khi tìm cách thoát khỏi đám cháy…"
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Đầu Bự: Bà… cháu bảo bà chờ cháu về mà."
+      imgCharacter: {fileID: 21300000, guid: 8c3cc8eb245ab2e4d8b1c0389efcebd6, type: 3}
+      isPlayer: 1
+    - content: "Hạo Nam: Đầu Bự! Nhìn anh! Đừng đứng yên!"
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+    - content: "Ngoài căn nhà cháy, Nghiêm Phong và Tiếu Diện Hổ lặng lẽ rời đi."
+      imgCharacter: {fileID: 21300000, guid: 6d62693f833119d4a88c3da04de57ea7, type: 3}
+      isPlayer: 0
+    - content: "Thái Tử: Giữ tay lên! Qua được đòn này rồi xuống đài!"
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Hân Hân: Anh Nam… đưa anh ấy xuống đi!"
+      imgCharacter: {fileID: 21300000, guid: df153ab8a26c2714b8c6e54d3d5bd4b2, type: 3}
+      isPlayer: 1
+    - content: "Thái Tử: Đợi đã! Nó còn đánh được!"
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+    - content: "Hạo Nam: Đủ rồi. Tao đưa nó về."
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Chiếc khăn trắng rơi xuống sàn. A Dũng nhận cúp. Đêm đó, tại nhà xác…"
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Đầu Bự: Cháu về rồi."
+      imgCharacter: {fileID: 21300000, guid: 8c3cc8eb245ab2e4d8b1c0389efcebd6, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Tao nhớ hồi mình tập ở sạp. Cú đó mày đánh trúng suốt."
+      imgCharacter: {fileID: 21300000, guid: b1b4bd6f6fe697541882237b2758fe5f, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Anh Nam… em còn nghe tiếng anh."
+      imgCharacter: {fileID: 21300000, guid: b1b4bd6f6fe697541882237b2758fe5f, type: 3}
+      isPlayer: 1
+  itemReward: {fileID: 0}

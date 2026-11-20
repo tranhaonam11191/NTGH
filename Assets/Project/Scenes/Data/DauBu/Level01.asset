@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level01
+  m_EditorClassIdentifier:
+  displayName: "Sạp báo trong lửa"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: e09c54b907904368af7c2a500bc3a1f0, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "A Dũng: Mai mốt tao đoạt đai quyền vương, mày khỏi phải dậy giao báo nữa."
+      imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Lo giao hết chồng này trước đi. Bà ngoại đang chờ tao về ăn sáng."
+      imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Bà ngoại, rồi Hân Hân… Mày không tính gì cho mình à?"
+      imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Bà khỏe, Hân Hân ở cạnh tao. Vậy cũng tốt rồi."
+      imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
+      isPlayer: 1
+    - content: "Tên đầu xoăn: Tâm sự đủ chưa? Dọn sạp đi. Chỗ này bọn tao lấy!"
+      imgCharacter: {fileID: 21300000, guid: 9a831d4180d5bb148a8d5a590d8ed01f, type: 3}
+      isPlayer: 0
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Báo thì tao bán. Sạp thì không."
+      imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Đêm đó, sạp báo cháy. Sáng ra, chỉ còn vài tờ báo đọc được."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "A Dũng: Tao nhờ anh Quạ Đen xử bọn nó rồi. Chúng không dám quay lại đâu."
+      imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Ông ta giúp mày… rồi muốn gì?"
+      imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
+      isPlayer: 1
+    - content: "A Dũng: Ảnh cho tao một con đường. Từ mai tao nghỉ giao báo."
+      imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
+      isPlayer: 0
+    - content: "Đầu Bự: Đi đâu thì đi. Có chuyện vẫn tìm tao."
+      imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Báo rơi hết rồi… còn cái sạp, tao giữ được."
+      imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: A Dũng, đỡ giùm tao cái kệ!"
+      imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Tên đầu xoăn: Có mỗi cái sạp mà mày cũng liều thế à?"
+      imgCharacter: {fileID: 21300000, guid: 9a831d4180d5bb148a8d5a590d8ed01f, type: 3}
+      isPlayer: 0
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Tên đầu xoăn: Thôi, để chồng báo đấy!"
+      imgCharacter: {fileID: 21300000, guid: 9a831d4180d5bb148a8d5a590d8ed01f, type: 3}
+      isPlayer: 0
+  itemReward: {fileID: 0}

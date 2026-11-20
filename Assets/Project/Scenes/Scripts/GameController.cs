@@ -97,6 +97,7 @@ public class GameController : MonoBehaviour
     bool m_ShowingStory;
     float m_PreviousTimeScale;
     float m_PlayerHp, m_EnemyHp;
+    bool m_FinalStand;
     bool m_HasClicked;
     float m_SecondsSinceFirstClick;
     resultType m_Result;
@@ -507,15 +508,26 @@ public class GameController : MonoBehaviour
         }
         weapon.Move(target.m_imgAvatar.transform.position);
         float previous = hp;
-        hp = Mathf.Clamp(hp - damage, 0, maxHp);
+        float minimumHp = target == Enemy ? maxHp * Data.finalStandEnemyHealth : 0f;
+        hp = Mathf.Clamp(hp - damage, minimumHp, maxHp);
         target.m_Health.DOKill();
         target.m_Health.DOFillAmount(hp / maxHp, 1f);
         QueueConversations(trigger, previous / maxHp, hp / maxHp);
-        if (hp > 0) return;
+        if (target == Enemy && minimumHp > 0f && hp <= minimumHp && !m_FinalStand)
+        {
+            m_FinalStand = true;
+            Enemy.m_timeToAttack.fillAmount = .25f;
+        }
+        bool survivedFinalHit = m_FinalStand && target == Player && hp > 0;
+        if (hp > 0 && !survivedFinalHit) return;
 
         endGame = true;
-        m_Result = target == Enemy ? resultType.win : resultType.lose;
-        if (m_Result == resultType.win) SOManager.instance.AdvanceAfterWin(Data);
+        m_Result = target == Enemy || survivedFinalHit ? resultType.win : resultType.lose;
+        if (m_Result == resultType.win)
+        {
+            SOManager.instance.AdvanceAfterWin(Data);
+            QueueConversations(ConversationTrigger.Victory);
+        }
         QueueConversations(ConversationTrigger.End);
     }
 

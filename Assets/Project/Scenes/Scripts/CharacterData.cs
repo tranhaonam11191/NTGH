@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Data", menuName = "ScriptableObjects/CharacterData", order = 1)]
-public class CreateDataCharacter : ScriptableObject
+public class CharacterData : ScriptableObject
 {
     public Character Character;
 }

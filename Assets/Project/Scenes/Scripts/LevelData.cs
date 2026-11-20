@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum ConversationTrigger
 {
-    Start, PlayerHealth, EnemyHealth, End, TimeAfterFirstClick
+    Start, PlayerHealth, EnemyHealth, End, TimeAfterFirstClick, Victory
 }
 
 [Serializable]
@@ -18,7 +18,8 @@ public class LevelConversation
     public bool Matches(ConversationTrigger moment, float previous, float current)
     {
         if (trigger != moment) return false;
-        if (moment == ConversationTrigger.Start || moment == ConversationTrigger.End) return true;
+        if (moment == ConversationTrigger.Start || moment == ConversationTrigger.End ||
+            moment == ConversationTrigger.Victory) return true;
         if (moment == ConversationTrigger.TimeAfterFirstClick) return current >= delaySeconds;
         return current < previous && previous >= healthThreshold && current <= healthThreshold;
     }
@@ -28,8 +29,10 @@ public class LevelConversation
 public class LevelData : ScriptableObject
 {
     public string displayName;
-    public CreateDataCharacter defaultPlayer;
-    public CreateDataCharacter enemy;
+    public CharacterData defaultPlayer;
+    public CharacterData enemy;
+    [Range(0f, 1f), Tooltip("At this fraction of enemy HP, survive the next enemy hit to win. Zero disables this objective.")]
+    public float finalStandEnemyHealth;
     public List<LevelConversation> conversations = new List<LevelConversation>();
     public CreateItemReward itemReward;
 

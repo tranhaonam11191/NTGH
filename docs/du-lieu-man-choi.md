@@ -18,6 +18,7 @@ Mở `Assets/Project/Scenes/Data/ArcsData.asset` trong Inspector để chỉnh t
 | Player Health | HP người chơi giảm từ trên ngưỡng xuống bằng hoặc dưới ngưỡng. |
 | Enemy Health | Cùng quy tắc, áp dụng cho HP của đối thủ. |
 | End | Khi một bên hết HP, trước popup thắng hoặc thua. |
+| Victory | Chỉ khi vượt màn. Dùng cho cảnh kết có tiết lộ cốt truyện. Nhóm Victory phát trước End nếu cùng được cấu hình. |
 | Time After First Click | Khi đủ số giây chơi đã đặt trong **Delay Seconds**, tính từ lần nhấn chuột trái hoặc chạm đầu tiên trong lúc trận cho phép thao tác. |
 
 **Health Threshold** là tỷ lệ HP còn lại của nhân vật được chọn. Ví dụ, đặt **Enemy Health** ở `0.5` cho địch có 120 HP sẽ phát thoại khi HP giảm từ 65 xuống 60 hoặc thấp hơn. Ngưỡng `1` kích hoạt ở lần mất máu đầu tiên từ đầy HP. Ngưỡng `0` kích hoạt khi HP về 0. Mỗi nhóm chỉ phát một lần trong trận, kể cả khi nhân vật hồi máu rồi vượt ngưỡng lần nữa.
@@ -32,7 +33,9 @@ Home, Next và Retry đều gọi `SOManager.PlayCurrentLevel()`. Manager lấy 
 
 Một chiến thắng ghi ngay vị trí kế tiếp vào khóa PlayerPrefs `Num_Story`, bắt đầu từ 0. Hết màn cuối trong arc, game sang màn đầu của arc kế. Thắng màn cuối danh mục sẽ ghi 0. Thua giữ vị trí để Retry hoặc trở về Home chơi lại. Các nút kết quả và quảng cáo không tăng màn lần thứ hai.
 
-Dữ liệu đã chuyển gồm 5 arc, theo thứ tự Quạ Đen → Diệu Dương → Kim Ma → Hoành Mi → Cầm Long. Bốn arc đầu có một màn mỗi arc. Arc Cầm Long có hai màn là `ArcCamLong` và `Final`. Lời thoại có sẵn nằm trong nhóm Start của từng màn. Có thể tách các câu thành nhiều nhóm trong Inspector.
+Danh mục hiện tại bắt đầu bằng màn Quạ Đen, tiếp theo là chín màn của arc **Đầu Bự — Cái giá của tình nghĩa** trong `Assets/Project/Scenes/Data/DauBu`. Ở mỗi màn của arc, hai bên có thoại riêng khi HP còn 70% và 30%. Cảnh kết truyện dùng Victory.
+
+Màn 5 đặt **Final Stand Enemy Health** bằng `0.3`. Khi A Dũng còn 30% HP, trận chuyển sang đòn cuối. Nếu Đầu Bự sống sót qua đòn đó, người chơi vượt màn dù A Dũng nhận cúp trong cốt truyện. Để trường này bằng 0 ở màn có điều kiện thắng thông thường.
 
 Vị trí lưu là chỉ số trong danh sách màn ghép theo thứ tự arc. Arc rỗng và ô level chưa gán được bỏ qua. Giá trị lưu cũ vượt số màn được quy về phần dư, giá trị âm bắt đầu ở 0. Khi sắp xếp lại danh mục, cùng một chỉ số lưu có thể trỏ đến màn khác.
 
@@ -42,4 +45,4 @@ Vị trí lưu là chỉ số trong danh sách màn ghép theo thứ tự arc. A
 - Trên bản sao một màn, tạo hai nhóm Enemy Health ở `0.51` và `0.5` cùng một nhóm End. Dùng một đòn từ trên 51% xuống dưới 50% để kiểm tra thứ tự. Làm tương tự với Player Health, sau đó hồi máu và vượt ngưỡng lần hai.
 - Tạo hai nhóm Time After First Click ở 0 và 3 giây. Đợi hơn 3 giây trước khi chạm để kiểm tra mốc bắt đầu. Chạm để mở nhóm đầu, đọc hơn 3 giây rồi đóng. Nhóm thứ hai phải xuất hiện sau 3 giây chơi tiếp. Retry và lặp lại.
 - Thua rồi chọn Retry. Kiểm tra cùng nhân vật và nhóm Start phát lại. Thua rồi về Home và vào lại để kiểm tra vị trí lưu.
-- Thắng liên tiếp qua ranh giới hai arc, qua hai màn trong Cầm Long và qua Final. Kiểm tra Next sau Final mở Quạ Đen. Thử về Home hoặc khởi động lại sau một chiến thắng để kiểm tra màn đã lưu.
+- Thắng màn Quạ Đen và kiểm tra Next mở Sạp báo trong lửa. Thắng màn thứ chín của Đầu Bự rồi kiểm tra Next quay lại Quạ Đen. Thử về Home hoặc khởi động lại sau một chiến thắng để kiểm tra màn đã lưu.

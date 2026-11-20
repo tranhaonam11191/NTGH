@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
+  m_Name: Level03
+  m_EditorClassIdentifier:
+  displayName: "Đôi găng của Hồng Hưng"
+  defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
+  enemy: {fileID: 11400000, guid: e1772aea82bc463f84318a522fa312cc, type: 2}
+  finalStandEnemyHealth: 0
+  conversations:
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Hạo Nam: Cường Lông Vàng với A Kiên mất rồi. Suất thi đấu của Hồng Hưng đang bỏ trống."
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Cho em lên đài."
+      imgCharacter: {fileID: 21300000, guid: ae76b3ea1a17412479e55a6af32b79d0, type: 3}
+      isPlayer: 1
+    - content: "Thái Tử: Đây không phải đánh nhau ngoài phố. Mày chịu nổi không?"
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Anh cứ dạy. Em sẽ tập."
+      imgCharacter: {fileID: 21300000, guid: ae76b3ea1a17412479e55a6af32b79d0, type: 3}
+      isPlayer: 1
+    - content: "Thái Tử: Đeo găng vào. Để tao xem mày giữ lời được bao lâu."
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+  - trigger: 0
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Ngày thi đấu vòng loại."
+      imgCharacter: {fileID: 0}
+      isPlayer: 0
+    - content: "Thái Tử: Lang Khánh sẽ ép mày đánh theo nhịp của hắn. Đừng nóng."
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Em chờ được."
+      imgCharacter: {fileID: 21300000, guid: 3fd8f7e0fc499db4fa32379f59ab916d, type: 3}
+      isPlayer: 1
+  - trigger: 5
+    healthThreshold: 0
+    delaySeconds: 0
+    lines:
+    - content: "Hạo Nam: Lương Hoa rút lui. Mày vào chung kết rồi."
+      imgCharacter: {fileID: 21300000, guid: 2bd3f7c7f7e2143449ad785331e6809c, type: 3}
+      isPlayer: 1
+    - content: "Đầu Bự: Vậy người bên kia là…"
+      imgCharacter: {fileID: 21300000, guid: 3fd8f7e0fc499db4fa32379f59ab916d, type: 3}
+      isPlayer: 1
+    - content: "Thái Tử: A Dũng."
+      imgCharacter: {fileID: 21300000, guid: 4ce0187b139b83b4a943464e550a00f2, type: 3}
+      isPlayer: 1
+    - content: "Thiên Thu: Ta đã nói rồi. Dương Thiêm có tướng vô địch."
+      imgCharacter: {fileID: 21300000, guid: 8517eb9381a852446bc0d5337744310e, type: 3}
+      isPlayer: 0
+    - content: "Về đến nhà, bà ngoại đặt bát mì xuống rồi khẽ chạm vào bàn tay quấn băng của Đầu Bự."
+      imgCharacter: {fileID: 21300000, guid: a4023b5114c75444dbd3d530a781e0a6, type: 3}
+      isPlayer: 0
+  - trigger: 1
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Đau thật. Thảo nào anh Thái Tử bắt tập thủ mãi."
+      imgCharacter: {fileID: 21300000, guid: 3fd8f7e0fc499db4fa32379f59ab916d, type: 3}
+      isPlayer: 1
+  - trigger: 1
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Đầu Bự: Còn nghe được tiếng chuông. Mình còn một hiệp."
+      imgCharacter: {fileID: 21300000, guid: 3fd8f7e0fc499db4fa32379f59ab916d, type: 3}
+      isPlayer: 1
+  - trigger: 2
+    healthThreshold: 0.7
+    delaySeconds: 0
+    lines:
+    - content: "Lang Khánh: Sao mày cứ chờ tao đánh trước?"
+      imgCharacter: {fileID: 21300000, guid: 28d5a8abe2a3db042a7d4dc1f5f2d5d2, type: 3}
+      isPlayer: 0
+  - trigger: 2
+    healthThreshold: 0.3
+    delaySeconds: 0
+    lines:
+    - content: "Lang Khánh: Tao nghe góc đài gọi rồi. Hiệp này dài thật."
+      imgCharacter: {fileID: 21300000, guid: 28d5a8abe2a3db042a7d4dc1f5f2d5d2, type: 3}
+      isPlayer: 0
+  itemReward: {fileID: 0}
