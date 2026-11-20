@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 629708ba56b37c34c872f190a889d769, type: 3}
+  m_Name: OutfitData_Outfit_01_TuCuu
+  m_EditorClassIdentifier: Assembly-CSharp::NTGH.Demo.OutfitSystem.OutfitData
+  m_outfitId: outfit_lv1_tucuu
+  m_displayName: "\u0110\u1ED3 B\xE1n B\xE1o"
+  m_rankTitle: "T\u1EE9 C\u1EEDu"
+  m_priceGold: 0
+  m_bonusHealth: 50
+  m_bonusDefence: 10
+  m_spriteLibraryAsset: {fileID: 11400000, guid: 4050fe1edb1a44c4dbc284ce4920443f, type: 2}
+  m_weaponSprite: {fileID: 0}

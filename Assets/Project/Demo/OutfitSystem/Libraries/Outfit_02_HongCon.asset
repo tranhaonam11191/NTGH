@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf7c34a0dc4e6348bea04faa70406ee, type: 3}
+  m_Name: Outfit_02_HongCon
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibraryAsset
+  m_Labels:
+  - m_Name: Head
+    m_Hash: 130111906
+    m_CategoryList:
+    - m_Name: Default
+      m_Hash: 753088835
+      m_Sprite: {fileID: 21300000, guid: 1c8010e58df67ab40adb784a95b742d7, type: 3}
+  - m_Name: Torso
+    m_Hash: 647926657
+    m_CategoryList:
+    - m_Name: Default
+      m_Hash: 753088835
+      m_Sprite: {fileID: 21300000, guid: d9c83e71d34883d47a31e257fd46d328, type: 3}
+  - m_Name: LeftArm
+    m_Hash: 730008282
+    m_CategoryList:
+    - m_Name: Default
+      m_Hash: 753088835
+      m_Sprite: {fileID: 21300000, guid: 52a75dc7cc680ab408295fd939bf63bf, type: 3}
+  - m_Name: RightArm
+    m_Hash: 733214503
+    m_CategoryList:
+    - m_Name: Default
+      m_Hash: 753088835
+      m_Sprite: {fileID: 21300000, guid: 271d5da1d7c9de14d91d0d83c3585139, type: 3}
+  - m_Name: LeftLeg
+    m_Hash: 101577729
+    m_CategoryList:
+    - m_Name: Default
+      m_Hash: 753088835
+      m_Sprite: {fileID: 21300000, guid: db535cfaf10670e43b4bb940af8803a1, type: 3}
+  - m_Name: RightLeg
+    m_Hash: 104663548
+    m_CategoryList:
+    - m_Name: Default
+      m_Hash: 753088835
+      m_Sprite: {fileID: 21300000, guid: 1a623e37eb7ffa240a01fb733672cb50, type: 3}
+  m_ModificationHash: 0
+  m_Version: 1

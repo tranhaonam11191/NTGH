@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf7c34a0dc4e6348bea04faa70406ee, type: 3}
+  m_Name: Outfit_MixAndMatch
+  m_EditorClassIdentifier: Unity.2D.Animation.Runtime::UnityEngine.U2D.Animation.SpriteLibraryAsset
+  m_Labels:
+  - m_Name: Head
+    m_Hash: 130111906
+    m_CategoryList:
+    - m_Name: Lv1
+      m_Hash: 779777020
+      m_Sprite: {fileID: 21300000, guid: 383d49582da006741975a79709e5fd75, type: 3}
+    - m_Name: Lv2
+      m_Hash: 930292294
+      m_Sprite: {fileID: 21300000, guid: 1c8010e58df67ab40adb784a95b742d7, type: 3}
+    - m_Name: Lv3
+      m_Hash: 7606992
+      m_Sprite: {fileID: 21300000, guid: 09af151e80130914993e1bb7110bb4d1, type: 3}
+    - m_Name: Lv4
+      m_Hash: 504399731
+      m_Sprite: {fileID: 21300000, guid: 19b567202f3bad64097ca281d4415a4a, type: 3}
+    - m_Name: Lv5
+      m_Hash: 689420261
+      m_Sprite: {fileID: 21300000, guid: 499482f29afc30b4480ea68734b9fcf5, type: 3}
+  - m_Name: Torso
+    m_Hash: 647926657
+    m_CategoryList:
+    - m_Name: Lv1
+      m_Hash: 779777020
+      m_Sprite: {fileID: 21300000, guid: 276c110af7f63cb46bdcd45160210796, type: 3}
+    - m_Name: Lv2
+      m_Hash: 930292294
+      m_Sprite: {fileID: 21300000, guid: d9c83e71d34883d47a31e257fd46d328, type: 3}
+    - m_Name: Lv3
+      m_Hash: 7606992
+      m_Sprite: {fileID: 21300000, guid: 26010ba4c47ef5d44a8b39e385931018, type: 3}
+    - m_Name: Lv4
+      m_Hash: 504399731
+      m_Sprite: {fileID: 21300000, guid: 4ce2242f8e358c540afd9e8f7ad36ebe, type: 3}
+    - m_Name: Lv5
+      m_Hash: 689420261
+      m_Sprite: {fileID: 21300000, guid: 63233c9f9649a734c95004f1fdf3e2d5, type: 3}
+  - m_Name: LeftArm
+    m_Hash: 730008282
+    m_CategoryList:
+    - m_Name: Lv1
+      m_Hash: 779777020
+      m_Sprite: {fileID: 21300000, guid: d7e2c2333a0135b48a8729d096729eb9, type: 3}
+    - m_Name: Lv2
+      m_Hash: 930292294
+      m_Sprite: {fileID: 21300000, guid: 52a75dc7cc680ab408295fd939bf63bf, type: 3}
+    - m_Name: Lv3
+      m_Hash: 7606992
+      m_Sprite: {fileID: 21300000, guid: aa0ce03e5a3759a40b42b31cbcec3bfe, type: 3}
+    - m_Name: Lv4
+      m_Hash: 504399731
+      m_Sprite: {fileID: 21300000, guid: e6ad3c0884a1faa40abd6846e07b8309, type: 3}
+    - m_Name: Lv5
+      m_Hash: 689420261
+      m_Sprite: {fileID: 21300000, guid: d961a2b248328364f9284172679eec9b, type: 3}
+  - m_Name: RightArm
+    m_Hash: 733214503
+    m_CategoryList:
+    - m_Name: Lv1
+      m_Hash: 779777020
+      m_Sprite: {fileID: 21300000, guid: e54a2b15453eacb4e8c50b3ae0f4c8e2, type: 3}
+    - m_Name: Lv2
+      m_Hash: 930292294
+      m_Sprite: {fileID: 21300000, guid: 271d5da1d7c9de14d91d0d83c3585139, type: 3}
+    - m_Name: Lv3
+      m_Hash: 7606992
+      m_Sprite: {fileID: 21300000, guid: e92e79811561c294385d144cc401f96b, type: 3}
+    - m_Name: Lv4
+      m_Hash: 504399731
+      m_Sprite: {fileID: 21300000, guid: bdaa7c35d7df60e49812fff791671585, type: 3}
+    - m_Name: Lv5
+      m_Hash: 689420261
+      m_Sprite: {fileID: 21300000, guid: 16e3085e1d44290469c9f524c94729c3, type: 3}
+  - m_Name: LeftLeg
+    m_Hash: 101577729
+    m_CategoryList:
+    - m_Name: Lv1
+      m_Hash: 779777020
+      m_Sprite: {fileID: 21300000, guid: 460a1960cfb58c54baf3be993d4b4821, type: 3}
+    - m_Name: Lv2
+      m_Hash: 930292294
+      m_Sprite: {fileID: 21300000, guid: db535cfaf10670e43b4bb940af8803a1, type: 3}
+    - m_Name: Lv3
+      m_Hash: 7606992
+      m_Sprite: {fileID: 21300000, guid: ecdbc2ac5d6c80c48a2a7a21841107d2, type: 3}
+    - m_Name: Lv4
+      m_Hash: 504399731
+      m_Sprite: {fileID: 21300000, guid: ac576d22b1dc5e3489fc2fac8ca5c101, type: 3}
+    - m_Name: Lv5
+      m_Hash: 689420261
+      m_Sprite: {fileID: 21300000, guid: 305ee7b9cc267354ab1c814ba0bd0a92, type: 3}
+  - m_Name: RightLeg
+    m_Hash: 104663548
+    m_CategoryList:
+    - m_Name: Lv1
+      m_Hash: 779777020
+      m_Sprite: {fileID: 21300000, guid: 9c2b43d0e452bf44fa5668c7da780f6d, type: 3}
+    - m_Name: Lv2
+      m_Hash: 930292294
+      m_Sprite: {fileID: 21300000, guid: 1a623e37eb7ffa240a01fb733672cb50, type: 3}
+    - m_Name: Lv3
+      m_Hash: 7606992
+      m_Sprite: {fileID: 21300000, guid: 80d2373ab1ed52246a990826ad777ce0, type: 3}
+    - m_Name: Lv4
+      m_Hash: 504399731
+      m_Sprite: {fileID: 21300000, guid: c3233424d94e89f4fb80cc17f4992f9d, type: 3}
+    - m_Name: Lv5
+      m_Hash: 689420261
+      m_Sprite: {fileID: 21300000, guid: b4c184a32ed14284fb6ee78868c9e62f, type: 3}
+  m_ModificationHash: 0
+  m_Version: 1

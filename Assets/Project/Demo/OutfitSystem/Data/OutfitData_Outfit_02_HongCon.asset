@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 629708ba56b37c34c872f190a889d769, type: 3}
+  m_Name: OutfitData_Outfit_02_HongCon
+  m_EditorClassIdentifier: Assembly-CSharp::NTGH.Demo.OutfitSystem.OutfitData
+  m_outfitId: outfit_lv2_hongcon
+  m_displayName: "\xC1o Kho\xE1c \u0110\u01B0\u1EDDng Ph\u1ED1"
+  m_rankTitle: "H\u1ED3ng C\xF4n"
+  m_priceGold: 500
+  m_bonusHealth: 150
+  m_bonusDefence: 30
+  m_spriteLibraryAsset: {fileID: 11400000, guid: f7e531a1ce3033241804c8d668a6e4a5, type: 2}
+  m_weaponSprite: {fileID: 0}
