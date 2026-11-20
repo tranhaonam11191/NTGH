@@ -25,7 +25,7 @@ Mở `Assets/Project/Scenes/Data/ArcsData.asset` trong Inspector để chỉnh t
 
 **Delay Seconds** dùng chung một mốc cho mọi nhóm thời gian của màn. Đặt `0` để phát ngay lúc click đầu tiên, hoặc `10` để phát sau 10 giây chơi. Các lần chạm đọc thoại mở đầu được bỏ qua. Khi đang đọc thoại, đồng hồ tạm dừng và tiếp tục khi trở lại trận. Retry đặt lại đồng hồ và trạng thái đã phát của mọi nhóm.
 
-Nếu một đòn vượt nhiều ngưỡng, các nhóm phù hợp phát theo thứ tự trong Inspector. Với đòn kết liễu, nhóm HP phát trước nhóm End. Nhóm có **Lines** rỗng được bỏ qua. Trong lúc đọc, trận đấu tạm dừng. Chạm khi chữ đang chạy để hiện hết câu, chạm tiếp để đọc câu sau. Câu cuối tự đóng sau một giây.
+Nếu một đòn vượt nhiều ngưỡng, các nhóm phù hợp phát theo thứ tự trong Inspector. Với đòn kết liễu, nhóm HP phát trước nhóm End. Nhóm có **Lines** rỗng được bỏ qua. Trong trận, một lớp đen mờ phủ bàn chơi khi đọc thoại. Bộ đếm đánh của địch giữ nguyên đến khi lớp này mờ đi hết. Các hiệu ứng đang chạy vẫn tiếp tục. Chạm khi chữ đang chạy để hiện hết câu, chạm tiếp để đọc câu sau. Câu cuối tự đóng sau một giây.
 
 ## Tiến trình và dữ liệu hiện có
 

@@ -19,10 +19,11 @@ public class StoryController : MonoBehaviour, IKeyBack
     ConversationPool _conversationPool;
     readonly List<Conversation> _activeConversations = new List<Conversation>();
 
-    public static void Show(IEnumerable<ConversationData> lines, System.Action onClosed)
+    public static void Show(IEnumerable<ConversationData> lines, System.Action onClosed, bool showBattleShield = false)
     {
-        Core.Add<StoryController>("Story", ScreenAnimation.None, ScreenAnimation.None,
-            onScreenLoad: story => story.Setup(lines, onClosed), hasShield: false);
+        var hideAnimation = showBattleShield ? ScreenAnimation.FadeHide : ScreenAnimation.None;
+        Core.Add<StoryController>("Story", ScreenAnimation.None, hideAnimation,
+            onScreenLoad: story => story.Setup(lines, onClosed), hasShield: showBattleShield, shieldAlpha: 0.5f);
     }
 
     void Setup(IEnumerable<ConversationData> lines, System.Action onClosed)

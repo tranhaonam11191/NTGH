@@ -95,7 +95,6 @@ public class GameController : MonoBehaviour
     readonly HashSet<LevelConversation> m_Played = new HashSet<LevelConversation>();
     readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
     bool m_ShowingStory;
-    float m_PreviousTimeScale;
     float m_PlayerHp, m_EnemyHp;
     bool m_FinalStand;
     bool m_HasClicked;
@@ -163,9 +162,7 @@ public class GameController : MonoBehaviour
             var lines = m_PendingLines.ToArray();
             m_PendingLines.Clear();
             m_ShowingStory = true;
-            m_PreviousTimeScale = Time.timeScale;
-            Time.timeScale = 0;
-            StoryController.Show(lines, ResumeBattle);
+            StoryController.Show(lines, () => m_ShowingStory = false, showBattleShield: true);
         }
         else if (endGame && !m_ResultShown)
         {
@@ -180,16 +177,8 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void ResumeBattle()
-    {
-        if (!m_ShowingStory) return;
-        Time.timeScale = m_PreviousTimeScale;
-        m_ShowingStory = false;
-    }
-
     void OnDestroy()
     {
-        ResumeBattle();
         Player.m_Health?.DOKill();
         Enemy.m_Health?.DOKill();
     }
@@ -221,11 +210,11 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
-        if (BlocksBoard) return;
+        if (Data == null || endGame) return;
 
         if (m_HasClicked)
             m_SecondsSinceFirstClick += Time.deltaTime;
-        else
+        else if (!BlocksBoard)
             m_HasClicked = Input.GetMouseButtonDown(0);
 
         if (m_HasClicked)
