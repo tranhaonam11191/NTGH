@@ -9,6 +9,8 @@ public class StoryController : MonoBehaviour, IKeyBack
     readonly Queue<ConversationData> m_Lines = new Queue<ConversationData>();
     System.Action m_OnClosed;
     bool m_Closing;
+    const float ScrollDuration = 0.16f;
+    const float RevealDuration = 0.12f;
 
     [SerializeField] ScrollRect _scrollView;
     [SerializeField] GameObject _storyPanel;
@@ -50,9 +52,10 @@ public class StoryController : MonoBehaviour, IKeyBack
         Conversation prefab = conversationData.isPlayer ? _playerConversation : _enemyConversation;
         Conversation conversation = _conversationPool.Rent(prefab, _storyPanel.transform);
         _activeConversations.Add(conversation);
+        _currentConversation = null;
+        conversation.Visibility.alpha = 0f;
         conversation.Setup(conversationData);
-        _currentConversation = conversation;
-        StartCoroutine(ScrollToLatestConversation());
+        StartCoroutine(ScrollAndReveal(conversation));
     }
 
     void ReturnConversations()
@@ -75,20 +78,34 @@ public class StoryController : MonoBehaviour, IKeyBack
         ReturnConversations();
     }
 
-    IEnumerator ScrollToLatestConversation()
+    IEnumerator ScrollAndReveal(Conversation conversation)
     {
-        // Wait for the new conversation to participate in the UI layout.
+        // The hidden row participates in the normal canvas layout pass.
         yield return null;
 
-        if (_scrollView == null || _scrollView.content == null)
+        if (_scrollView.content.rect.height > _scrollView.viewport.rect.height)
         {
-            yield break;
+            _scrollView.StopMovement();
+            float start = Mathf.Clamp01(_scrollView.verticalNormalizedPosition);
+            if (start > 0f)
+            {
+                for (float elapsed = 0f; elapsed < ScrollDuration; elapsed += Time.unscaledDeltaTime)
+                {
+                    float remaining = 1f - elapsed / ScrollDuration;
+                    _scrollView.verticalNormalizedPosition = start * remaining * remaining;
+                    yield return null;
+                }
+                _scrollView.verticalNormalizedPosition = 0f;
+            }
         }
 
-        Canvas.ForceUpdateCanvases();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(_scrollView.content);
-        _scrollView.StopMovement();
-        _scrollView.verticalNormalizedPosition = 0f;
+        for (float elapsed = 0f; elapsed < RevealDuration; elapsed += Time.unscaledDeltaTime)
+        {
+            conversation.Visibility.alpha = elapsed / RevealDuration;
+            yield return null;
+        }
+        conversation.Visibility.alpha = 1f;
+        _currentConversation = conversation;
     }
     void Update()
     {

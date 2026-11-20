@@ -40,7 +40,14 @@ public class Conversation : MonoBehaviour
     float m_visibleCharacterCount;
 
     ConversationData _conversationData;
+    public CanvasGroup Visibility { get; private set; }
     public bool IsComplete { get; private set; } = true;
+
+    void Awake()
+    {
+        Visibility = GetComponent<CanvasGroup>();
+        if (Visibility == null) Visibility = gameObject.AddComponent<CanvasGroup>();
+    }
 
     public void Setup(ConversationData data)
     {
@@ -83,7 +90,7 @@ public class Conversation : MonoBehaviour
 
     void Update()
     {
-        if (IsComplete)
+        if (IsComplete || Visibility.alpha <= 0f)
         {
             return;
         }
