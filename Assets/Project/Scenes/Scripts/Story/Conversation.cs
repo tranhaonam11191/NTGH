@@ -39,31 +39,13 @@ public class Conversation : MonoBehaviour
 
     float m_visibleCharacterCount;
 
-    ContentStory m_data;
-    public void Setup(ContentStory data)
-    {
-        m_data = data;
-
-        if(m_data.imgCharacter != null)
-        {
-            m_imgCharacter.color = Color.white;
-            m_imgCharacter.sprite = m_data.imgCharacter;
-        }
-        else
-        {
-            m_imgCharacter.color = new Color(1, 1, 1, 0);
-            m_imgCharacter.sprite = null;
-        }
-
-
-        StartTyping(m_data.content);
-    }
     ConversationData _conversationData;
     public bool IsComplete { get; private set; } = true;
+
     public void Setup(ConversationData data)
     {
         _conversationData = data;
-    
+
         if(_conversationData.imgCharacter != null)
         {
             m_imgCharacter.color = Color.white;
@@ -126,7 +108,7 @@ public class Conversation : MonoBehaviour
         StopAllCoroutines();
         IsComplete = true;
         m_visibleCharacterCount = 0f;
-        m_data = null;
+
         _conversationData = null;
 
         if (m_textContent != null)
