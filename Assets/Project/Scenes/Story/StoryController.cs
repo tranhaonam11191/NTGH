@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using SS.UI;
 
-public class StoryController : MonoBehaviour
+public class StoryController : MonoBehaviour, IKeyBack
 {
     readonly Queue<ConversationData> m_Lines = new Queue<ConversationData>();
     System.Action m_OnClosed;
@@ -18,7 +19,13 @@ public class StoryController : MonoBehaviour
     ConversationPool _conversationPool;
     readonly List<Conversation> _activeConversations = new List<Conversation>();
 
-    public void Setup(IEnumerable<ConversationData> lines, System.Action onClosed)
+    public static void Show(IEnumerable<ConversationData> lines, System.Action onClosed)
+    {
+        Core.Add<StoryController>("Story", ScreenAnimation.None, ScreenAnimation.None,
+            onScreenLoad: story => story.Setup(lines, onClosed), hasShield: false);
+    }
+
+    void Setup(IEnumerable<ConversationData> lines, System.Action onClosed)
     {
         m_OnClosed = onClosed;
         _conversationPool = ConversationPool.Instance;
@@ -87,8 +94,7 @@ public class StoryController : MonoBehaviour
         if (m_Closing || _currentConversation == null) return;
         if (Input.GetMouseButtonDown(0))
         {
-            if (!_currentConversation.IsComplete) _currentConversation.SkipTyping();
-            else ShowConversation();
+            Advance();
         }
         else if (m_Lines.Count == 0 && _currentConversation.IsComplete)
         {
@@ -96,11 +102,20 @@ public class StoryController : MonoBehaviour
         }
     }
 
+    public void OnKeyBack() => Advance();
+
+    void Advance()
+    {
+        if (m_Closing || _currentConversation == null) return;
+        if (!_currentConversation.IsComplete) _currentConversation.SkipTyping();
+        else ShowConversation();
+    }
+
     IEnumerator CloseStory()
     {
         yield return new WaitForSecondsRealtime(1f);
         ReturnConversations();
         var onClosed = m_OnClosed;
-        UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(gameObject.scene).completed += _ => onClosed?.Invoke();
+        Core.Close(this, () => onClosed?.Invoke());
     }
 }

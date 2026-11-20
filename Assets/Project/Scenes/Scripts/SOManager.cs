@@ -44,10 +44,29 @@ public class SOManager : MonoBehaviour
         }
 
         m_Loading = true;
+        Core.Init();
+        var opening = new List<ConversationData>();
+        foreach (var group in level.conversations)
+        {
+            if (group?.trigger == ConversationTrigger.Start && group.lines != null)
+                opening.AddRange(group.lines.FindAll(line => line != null));
+        }
+        if (opening.Count == 0)
+        {
+            LoadBattle(level);
+            return;
+        }
+
+        Core.Load<Canvas>("StoryIntro", onSceneLoaded: _ =>
+            StoryController.Show(opening, () => LoadBattle(level)));
+    }
+
+    void LoadBattle(LevelData level)
+    {
         Core.Load<GameController>(GameController.SCENE_NAME, onSceneLoaded: game =>
         {
             m_Loading = false;
-            game.Setup(level);
+            game.Setup(level, openingPlayed: true);
         });
     }
 

@@ -113,7 +113,7 @@ public class GameController : MonoBehaviour
             Setup(SOManager.instance.CurrentLevelData);
     }
 
-    public void Setup(LevelData level)
+    public void Setup(LevelData level, bool openingPlayed = false)
     {
         if (Data != null) return;
         if (level == null || !level.HasCombatants)
@@ -134,7 +134,7 @@ public class GameController : MonoBehaviour
         SetupLevel();
         SetupGold();
         SetupWeapon();
-        QueueConversations(ConversationTrigger.Start);
+        if (!openingPlayed) QueueConversations(ConversationTrigger.Start);
         StartCoroutine(PrepareBoard());
     }
 
@@ -165,8 +165,7 @@ public class GameController : MonoBehaviour
             m_ShowingStory = true;
             m_PreviousTimeScale = Time.timeScale;
             Time.timeScale = 0;
-            Core.Load<StoryController>("Story", LoadSceneMode.Additive,
-                story => story.Setup(lines, ResumeBattle));
+            StoryController.Show(lines, ResumeBattle);
         }
         else if (endGame && !m_ResultShown)
         {

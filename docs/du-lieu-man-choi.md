@@ -29,7 +29,7 @@ Nếu một đòn vượt nhiều ngưỡng, các nhóm phù hợp phát theo th
 
 ## Tiến trình và dữ liệu hiện có
 
-Home, Next và Retry đều gọi `SOManager.PlayCurrentLevel()`. Manager lấy màn hiện tại rồi truyền chính asset đó vào `GameController.Setup(level)` qua callback tải scene của SS. Game mở Story dạng additive và tiếp tục cùng trận sau khi đóng thoại.
+Home, Next và Retry đều gọi `SOManager.PlayCurrentLevel()`. Nếu màn có thoại Start, SS tải scene `StoryIntro`, hiển thị screen `Story` trên nền cũ rồi mới tải Game. Màn không có thoại mở đầu vào Game ngay. Thoại trong và sau trận dùng cùng screen trong suốt, giữ nguyên bàn chơi và camera Game.
 
 Một chiến thắng ghi ngay vị trí kế tiếp vào khóa PlayerPrefs `Num_Story`, bắt đầu từ 0. Hết màn cuối trong arc, game sang màn đầu của arc kế. Thắng màn cuối danh mục sẽ ghi 0. Thua giữ vị trí để Retry hoặc trở về Home chơi lại. Các nút kết quả và quảng cáo không tăng màn lần thứ hai.
 
