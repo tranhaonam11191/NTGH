@@ -1,3 +1,4 @@
+using NTGH.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,7 +9,10 @@ public class HomeController : MonoBehaviour
     public static HomeController instance;
 
     [SerializeField] private HomeOutfitView m_outfitView;
-    public OutfitProgression Outfits => m_outfitView.Progression;
+    [SerializeField] private HomeHouseTheme m_houseTheme;
+    [SerializeField] private CurrencyDisplayView m_currencyDisplay;
+    public HomeHouseTheme HouseTheme => m_houseTheme;
+    public OutfitProgression Outfits => m_outfitView != null ? m_outfitView.Progression : null;
 
     private void Awake()
     {
@@ -17,9 +21,10 @@ public class HomeController : MonoBehaviour
     [SerializeField] TextMeshProUGUI m_textGold, m_textExp;
 
     public void Start()
-    {        
-        Outfits.RankChanged += OnOutfitUpgraded;
-        SetData();            
+    {
+        if (Outfits != null)
+            Outfits.RankChanged += OnOutfitUpgraded;
+        SetData();
 
         //AdsController.instance.RequestBanner();
     }
@@ -34,9 +39,14 @@ public class HomeController : MonoBehaviour
 
     public void SetData()
     {
-        m_textExp.text = PlayerPrefs.HasKey(Const.EXP) ? PlayerPrefs.GetInt(Const.EXP).ToString() : "0";
+        if (m_textExp != null)
+            m_textExp.text = PlayerPrefs.HasKey(Const.EXP) ? PlayerPrefs.GetInt(Const.EXP).ToString() : "0";
 
-        m_textGold.text = PlayerPrefs.GetInt(Const.GOLD).ToString();
+        int gold = PlayerPrefs.GetInt(Const.GOLD);
+        if (m_currencyDisplay != null)
+            m_currencyDisplay.SetAmount(gold);
+        else if (m_textGold != null)
+            m_textGold.text = gold.ToString("N0");
     }
     public void onCLickPlay()
     {
@@ -44,8 +54,23 @@ public class HomeController : MonoBehaviour
     }
 
     public void OnClickWeapon()
-    {        
+    {
         SS.UI.Core.Load<ShopWeapon>("ShopWeapon", LoadSceneMode.Additive);
+    }
+
+    public void OnClickEvent()
+    {
+        Debug.Log("[HomeController] OnClickEvent");
+    }
+
+    public void OnClickOutfit()
+    {
+        Debug.Log("[HomeController] OnClickOutfit");
+    }
+
+    public void OnClickAddCurrency()
+    {
+        Debug.Log("[HomeController] OnClickAddCurrency");
     }
 
     public void OnClickMap()
@@ -62,6 +87,7 @@ public class HomeController : MonoBehaviour
 
     public void OnClickSettings()
     {
-        _soundSettings.Setup();
+        if (_soundSettings != null)
+            _soundSettings.Setup();
     }
 }
