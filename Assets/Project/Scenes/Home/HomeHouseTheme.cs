@@ -34,6 +34,7 @@ public sealed class HomeHouseTheme : MonoBehaviour
 
     private void Awake()
     {
+        User.EnsureLoaded();
         Restore(Part.Awning);
         Restore(Part.Door);
         Restore(Part.Wall);
@@ -41,7 +42,8 @@ public sealed class HomeHouseTheme : MonoBehaviour
 
     public Level GetPartLevel(Part part)
     {
-        return (Level)Mathf.Clamp(PlayerPrefs.GetInt(Key(part), 1), 1, 3);
+        User.EnsureLoaded();
+        return (Level)Mathf.Clamp(User.data.GetHousePartId(part, (int)Level.Dilapidated), (int)Level.Dilapidated, (int)Level.Renovated);
     }
 
     public void SetTheme(Level level)
@@ -53,8 +55,10 @@ public sealed class HomeHouseTheme : MonoBehaviour
 
     public void SetPartLevel(Part part, Level level)
     {
+        User.EnsureLoaded();
         GetLayer(part).Show(level);
-        PlayerPrefs.SetInt(Key(part), (int)level);
+        User.data.SetHousePartId(part, (int)level);
+        User.Save();
     }
 
     // Visibility is independent of the owned level (e.g. for a preview).
@@ -79,8 +83,6 @@ public sealed class HomeHouseTheme : MonoBehaviour
     }
 
     private void Restore(Part part) => GetLayer(part).Show(GetPartLevel(part));
-
-    private static string Key(Part part) => "Home.House." + part;
 
     private Layer GetLayer(Part part) => part switch
     {

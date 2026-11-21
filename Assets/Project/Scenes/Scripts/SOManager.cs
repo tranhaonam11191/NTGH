@@ -28,9 +28,27 @@ public class SOManager : MonoBehaviour
         }
         instance = this;
         DontDestroyOnLoad(gameObject);
+        User.EnsureLoaded();
+        MigrateLegacyWeapons();
         m_Levels = m_ArcsData != null ? m_ArcsData.GetOrderedLevels() : new List<LevelData>();
         if (m_Levels.Count > 0)
-            m_LevelIndex = Mathf.Max(0, PlayerPrefs.GetInt(Const.NUM_STORY, 0)) % m_Levels.Count;
+            m_LevelIndex = Mathf.Max(0, User.data.level) % m_Levels.Count;
+    }
+
+    void MigrateLegacyWeapons()
+    {
+        if (itemRewards == null || itemRewards.Length == 0) return;
+
+        var ids = new List<string>(itemRewards.Length);
+        foreach (CreateItemReward item in itemRewards)
+        {
+            if (item != null && item.ItemReward != null && !string.IsNullOrEmpty(item.ItemReward.ID))
+            {
+                ids.Add(item.ItemReward.ID);
+            }
+        }
+
+        User.MigrateLegacyUnlockedItems(ids);
     }
 
     public void PlayCurrentLevel()
@@ -73,9 +91,10 @@ public class SOManager : MonoBehaviour
     public void AdvanceAfterWin(LevelData completed)
     {
         if (completed == null || completed != CurrentLevelData) return;
+        User.EnsureLoaded();
         m_LevelIndex = (m_LevelIndex + 1) % m_Levels.Count;
-        PlayerPrefs.SetInt(Const.NUM_STORY, m_LevelIndex);
-        PlayerPrefs.Save();
+        User.data.level = m_LevelIndex;
+        User.Save();
     }
 
     public void PlayAudio(string fileName)
@@ -92,11 +111,13 @@ public class SOManager : MonoBehaviour
 
     public CreateItemReward GetWeapon()
     {
-        if (PlayerPrefs.HasKey(Const.CURRENTWEAPON))
+        User.EnsureLoaded();
+        string currentWeaponId = User.data.current_weapon_id;
+        if (!string.IsNullOrEmpty(currentWeaponId))
         {
             foreach (CreateItemReward item in itemRewards)
             {
-                if (item.ItemReward.ID.Equals(PlayerPrefs.GetString(Const.CURRENTWEAPON)))
+                if (item != null && item.ItemReward != null && item.ItemReward.ID.Equals(currentWeaponId))
                 {
                     return item;
                 }

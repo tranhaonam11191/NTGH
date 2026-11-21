@@ -1,14 +1,21 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.Video;
 
 public class MainController : MonoBehaviour
 {
     [SerializeField] VideoPlayer m_videoPlayer;
+    [SerializeField] RawImage m_RawImage;
+    [SerializeField] Image m_Background;
+    [SerializeField] GameObject m_BackgroundDonDestroy;
 
     void Awake()
     {
+        User.EnsureLoaded();
         SS.UI.Core.Init();
+        //DontDestroyOnLoad(m_BackgroundDonDestroy);
     }
 
     IEnumerator Start()
@@ -34,6 +41,8 @@ public class MainController : MonoBehaviour
         m_videoPlayer.isLooping = false;
         m_videoPlayer.Play();
 
+        m_RawImage.DOFade(1, 1f);
+
         while (remainingTime > 0)
         {
             yield return null;
@@ -53,6 +62,11 @@ public class MainController : MonoBehaviour
 
     void OnVideoCompleted(VideoPlayer videoPlayer)
     {
-        SS.UI.Core.Load<HomeController>("Home");
+        m_RawImage.DOFade(0, .1f);
+        m_Background.DOFade(1, .1f).OnComplete(() =>
+                {
+                    SS.UI.Core.Load<HomeController>("Home");
+                });
+        //SS.UI.Core.Load<HomeController>("Home");
     }
 }

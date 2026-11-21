@@ -39,10 +39,12 @@ public class HomeController : MonoBehaviour
 
     public void SetData()
     {
-        if (m_textExp != null)
-            m_textExp.text = PlayerPrefs.HasKey(Const.EXP) ? PlayerPrefs.GetInt(Const.EXP).ToString() : "0";
+        User.EnsureLoaded();
 
-        int gold = PlayerPrefs.GetInt(Const.GOLD);
+        if (m_textExp != null)
+            m_textExp.text = User.data.exp.ToString();
+
+        int gold = User.data.gold;
         if (m_currencyDisplay != null)
             m_currencyDisplay.SetAmount(gold);
         else if (m_textGold != null)

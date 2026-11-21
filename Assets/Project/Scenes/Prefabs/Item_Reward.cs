@@ -32,20 +32,19 @@ public class Item_Reward : MonoBehaviour
 
         if (itemReward != null)
         {
+            User.EnsureLoaded();
+            string itemId = itemReward.ItemReward.ID;
+
             m_img.sprite = itemReward.ItemReward.Sprite;
 
-            m_imgLock.gameObject.SetActive(!PlayerPrefs.HasKey(itemReward.ItemReward.ID));
+            isUnlock = User.data.IsItemUnlocked(itemId);
+            m_imgLock.gameObject.SetActive(!isUnlock);
 
             m_textPrice.text = itemReward.ItemReward.Price + "$";
 
-            isUnlock = PlayerPrefs.HasKey(itemReward.ItemReward.ID);
-
-            if (PlayerPrefs.HasKey(Const.CURRENTWEAPON))
+            if (!string.IsNullOrEmpty(User.data.current_weapon_id) && User.data.current_weapon_id == itemId)
             {
-                if (PlayerPrefs.GetString(Const.CURRENTWEAPON) == itemReward.ItemReward.ID)
-                {
-                    onSelected();
-                }
+                onSelected();
             }
         }
 
@@ -79,7 +78,9 @@ public class Item_Reward : MonoBehaviour
                 else if (ShopWeapon.ItemCurrent == this)
                 {
                     onDeSelected();
-                    PlayerPrefs.DeleteKey(Const.CURRENTWEAPON);
+                    User.EnsureLoaded();
+                    User.data.SetCurrentWeapon(string.Empty);
+                    User.Save();
                 }
             }
 
@@ -91,7 +92,12 @@ public class Item_Reward : MonoBehaviour
     {
         ShopWeapon.ItemCurrent = this;
         m_isUsing.gameObject.SetActive(true);
-        PlayerPrefs.SetString(Const.CURRENTWEAPON, itemReward.ItemReward.ID);
+        User.EnsureLoaded();
+        if (User.data.current_weapon_id != itemReward.ItemReward.ID)
+        {
+            User.data.SetCurrentWeapon(itemReward.ItemReward.ID);
+            User.Save();
+        }
     }
 
     public void onDeSelected()

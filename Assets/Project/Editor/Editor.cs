@@ -8,6 +8,7 @@ public class EditorUNITY : MonoBehaviour
     {
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
+        User.data = null;
         Debug.Log("ClearAll");
     }
 

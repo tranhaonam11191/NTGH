@@ -21,18 +21,21 @@ public class PopupYesNo : PopupBase
 
     public void Setup(CreateItemReward data)
     {
+        User.EnsureLoaded();
         Data = data;
 
-        m_btnMoney.interactable = Data.ItemReward.Price <= PlayerPrefs.GetInt(Const.GOLD);
+        m_btnMoney.interactable = Data.ItemReward.Price <= User.data.gold;
 
         m_btnAds.interactable = AdsController.instance.checkReward();
     }
 
     public void OnClickBuyItemByMoney()
-    {        
-        int gold = PlayerPrefs.GetInt(Const.GOLD);
-        gold -= Data.ItemReward.Price;
-        PlayerPrefs.SetInt(Const.GOLD, gold);
+    {
+        User.EnsureLoaded();
+        if (!User.data.TrySpendGold(Data.ItemReward.Price))
+        {
+            return;
+        }
         Callback();
     }
 
@@ -43,8 +46,10 @@ public class PopupYesNo : PopupBase
 
     void Callback()
     {
-        PlayerPrefs.SetString(Data.ItemReward.ID, Data.ItemReward.ID);
-        PlayerPrefs.SetString(Const.CURRENTWEAPON, Data.ItemReward.ID);
+        User.EnsureLoaded();
+        User.data.UnlockItem(Data.ItemReward.ID);
+        User.data.SetCurrentWeapon(Data.ItemReward.ID);
+        User.Save();
         ShopWeapon.instance.Setup();
         OnClickClose();
     }

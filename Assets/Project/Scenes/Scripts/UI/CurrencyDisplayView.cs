@@ -23,15 +23,33 @@ namespace NTGH.UI
 
         private void OnEnable()
         {
-            if (m_autoRefreshOnEnable && Application.isPlaying)
+            if (Application.isPlaying)
             {
-                RefreshFromPlayerPrefs();
+                User.OnGoldChanged += SetAmount;
+                if (m_autoRefreshOnEnable)
+                {
+                    RefreshFromUserData();
+                }
             }
+        }
+
+        private void OnDisable()
+        {
+            if (Application.isPlaying)
+            {
+                User.OnGoldChanged -= SetAmount;
+            }
+        }
+
+        public void RefreshFromUserData()
+        {
+            User.EnsureLoaded();
+            SetAmount(User.data.gold);
         }
 
         public void RefreshFromPlayerPrefs()
         {
-            SetAmount(PlayerPrefs.GetInt(Const.GOLD));
+            RefreshFromUserData();
         }
 
         public void SetAmount(int amount)

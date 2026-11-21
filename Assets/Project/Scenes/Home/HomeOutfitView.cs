@@ -38,7 +38,8 @@ public class HomeOutfitView : MonoBehaviour
 
         Progression = new OutfitProgression(m_character.Outfits);
         Progression.RankChanged += ApplyRank;
-        ApplyRank(Progression.CurrentRank);
+        Progression.OutfitChanged += ApplyOutfitId;
+        ApplyOutfitIndex(Progression.CurrentOutfitIndex);
         OnRectTransformDimensionsChange();
     }
 
@@ -46,7 +47,18 @@ public class HomeOutfitView : MonoBehaviour
 
     private void ApplyRank(int rank)
     {
-        m_character.EquipOutfitByIndex(rank - 1);
+        ApplyOutfitIndex(Progression != null ? Progression.CurrentOutfitIndex : rank - 1);
+    }
+
+    private void ApplyOutfitId(string outfitId)
+    {
+        if (Progression != null)
+            ApplyOutfitIndex(Progression.CurrentOutfitIndex);
+    }
+
+    private void ApplyOutfitIndex(int outfitIndex)
+    {
+        m_character.EquipOutfitByIndex(outfitIndex);
 
         for (int i = 0; i < m_parts.Length; i++)
         {
@@ -86,6 +98,9 @@ public class HomeOutfitView : MonoBehaviour
     private void OnDestroy()
     {
         if (Progression != null)
+        {
             Progression.RankChanged -= ApplyRank;
+            Progression.OutfitChanged -= ApplyOutfitId;
+        }
     }
 }

@@ -10,8 +10,8 @@ public class SoundSettings : MonoBehaviour
     public void Setup()
     {
         gameObject.SetActive(true);
-        float sfx = PlayerPrefs.GetFloat("SFX_VOLUME", 1);
-        _toggleAudio.SetIsOnWithoutNotify(sfx == 1);
+        float sfx = SoundManager.SfxVolume;
+        _toggleAudio.SetIsOnWithoutNotify(sfx > 0f);
     }
 
     public void OnValueChange(bool value)

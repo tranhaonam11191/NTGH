@@ -6,7 +6,6 @@ namespace NTGH.Demo.OutfitSystem
 {
     public class OutfitDemoUI : MonoBehaviour
     {
-        private const string PrefKeyOutfitId = "Demo_CurrentOutfitId";
         private static readonly string[] MixLabels = { "Lv1", "Lv2", "Lv3", "Lv4", "Lv5" };
 
         [SerializeField] private CharacterOutfitController m_characterController;
@@ -56,7 +55,8 @@ namespace NTGH.Demo.OutfitSystem
 
             if (m_characterController != null)
             {
-                string savedId = PlayerPrefs.GetString(PrefKeyOutfitId);
+                User.EnsureLoaded();
+                string savedId = User.data.current_outfit_id;
                 int index = 0;
                 for (int i = 0; i < m_characterController.Outfits.Count; i++)
                 {
@@ -96,8 +96,9 @@ namespace NTGH.Demo.OutfitSystem
             }
 
             m_characterController.EquipOutfitByIndex(index);
-            PlayerPrefs.SetString(PrefKeyOutfitId, m_characterController.CurrentOutfit.OutfitId);
-            PlayerPrefs.Save();
+            User.EnsureLoaded();
+            User.data.current_outfit_id = m_characterController.CurrentOutfit.OutfitId;
+            User.Save();
             m_torsoMixIndex = index % MixLabels.Length;
             m_armsMixIndex = index % MixLabels.Length;
             m_legsMixIndex = index % MixLabels.Length;

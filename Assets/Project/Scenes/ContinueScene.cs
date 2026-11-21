@@ -11,8 +11,8 @@ public class ContinueScene : MonoBehaviour
     }
 
     public void OnClickRePlay()
-    {        
-        PlayerPrefs.DeleteAll();
+    {
+        User.ResetData();
         SS.UI.Core.Load<HomeController>("Home");
     }
 }

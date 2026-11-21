@@ -112,11 +112,10 @@ public class Popup : PopupBase
 
     void InCreaseValue(int coefficient = 1)
     {
-        int valueEXP = PlayerPrefs.GetInt(Const.EXP) + (Data.Exp * coefficient);
-        PlayerPrefs.SetInt(Const.EXP, valueEXP);
-
-        int valueGOLD = PlayerPrefs.GetInt(Const.GOLD) + (Data.Gold * coefficient);
-        PlayerPrefs.SetInt(Const.GOLD, valueGOLD);
+        User.EnsureLoaded();
+        User.data.AddExp(Data.Exp * coefficient);
+        User.data.AddGold(Data.Gold * coefficient);
+        User.Save();
     }
 
     public void OnClickWatchAds()

@@ -37,34 +37,37 @@ public class SoundManager : MonoBehaviour
     public static float BgmVolume
     {
         get
-        {            
-            return bgmVolume;
+        {
+            User.EnsureLoaded();
+            return User.data.bgm_volume;
         }
 
         set
         {
-            bgmVolume = value;            
+            User.EnsureLoaded();
+            User.data.bgm_volume = value;
         }
     }
 
     public static float SfxVolume
     {
         get
-        {            
-            return sfxVolume;
+        {
+            User.EnsureLoaded();
+            return User.data.sfx_volume;
         }
 
         set
         {
-            sfxVolume = value;
+            User.EnsureLoaded();
+            User.data.sfx_volume = value;
         }
-    }    
+    }
 
     public static void Save()
     {
-        PlayerPrefs.SetFloat("BGM_VOLUME", BgmVolume);
-        PlayerPrefs.SetFloat("SFX_VOLUME", SfxVolume);        
-        PlayerPrefs.Save();
+        User.EnsureLoaded();
+        User.Save();
     }
 
     [SerializeField] string m_BgmPath = "Sounds/Bgm";

@@ -50,7 +50,9 @@ public class PopupReward : PopupBase
     public void callbackOnCompleteAds()
     {
         Debug.Log("OnCompleteCallback ads");
-        PlayerPrefs.SetString(data.ID, data.ID);
+        User.EnsureLoaded();
+        User.data.UnlockItem(data.ID);
+        User.Save();
         OnClickClose();
     }
 
