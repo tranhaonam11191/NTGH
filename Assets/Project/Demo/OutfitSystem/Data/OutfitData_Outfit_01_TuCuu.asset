@@ -16,7 +16,10 @@ MonoBehaviour:
   m_displayName: "\u0110\u1ED3 B\xE1n B\xE1o"
   m_rankTitle: "T\u1EE9 C\u1EEDu"
   m_priceGold: 0
+  m_unlockMethod: 0
+  m_adsRequired: 1
   m_bonusHealth: 50
   m_bonusDefence: 10
   m_spriteLibraryAsset: {fileID: 11400000, guid: 4050fe1edb1a44c4dbc284ce4920443f, type: 2}
   m_weaponSprite: {fileID: 0}
+  m_previewSprite: {fileID: 21300000, guid: a9a0169a385cf2a479d710130bc972d4, type: 3}

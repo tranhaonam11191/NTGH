@@ -16,7 +16,10 @@ MonoBehaviour:
   m_displayName: "Vest Long \u0110\u1EA7u"
   m_rankTitle: "Long \u0110\u1EA7u"
   m_priceGold: 8000
+  m_unlockMethod: 2
+  m_adsRequired: 2
   m_bonusHealth: 1200
   m_bonusDefence: 240
   m_spriteLibraryAsset: {fileID: 11400000, guid: 37f0157f06edde04cb5ffe2b3bd0d2e6, type: 2}
   m_weaponSprite: {fileID: 0}
+  m_previewSprite: {fileID: 21300000, guid: 26ec701336092ec4b826ef82aad08694, type: 3}

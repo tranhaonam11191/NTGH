@@ -16,7 +16,10 @@ MonoBehaviour:
   m_displayName: "\xC1o Kho\xE1c Da"
   m_rankTitle: "Song Hoa H\u1ED3ng C\xF4n"
   m_priceGold: 1500
+  m_unlockMethod: 2
+  m_adsRequired: 1
   m_bonusHealth: 320
   m_bonusDefence: 65
   m_spriteLibraryAsset: {fileID: 11400000, guid: 0e150e302ffd8db43aa14faa7d596385, type: 2}
   m_weaponSprite: {fileID: 0}
+  m_previewSprite: {fileID: 21300000, guid: ee0fbc9d0eadfd8488adb0d1c330e080, type: 3}

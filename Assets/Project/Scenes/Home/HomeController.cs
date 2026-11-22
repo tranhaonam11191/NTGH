@@ -17,6 +17,7 @@ public class HomeController : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        SS.UI.Core.Init();
     }
     [SerializeField] TextMeshProUGUI m_textGold, m_textExp;
 
@@ -67,7 +68,33 @@ public class HomeController : MonoBehaviour
 
     public void OnClickOutfit()
     {
-        Debug.Log("[HomeController] OnClickOutfit");
+        OpenCustomizePopup(HomeCustomizeTab.Outfit);
+    }
+
+    public void OnClickHouse()
+    {
+        OpenCustomizePopup(HomeCustomizeTab.House);
+    }
+
+    private void OpenCustomizePopup(HomeCustomizeTab initialTab)
+    {
+        SS.UI.Core.Init();
+
+        Canvas homeCanvas = GetComponentInChildren<Canvas>();
+        Canvas ssCanvas = SS.UI.Core.Canvas;
+        if (homeCanvas != null && ssCanvas != null && ssCanvas.sortingOrder <= homeCanvas.sortingOrder)
+        {
+            ssCanvas.sortingOrder = homeCanvas.sortingOrder + 10;
+        }
+
+        SS.UI.Core.Add<HomeCustomizePopupController>(
+            "HomeCustomizePopup",
+            showAnimation: "ScaleShow",
+            hideAnimation: "ScaleHide",
+            useExistingScreen: true,
+            onScreenLoad: popup => popup.Setup(this, initialTab),
+            hasShield: true,
+            hideTopScreen: false);
     }
 
     public void OnClickAddCurrency()
