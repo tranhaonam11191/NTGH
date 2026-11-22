@@ -80,12 +80,24 @@ namespace NTGH.UI
 
         private Action m_onActionClicked;
         private Tween m_feedbackTween;
+        private NeonButtonStyle m_actionButtonStyle;
 
         private void Awake()
         {
             if (m_actionButton != null)
             {
                 m_actionButton.onClick.AddListener(HandleActionClick);
+                m_actionButtonStyle = m_actionButton.GetComponent<NeonButtonStyle>();
+                if (m_actionButtonStyle == null)
+                {
+                    m_actionButtonStyle = m_actionButton.gameObject.AddComponent<NeonButtonStyle>();
+                }
+                m_actionButtonStyle.ConfigureReferences(
+                    m_actionFill,
+                    m_actionOuterBorder,
+                    m_actionInnerBorder,
+                    m_actionIcon,
+                    m_actionLabel);
             }
         }
 
@@ -293,9 +305,21 @@ namespace NTGH.UI
                 m_statusBadgeIcon.enabled = badgeIcon != null;
             }
 
-            if (m_actionFill != null) m_actionFill.color = actionFill;
-            if (m_actionOuterBorder != null) m_actionOuterBorder.color = actionOuter;
-            if (m_actionInnerBorder != null) m_actionInnerBorder.color = actionInner;
+            if (m_actionButtonStyle != null)
+            {
+                m_actionButtonStyle.SetPalette(
+                    actionFill,
+                    actionOuter,
+                    actionInner,
+                    actionIconColor,
+                    actionTextColor);
+            }
+            else
+            {
+                if (m_actionFill != null) m_actionFill.color = actionFill;
+                if (m_actionOuterBorder != null) m_actionOuterBorder.color = actionOuter;
+                if (m_actionInnerBorder != null) m_actionInnerBorder.color = actionInner;
+            }
 
             if (m_actionIcon != null)
             {

@@ -1,17 +1,19 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace NTGH.UI
 {
     /// <summary>
-    /// Controls color tinting and optional idle pulse for Neon 90s UI buttons.
+    /// Controls color tinting, optional idle pulse, and tactile press-down + neon glow-up
+    /// feedback for Neon 90s UI buttons.
     /// Lives on NeonButton_Base and is inherited by NeonButton_Text, NeonButton_Icon,
-    /// and NeonButton_IconText prefab variants.
+    /// NeonButton_IconText, popup tabs, close buttons, and card CTA buttons.
     /// </summary>
     [DisallowMultipleComponent]
-    public class NeonButtonStyle : MonoBehaviour
+    public class NeonButtonStyle : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler
     {
         [Header("Frame Layers (Pure White 9-Slice Sprites)")]
         [SerializeField] private Image m_fill;
@@ -41,7 +43,21 @@ namespace NTGH.UI
         [SerializeField] private float m_pulseScale = 1.035f;
         [SerializeField] private float m_pulseDuration = 0.85f;
 
+        [Header("Press Feedback Animation")]
+        [SerializeField] private bool m_enablePressFeedback = true;
+        [SerializeField] private float m_pressScale = 0.92f;
+        [SerializeField] private float m_pressDuration = 0.07f;
+        [SerializeField] private float m_releaseDuration = 0.16f;
+        [SerializeField, Range(0f, 1f)] private float m_neonGlowBoost = 0.48f;
+        [SerializeField, Range(0f, 1f)] private float m_fillGlowBoost = 0.26f;
+
+        private Button m_button;
+        private Vector3 m_baseScale = Vector3.one;
+        private bool m_hasCapturedBaseScale;
+        private bool m_isPressed;
         private Tween m_pulseTween;
+        private Tween m_scaleTween;
+        private Sequence m_colorSequence;
 
         public Image FillImage => m_fill;
         public Image OuterBorderImage => m_outerBorder;
@@ -51,41 +67,180 @@ namespace NTGH.UI
 
         private void Awake()
         {
+            m_button = GetComponent<Button>();
+            if (m_button != null && m_enablePressFeedback && m_button.transition == Selectable.Transition.ColorTint)
+            {
+                // Avoid Unity's default gray ColorTint darkening our neon glow on press.
+                m_button.transition = Selectable.Transition.None;
+            }
+
+            CaptureBaseScale();
             ApplyStyle();
         }
 
         private void OnEnable()
         {
-            if (m_enablePulse && Application.isPlaying)
+            m_isPressed = false;
+            if (Application.isPlaying)
             {
-                m_pulseTween?.Kill();
-                transform.localScale = Vector3.one;
-                m_pulseTween = transform
-                    .DOScale(m_pulseScale, m_pulseDuration)
-                    .SetEase(Ease.InOutSine)
-                    .SetLoops(-1, LoopType.Yoyo);
+                CaptureBaseScale();
+                transform.localScale = m_baseScale;
+                ApplyStyle();
+                StartIdlePulseIfEnabled();
             }
         }
 
         private void OnDisable()
         {
-            m_pulseTween?.Kill();
-            m_pulseTween = null;
+            m_isPressed = false;
+            KillAllTweens();
             if (Application.isPlaying)
             {
-                transform.localScale = Vector3.one;
+                if (m_hasCapturedBaseScale)
+                    transform.localScale = m_baseScale;
+                ApplyStyle();
             }
         }
 
         private void OnDestroy()
         {
-            m_pulseTween?.Kill();
-            m_pulseTween = null;
+            KillAllTweens();
         }
 
         private void OnValidate()
         {
             ApplyStyle();
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if (!m_enablePressFeedback || !Application.isPlaying)
+                return;
+
+            if (m_button != null && !m_button.interactable)
+                return;
+
+            m_isPressed = true;
+            CaptureBaseScale();
+
+            m_pulseTween?.Kill();
+            m_pulseTween = null;
+
+            m_scaleTween?.Kill();
+            m_scaleTween = transform
+                .DOScale(m_baseScale * m_pressScale, m_pressDuration)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(true);
+
+            TweenColors(pressed: true, duration: m_pressDuration);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            ReleasePress();
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            ReleasePress();
+        }
+
+        private void ReleasePress()
+        {
+            if (!m_isPressed)
+                return;
+
+            m_isPressed = false;
+
+            m_scaleTween?.Kill();
+            m_scaleTween = transform
+                .DOScale(m_baseScale, m_releaseDuration)
+                .SetEase(Ease.OutBack)
+                .SetUpdate(true)
+                .OnComplete(StartIdlePulseIfEnabled);
+
+            TweenColors(pressed: false, duration: m_releaseDuration);
+        }
+
+        private void TweenColors(bool pressed, float duration)
+        {
+            m_colorSequence?.Kill();
+            m_colorSequence = DOTween.Sequence().SetUpdate(true);
+
+            Color fillTarget = pressed ? BrightenFill(m_fillColor, m_outerBorderColor, m_fillGlowBoost) : m_fillColor;
+            Color outerTarget = pressed ? BrightenNeon(m_outerBorderColor, m_neonGlowBoost) : m_outerBorderColor;
+            Color innerTarget = pressed ? BrightenNeon(m_innerBorderColor, m_neonGlowBoost) : m_innerBorderColor;
+            Color iconTarget = pressed ? BrightenNeon(m_iconColor, m_neonGlowBoost * 0.85f) : m_iconColor;
+            Color labelTarget = pressed ? BrightenNeon(m_labelColor, m_neonGlowBoost * 0.65f) : m_labelColor;
+            Color labelFillTarget = pressed ? BrightenFill(m_labelFillColor, m_labelBorderColor, m_fillGlowBoost) : m_labelFillColor;
+            Color labelBorderTarget = pressed ? BrightenNeon(m_labelBorderColor, m_neonGlowBoost) : m_labelBorderColor;
+
+            Ease ease = pressed ? Ease.OutQuad : Ease.OutSine;
+
+            if (m_fill != null) m_colorSequence.Join(m_fill.DOColor(fillTarget, duration).SetEase(ease));
+            if (m_outerBorder != null) m_colorSequence.Join(m_outerBorder.DOColor(outerTarget, duration).SetEase(ease));
+            if (m_innerBorder != null) m_colorSequence.Join(m_innerBorder.DOColor(innerTarget, duration).SetEase(ease));
+            if (m_icon != null) m_colorSequence.Join(m_icon.DOColor(iconTarget, duration).SetEase(ease));
+            if (m_label != null) m_colorSequence.Join(m_label.DOColor(labelTarget, duration).SetEase(ease));
+            if (m_labelFill != null) m_colorSequence.Join(m_labelFill.DOColor(labelFillTarget, duration).SetEase(ease));
+            if (m_labelBorder != null) m_colorSequence.Join(m_labelBorder.DOColor(labelBorderTarget, duration).SetEase(ease));
+        }
+
+        private static Color BrightenNeon(Color baseColor, float boost)
+        {
+            Color boosted = new Color(
+                Mathf.Min(1f, baseColor.r * 1.28f),
+                Mathf.Min(1f, baseColor.g * 1.28f),
+                Mathf.Min(1f, baseColor.b * 1.28f),
+                Mathf.Min(1f, baseColor.a + 0.12f));
+
+            Color luminousWhite = new Color(1f, 1f, 1f, Mathf.Min(1f, baseColor.a + 0.15f));
+            return Color.Lerp(boosted, luminousWhite, boost);
+        }
+
+        private static Color BrightenFill(Color fillColor, Color neonAccent, float boost)
+        {
+            Color infused = new Color(
+                Mathf.Clamp01(fillColor.r + neonAccent.r * boost * 0.65f + boost * 0.12f),
+                Mathf.Clamp01(fillColor.g + neonAccent.g * boost * 0.65f + boost * 0.12f),
+                Mathf.Clamp01(fillColor.b + neonAccent.b * boost * 0.65f + boost * 0.12f),
+                Mathf.Min(1f, fillColor.a + 0.06f));
+            return infused;
+        }
+
+        private void CaptureBaseScale()
+        {
+            if (m_hasCapturedBaseScale)
+                return;
+
+            Vector3 current = transform.localScale;
+            m_baseScale = current.sqrMagnitude > 0.0001f ? current : Vector3.one;
+            m_hasCapturedBaseScale = true;
+        }
+
+        private void StartIdlePulseIfEnabled()
+        {
+            if (!m_enablePulse || !Application.isPlaying || !isActiveAndEnabled || m_isPressed)
+                return;
+
+            m_pulseTween?.Kill();
+            transform.localScale = m_baseScale;
+            m_pulseTween = transform
+                .DOScale(m_baseScale * m_pulseScale, m_pulseDuration)
+                .SetEase(Ease.InOutSine)
+                .SetLoops(-1, LoopType.Yoyo);
+        }
+
+        private void KillAllTweens()
+        {
+            m_pulseTween?.Kill();
+            m_pulseTween = null;
+
+            m_scaleTween?.Kill();
+            m_scaleTween = null;
+
+            m_colorSequence?.Kill();
+            m_colorSequence = null;
         }
 
         public void ApplyStyle()
@@ -140,7 +295,13 @@ namespace NTGH.UI
             m_labelColor = labelColor;
             m_labelFillColor = labelFillColor ?? fillColor;
             m_labelBorderColor = labelBorderColor ?? outerBorderColor;
-            ApplyStyle();
+
+            if (!m_isPressed)
+            {
+                m_colorSequence?.Kill();
+                m_colorSequence = null;
+                ApplyStyle();
+            }
         }
 
         public void SetIcon(Sprite sprite)
