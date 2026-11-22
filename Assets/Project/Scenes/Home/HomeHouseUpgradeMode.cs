@@ -223,7 +223,14 @@ public class HomeHouseUpgradeMode : MonoBehaviour
 
         HomeHouseTheme.Level currentLevel = m_houseTheme.GetPartLevel(part);
         if (currentLevel >= HomeHouseTheme.Level.Renovated)
+        {
+            NeonDialogPopupController.ShowNotice(
+                title: "COMING SOON",
+                message: "Cấp nâng cấp tiếp theo sẽ sớm ra mắt!",
+                okLabel: "OK",
+                callerCanvas: m_ownerCanvas);
             return;
+        }
 
         HomeHouseTheme.Level nextLevel = (HomeHouseTheme.Level)((int)currentLevel + 1);
         HomeHouseTheme.HouseItemSpec spec = HomeHouseTheme.GetItemSpec(part, nextLevel);

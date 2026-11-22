@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1859920050644544620
 RectTransform:
   m_ObjectHideFlags: 0
@@ -204,6 +204,12 @@ MonoBehaviour:
   m_enablePulse: 0
   m_pulseScale: 1.035
   m_pulseDuration: 0.85
+  m_enablePressFeedback: 1
+  m_pressScale: 0.92
+  m_pressDuration: 0.07
+  m_releaseDuration: 0.16
+  m_neonGlowBoost: 0.48
+  m_fillGlowBoost: 0.26
 --- !u!1 &6035867913773114691
 GameObject:
   m_ObjectHideFlags: 0

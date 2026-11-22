@@ -1023,7 +1023,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: 136200516eab29f47a6b17e9867e0d3d, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 1

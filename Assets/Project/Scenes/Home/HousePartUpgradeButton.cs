@@ -1,13 +1,14 @@
 using System;
 using DG.Tweening;
 using NTGH.UI;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Floating Neon 90s upgrade button anchored directly over a house part (Awning, Door, Wall)
+/// Compact icon-only Neon 90s upgrade arrow button anchored over a house part (Awning, Door, Wall)
 /// during Home House Upgrade Mode.
+/// - Displays an upward upgrade arrow with a gentle bob animation when upgradeable.
+/// - Remains clickable at max level so clicking opens the "Coming Soon" notice popup.
 /// </summary>
 [DisallowMultipleComponent]
 public class HousePartUpgradeButton : MonoBehaviour
@@ -19,38 +20,37 @@ public class HousePartUpgradeButton : MonoBehaviour
     [SerializeField] private Button m_button;
     [SerializeField] private NeonButtonStyle m_neonStyle;
     [SerializeField] private CanvasGroup m_canvasGroup;
-    [SerializeField] private TextMeshProUGUI m_partNameText;
-    [SerializeField] private TextMeshProUGUI m_levelText;
-    [SerializeField] private Image m_actionIcon;
-    [SerializeField] private TextMeshProUGUI m_priceText;
-    [SerializeField] private RectTransform m_priceRow;
+    [SerializeField] private Image m_arrowIcon;
 
-    [Header("Icons")]
-    [SerializeField] private Sprite m_dollarIcon;
-    [SerializeField] private Sprite m_checkIcon;
+    [Header("Idle Bob Animation")]
+    [SerializeField] private float m_bobDistance = 5f;
+    [SerializeField] private float m_bobDuration = 0.65f;
 
     private Action<HomeHouseTheme.Part> m_onClicked;
     private Sequence m_showHideSeq;
     private Tween m_feedbackTween;
+    private Tween m_bobTween;
     private RectTransform m_rectTransform;
     private Vector2 m_baseAnchoredPos;
+    private Vector2 m_arrowBasePos;
     private bool m_hasCapturedPos;
+    private bool m_hasCapturedArrowPos;
 
-    // Neon 90s palettes for upgrade button states
-    private static readonly Color ColAffordFill = new Color(0.05f, 0.16f, 0.20f, 0.94f);
+    // Neon 90s palettes for upgrade arrow button states
+    private static readonly Color ColAffordFill = new Color(0.05f, 0.16f, 0.22f, 0.92f);
     private static readonly Color ColAffordOuter = new Color(0.16f, 0.92f, 0.88f, 1f);
     private static readonly Color ColAffordInner = new Color(1.00f, 0.80f, 0.30f, 1f);
-    private static readonly Color ColAffordPrice = new Color(1.00f, 0.90f, 0.45f, 1f);
+    private static readonly Color ColAffordArrow = new Color(1.00f, 0.92f, 0.45f, 1f);
 
-    private static readonly Color ColLockedFill = new Color(0.20f, 0.06f, 0.10f, 0.94f);
-    private static readonly Color ColLockedOuter = new Color(1.00f, 0.32f, 0.42f, 1f);
+    private static readonly Color ColLockedFill = new Color(0.20f, 0.06f, 0.10f, 0.92f);
+    private static readonly Color ColLockedOuter = new Color(1.00f, 0.32f, 0.44f, 1f);
     private static readonly Color ColLockedInner = new Color(1.00f, 0.68f, 0.30f, 0.90f);
-    private static readonly Color ColLockedPrice = new Color(1.00f, 0.54f, 0.60f, 1f);
+    private static readonly Color ColLockedArrow = new Color(1.00f, 0.60f, 0.64f, 1f);
 
-    private static readonly Color ColMaxFill = new Color(0.06f, 0.18f, 0.13f, 0.90f);
-    private static readonly Color ColMaxOuter = new Color(0.24f, 0.92f, 0.56f, 0.95f);
-    private static readonly Color ColMaxInner = new Color(1.00f, 0.82f, 0.35f, 0.90f);
-    private static readonly Color ColMaxPrice = new Color(0.45f, 1.00f, 0.72f, 1f);
+    private static readonly Color ColMaxFill = new Color(0.06f, 0.16f, 0.13f, 0.88f);
+    private static readonly Color ColMaxOuter = new Color(0.24f, 0.90f, 0.56f, 0.92f);
+    private static readonly Color ColMaxInner = new Color(1.00f, 0.82f, 0.35f, 0.85f);
+    private static readonly Color ColMaxArrow = new Color(0.52f, 1.00f, 0.76f, 0.95f);
 
     public HomeHouseTheme.Part Part => m_part;
 
@@ -65,9 +65,15 @@ public class HousePartUpgradeButton : MonoBehaviour
             m_canvasGroup = GetComponent<CanvasGroup>();
 
         CaptureBasePosition();
+        CaptureArrowBasePosition();
 
         if (m_button != null)
             m_button.onClick.AddListener(HandleClicked);
+    }
+
+    private void OnDisable()
+    {
+        StopArrowBob();
     }
 
     private void OnDestroy()
@@ -90,34 +96,22 @@ public class HousePartUpgradeButton : MonoBehaviour
         HomeHouseTheme.Level currentLevel = houseTheme.GetPartLevel(m_part);
         bool isMax = currentLevel >= HomeHouseTheme.Level.Renovated;
 
-        if (m_partNameText != null)
-            m_partNameText.text = HomeHouseTheme.GetPartDisplayName(m_part).ToUpperInvariant();
+        // Keep button interactable even at max level so clicking shows the "Coming Soon" dialog.
+        if (m_button != null)
+            m_button.interactable = true;
 
         if (isMax)
         {
-            if (m_levelText != null)
-                m_levelText.text = "CẤP TỐI ĐA";
-
-            if (m_actionIcon != null)
-            {
-                m_actionIcon.sprite = m_checkIcon;
-                m_actionIcon.gameObject.SetActive(m_checkIcon != null);
-                m_actionIcon.color = ColMaxPrice;
-            }
-
-            if (m_priceText != null)
-            {
-                m_priceText.text = "MAX";
-                m_priceText.color = ColMaxPrice;
-            }
-
-            if (m_button != null)
-                m_button.interactable = false;
-
             if (m_neonStyle != null)
             {
-                m_neonStyle.SetPalette(ColMaxFill, ColMaxOuter, ColMaxInner, ColMaxPrice, Color.white);
+                m_neonStyle.SetPalette(ColMaxFill, ColMaxOuter, ColMaxInner, ColMaxArrow, Color.white);
             }
+            else if (m_arrowIcon != null)
+            {
+                m_arrowIcon.color = ColMaxArrow;
+            }
+
+            StopArrowBob();
         }
         else
         {
@@ -126,41 +120,27 @@ public class HousePartUpgradeButton : MonoBehaviour
             bool alreadyUnlocked = houseTheme.IsPartLevelUnlocked(m_part, nextLevel);
             bool canAfford = alreadyUnlocked || playerGold >= spec.PriceGold;
 
-            if (m_levelText != null)
-                m_levelText.text = $"CẤP {(int)currentLevel} → {(int)nextLevel}";
-
-            if (m_actionIcon != null)
-            {
-                m_actionIcon.sprite = alreadyUnlocked ? m_checkIcon : m_dollarIcon;
-                m_actionIcon.gameObject.SetActive(m_actionIcon.sprite != null);
-                m_actionIcon.color = canAfford ? ColAffordPrice : ColLockedPrice;
-            }
-
-            if (m_priceText != null)
-            {
-                m_priceText.text = alreadyUnlocked ? "NÂNG CẤP" : spec.PriceGold.ToString("N0");
-                m_priceText.color = canAfford ? ColAffordPrice : ColLockedPrice;
-            }
-
-            if (m_button != null)
-                m_button.interactable = true;
-
             if (m_neonStyle != null)
             {
                 if (canAfford)
-                    m_neonStyle.SetPalette(ColAffordFill, ColAffordOuter, ColAffordInner, ColAffordPrice, Color.white);
+                    m_neonStyle.SetPalette(ColAffordFill, ColAffordOuter, ColAffordInner, ColAffordArrow, Color.white);
                 else
-                    m_neonStyle.SetPalette(ColLockedFill, ColLockedOuter, ColLockedInner, ColLockedPrice, Color.white);
+                    m_neonStyle.SetPalette(ColLockedFill, ColLockedOuter, ColLockedInner, ColLockedArrow, Color.white);
             }
-        }
+            else if (m_arrowIcon != null)
+            {
+                m_arrowIcon.color = canAfford ? ColAffordArrow : ColLockedArrow;
+            }
 
-        if (m_priceRow != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(m_priceRow);
+            if (gameObject.activeInHierarchy)
+                StartArrowBob();
+        }
     }
 
     public void ShowAnimated(float delay = 0f)
     {
         CaptureBasePosition();
+        CaptureArrowBasePosition();
         KillTweens();
         gameObject.SetActive(true);
 
@@ -181,6 +161,8 @@ public class HousePartUpgradeButton : MonoBehaviour
         m_showHideSeq.Append(transform.DOScale(Vector3.one, 0.28f).SetEase(Ease.OutBack));
         if (m_canvasGroup != null)
             m_showHideSeq.Join(m_canvasGroup.DOFade(1f, 0.20f).SetEase(Ease.OutQuad));
+
+        m_showHideSeq.OnComplete(StartArrowBob);
     }
 
     public void HideAnimated()
@@ -220,7 +202,7 @@ public class HousePartUpgradeButton : MonoBehaviour
     {
         m_feedbackTween?.Kill();
         transform.localScale = Vector3.one;
-        m_feedbackTween = transform.DOPunchScale(Vector3.one * 0.16f, 0.28f, 6, 0.6f).SetUpdate(true);
+        m_feedbackTween = transform.DOPunchScale(Vector3.one * 0.18f, 0.28f, 6, 0.6f).SetUpdate(true);
     }
 
     public void PlayErrorShake()
@@ -241,6 +223,31 @@ public class HousePartUpgradeButton : MonoBehaviour
         }
     }
 
+    private void StartArrowBob()
+    {
+        if (m_arrowIcon == null || !Application.isPlaying || !gameObject.activeInHierarchy)
+            return;
+
+        CaptureArrowBasePosition();
+        m_bobTween?.Kill();
+        RectTransform arrowRt = m_arrowIcon.rectTransform;
+        arrowRt.anchoredPosition = m_arrowBasePos - new Vector2(0f, m_bobDistance * 0.5f);
+        m_bobTween = arrowRt
+            .DOAnchorPosY(m_arrowBasePos.y + m_bobDistance * 0.5f, m_bobDuration)
+            .SetEase(Ease.InOutSine)
+            .SetLoops(-1, LoopType.Yoyo)
+            .SetUpdate(true);
+    }
+
+    private void StopArrowBob()
+    {
+        m_bobTween?.Kill();
+        m_bobTween = null;
+
+        if (m_arrowIcon != null && m_hasCapturedArrowPos)
+            m_arrowIcon.rectTransform.anchoredPosition = m_arrowBasePos;
+    }
+
     private void HandleClicked()
     {
         m_onClicked?.Invoke(m_part);
@@ -255,6 +262,15 @@ public class HousePartUpgradeButton : MonoBehaviour
         m_hasCapturedPos = true;
     }
 
+    private void CaptureArrowBasePosition()
+    {
+        if (m_hasCapturedArrowPos || m_arrowIcon == null)
+            return;
+
+        m_arrowBasePos = m_arrowIcon.rectTransform.anchoredPosition;
+        m_hasCapturedArrowPos = true;
+    }
+
     private void KillTweens()
     {
         m_showHideSeq?.Kill();
@@ -262,6 +278,8 @@ public class HousePartUpgradeButton : MonoBehaviour
 
         m_feedbackTween?.Kill();
         m_feedbackTween = null;
+
+        StopArrowBob();
     }
 
     public void ConfigureReferences(
@@ -269,24 +287,12 @@ public class HousePartUpgradeButton : MonoBehaviour
         Button button,
         NeonButtonStyle neonStyle,
         CanvasGroup canvasGroup,
-        TextMeshProUGUI partNameText,
-        TextMeshProUGUI levelText,
-        Image actionIcon,
-        TextMeshProUGUI priceText,
-        RectTransform priceRow,
-        Sprite dollarIcon,
-        Sprite checkIcon)
+        Image arrowIcon)
     {
         m_part = part;
         m_button = button;
         m_neonStyle = neonStyle;
         m_canvasGroup = canvasGroup;
-        m_partNameText = partNameText;
-        m_levelText = levelText;
-        m_actionIcon = actionIcon;
-        m_priceText = priceText;
-        m_priceRow = priceRow;
-        m_dollarIcon = dollarIcon;
-        m_checkIcon = checkIcon;
+        m_arrowIcon = arrowIcon;
     }
 }
