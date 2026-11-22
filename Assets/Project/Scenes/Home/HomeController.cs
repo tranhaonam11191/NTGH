@@ -11,6 +11,7 @@ public class HomeController : MonoBehaviour
     [SerializeField] private HomeOutfitView m_outfitView;
     [SerializeField] private HomeHouseTheme m_houseTheme;
     [SerializeField] private CurrencyDisplayView m_currencyDisplay;
+    [SerializeField] private HomeHouseUpgradeMode m_houseUpgradeMode;
 
     [Header("Item Catalogs (ScriptableObjects)")]
     [SerializeField] private ItemCatalogSO m_outfitCatalog;
@@ -103,6 +104,12 @@ public class HomeController : MonoBehaviour
 
     public void OnClickHouse()
     {
+        if (m_houseUpgradeMode != null)
+        {
+            m_houseUpgradeMode.EnterHouseMode();
+            return;
+        }
+
         if (m_houseCatalog == null)
         {
             Debug.LogWarning("[HomeController] House catalog is not assigned.");
