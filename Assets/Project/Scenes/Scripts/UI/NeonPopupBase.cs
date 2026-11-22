@@ -17,8 +17,7 @@ namespace NTGH.UI
         [Header("Base Popup References")]
         [SerializeField] protected RectTransform m_panelRoot;
         [SerializeField] protected TextMeshProUGUI m_titleText;
-        [SerializeField] protected Button m_closeButton;
-        [SerializeField] protected GameObject m_currencyRow;
+        [SerializeField] protected Button m_closeButton;        
         [SerializeField] protected CurrencyDisplayView m_currencyDisplay;
         [SerializeField] protected TextMeshProUGUI m_hintText;
         [SerializeField] protected RectTransform m_contentContainer;
@@ -73,24 +72,7 @@ namespace NTGH.UI
             {
                 m_titleText.text = title ?? string.Empty;
             }
-        }
-
-        public void SetHint(string hint)
-        {
-            if (m_hintText != null)
-            {
-                m_hintText.text = hint ?? string.Empty;
-                m_hintText.gameObject.SetActive(!string.IsNullOrEmpty(hint));
-            }
-        }
-
-        public void SetCurrencyRowVisible(bool visible)
-        {
-            if (m_currencyRow != null)
-            {
-                m_currencyRow.SetActive(visible);
-            }
-        }
+        }        
 
         public void ShowToast(string message)
         {
@@ -143,8 +125,7 @@ namespace NTGH.UI
         {
             m_panelRoot = panelRoot;
             m_titleText = titleText;
-            m_closeButton = closeButton;
-            m_currencyRow = currencyRow;
+            m_closeButton = closeButton;            
             m_currencyDisplay = currencyDisplay;
             m_hintText = hintText;
             m_contentContainer = contentContainer;

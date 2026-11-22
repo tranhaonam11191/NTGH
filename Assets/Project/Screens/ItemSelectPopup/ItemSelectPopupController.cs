@@ -153,8 +153,7 @@ namespace NTGH.UI
 
             if (m_popupBase != null)
             {
-                m_popupBase.SetTitle(string.IsNullOrEmpty(label) ? "CHỌN VẬT PHẨM" : label.ToUpperInvariant());
-                m_popupBase.SetHint("Mở khóa bằng Tiền hoặc Xem QC");
+                m_popupBase.SetTitle(string.IsNullOrEmpty(label) ? "CHỌN VẬT PHẨM" : label.ToUpperInvariant());                
                 if (m_popupBase.CurrencyDisplay != null)
                 {
                     m_popupBase.CurrencyDisplay.RefreshFromUserData();
