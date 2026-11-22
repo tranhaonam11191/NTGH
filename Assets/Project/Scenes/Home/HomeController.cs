@@ -11,6 +11,12 @@ public class HomeController : MonoBehaviour
     [SerializeField] private HomeOutfitView m_outfitView;
     [SerializeField] private HomeHouseTheme m_houseTheme;
     [SerializeField] private CurrencyDisplayView m_currencyDisplay;
+
+    [Header("Item Catalogs (ScriptableObjects)")]
+    [SerializeField] private ItemCatalogSO m_outfitCatalog;
+    [SerializeField] private ItemCatalogSO m_houseCatalog;
+    [SerializeField] private ItemCatalogSO m_weaponCatalog;
+
     public HomeHouseTheme HouseTheme => m_houseTheme;
     public OutfitProgression Outfits => m_outfitView != null ? m_outfitView.Progression : null;
 
@@ -58,6 +64,18 @@ public class HomeController : MonoBehaviour
 
     public void OnClickWeapon()
     {
+        if (m_weaponCatalog != null)
+        {
+            ItemSelectPopupController.Open(
+                m_weaponCatalog,
+                onItemSelected: HandleWeaponSelected,
+                isEquipped: item => User.data != null && User.data.current_weapon_id == item.Id,
+                isUnlocked: item => User.data != null && User.data.IsItemUnlocked(item.Id),
+                labelOverride: "VŨ KHÍ",
+                callerCanvas: GetComponentInChildren<Canvas>());
+            return;
+        }
+
         SS.UI.Core.Load<ShopWeapon>("ShopWeapon", LoadSceneMode.Additive);
     }
 
@@ -68,33 +86,93 @@ public class HomeController : MonoBehaviour
 
     public void OnClickOutfit()
     {
-        OpenCustomizePopup(HomeCustomizeTab.Outfit);
+        if (m_outfitCatalog == null)
+        {
+            Debug.LogWarning("[HomeController] Outfit catalog is not assigned.");
+            return;
+        }
+
+        ItemSelectPopupController.Open(
+            m_outfitCatalog,
+            onItemSelected: HandleOutfitSelected,
+            isEquipped: item => Outfits != null && Outfits.CurrentOutfitId == item.Id,
+            isUnlocked: item => Outfits != null && Outfits.IsUnlocked(item.Id),
+            labelOverride: "TRANG PHỤC",
+            callerCanvas: GetComponentInChildren<Canvas>());
     }
 
     public void OnClickHouse()
     {
-        OpenCustomizePopup(HomeCustomizeTab.House);
-    }
-
-    private void OpenCustomizePopup(HomeCustomizeTab initialTab)
-    {
-        SS.UI.Core.Init();
-
-        Canvas homeCanvas = GetComponentInChildren<Canvas>();
-        Canvas ssCanvas = SS.UI.Core.Canvas;
-        if (homeCanvas != null && ssCanvas != null && ssCanvas.sortingOrder <= homeCanvas.sortingOrder)
+        if (m_houseCatalog == null)
         {
-            ssCanvas.sortingOrder = homeCanvas.sortingOrder + 10;
+            Debug.LogWarning("[HomeController] House catalog is not assigned.");
+            return;
         }
 
-        SS.UI.Core.Add<HomeCustomizePopupController>(
-            "HomeCustomizePopup",
-            showAnimation: "ScaleShow",
-            hideAnimation: "ScaleHide",
-            useExistingScreen: true,
-            onScreenLoad: popup => popup.Setup(this, initialTab),
-            hasShield: true,
-            hideTopScreen: false);
+        ItemSelectPopupController.Open(
+            m_houseCatalog,
+            onItemSelected: HandleHouseSelected,
+            isEquipped: IsHouseEntryEquipped,
+            isUnlocked: IsHouseEntryUnlocked,
+            labelOverride: "NHÀ CỬA",
+            callerCanvas: GetComponentInChildren<Canvas>());
+    }
+
+    private void HandleOutfitSelected(SelectableItemEntry item)
+    {
+        if (item == null || Outfits == null) return;
+        Outfits.UnlockAndEquipById(item.Id);
+        SetData();
+    }
+
+    private void HandleHouseSelected(SelectableItemEntry item)
+    {
+        if (item == null || m_houseTheme == null) return;
+        if (TryParseHousePayload(item.Payload, out HomeHouseTheme.Part part, out HomeHouseTheme.Level level))
+        {
+            m_houseTheme.SetPartLevel(part, level);
+            SetData();
+        }
+    }
+
+    private void HandleWeaponSelected(SelectableItemEntry item)
+    {
+        if (item == null) return;
+        User.EnsureLoaded();
+        User.data.UnlockItem(item.Id);
+        User.data.SetCurrentWeapon(item.Id);
+        User.Save();
+        SetData();
+    }
+
+    private bool IsHouseEntryEquipped(SelectableItemEntry item)
+    {
+        if (item == null || m_houseTheme == null) return false;
+        return TryParseHousePayload(item.Payload, out HomeHouseTheme.Part part, out HomeHouseTheme.Level level)
+               && m_houseTheme.GetPartLevel(part) == level;
+    }
+
+    private bool IsHouseEntryUnlocked(SelectableItemEntry item)
+    {
+        if (item == null || m_houseTheme == null) return false;
+        return TryParseHousePayload(item.Payload, out HomeHouseTheme.Part part, out HomeHouseTheme.Level level)
+               && m_houseTheme.IsPartLevelUnlocked(part, level);
+    }
+
+    private static bool TryParseHousePayload(string payload, out HomeHouseTheme.Part part, out HomeHouseTheme.Level level)
+    {
+        part = HomeHouseTheme.Part.Awning;
+        level = HomeHouseTheme.Level.Dilapidated;
+        if (string.IsNullOrEmpty(payload)) return false;
+
+        string[] tokens = payload.Split(':');
+        if (tokens.Length != 2) return false;
+
+        if (!System.Enum.TryParse(tokens[0], out part)) return false;
+        if (!int.TryParse(tokens[1], out int lvlInt)) return false;
+
+        level = (HomeHouseTheme.Level)Mathf.Clamp(lvlInt, (int)HomeHouseTheme.Level.Dilapidated, (int)HomeHouseTheme.Level.Renovated);
+        return true;
     }
 
     public void OnClickAddCurrency()

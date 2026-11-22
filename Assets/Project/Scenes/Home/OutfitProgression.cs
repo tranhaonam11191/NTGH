@@ -88,6 +88,27 @@ public sealed class OutfitProgression
             User.Save();
     }
 
+    public bool IsUnlocked(string outfitId)
+    {
+        int index = FindOutfitIndexById(outfitId);
+        return index >= 0 && IsUnlocked(index);
+    }
+
+    public bool UnlockAndEquipById(string outfitId)
+    {
+        int index = FindOutfitIndexById(outfitId);
+        if (index < 0)
+            return false;
+
+        OutfitData outfit = m_outfits[index];
+        if (outfit == null)
+            return false;
+
+        User.EnsureLoaded();
+        UnlockAndOptionallyEquip(index, outfit, autoEquip: true);
+        return true;
+    }
+
     public bool IsUnlocked(int index)
     {
         if (index < 0 || index >= m_outfits.Count)

@@ -312,6 +312,10 @@ namespace NTGH.UI
             {
                 m_actionLabel.text = actionText;
                 m_actionLabel.color = actionTextColor;
+                if (m_actionLabel.transform.parent is RectTransform contentRt)
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(contentRt);
+                }
             }
 
             if (m_actionButton != null)

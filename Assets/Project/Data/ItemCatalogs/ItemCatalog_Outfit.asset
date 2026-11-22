@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ce095f0475a8504ea66a34dc10cac4c, type: 3}
+  m_Name: ItemCatalog_Outfit
+  m_EditorClassIdentifier: Assembly-CSharp::NTGH.UI.ItemCatalogSO
+  m_defaultLabel: "TRANG PH\u1EE4C"
+  m_equipActionLabel: "M\u1EB6C"
+  m_equippedStatusLabel: "\u0110ANG M\u1EB6C"
+  m_items:
+  - m_id: outfit_lv1_tucuu
+    m_displayName: "\u0110\u1ED3 B\xE1n B\xE1o"
+    m_subtitle: "T\u1EE9 C\u1EEDu \u2022 +50 HP"
+    m_groupLabel: 
+    m_previewSprite: {fileID: 21300000, guid: a9a0169a385cf2a479d710130bc972d4, type: 3}
+    m_unlockMethod: 0
+    m_priceGold: 0
+    m_adsRequired: 1
+    m_payload: outfit_lv1_tucuu
+  - m_id: outfit_lv2_hongcon
+    m_displayName: "\xC1o Kho\xE1c \u0110\u01B0\u1EDDng Ph\u1ED1"
+    m_subtitle: "H\u1ED3ng C\xF4n \u2022 +150 HP"
+    m_groupLabel: 
+    m_previewSprite: {fileID: 21300000, guid: 9498c2bdcdb905f4b9a2f997124fb502, type: 3}
+    m_unlockMethod: 1
+    m_priceGold: 500
+    m_adsRequired: 1
+    m_payload: outfit_lv2_hongcon
+  - m_id: outfit_lv3_songhoa
+    m_displayName: "\xC1o Kho\xE1c Da"
+    m_subtitle: "Song Hoa H\u1ED3ng C\xF4n \u2022 +320 HP"
+    m_groupLabel: 
+    m_previewSprite: {fileID: 21300000, guid: ee0fbc9d0eadfd8488adb0d1c330e080, type: 3}
+    m_unlockMethod: 2
+    m_priceGold: 1500
+    m_adsRequired: 1
+    m_payload: outfit_lv3_songhoa
+  - m_id: outfit_lv4_nhilo
+    m_displayName: Vest Xanh Navy
+    m_subtitle: "Nh\u1ECB L\u1ED9 Nguy\xEAn So\xE1i \u2022 +600 HP"
+    m_groupLabel: 
+    m_previewSprite: {fileID: 21300000, guid: fd77105a45f333e48a4b08d994fdecd2, type: 3}
+    m_unlockMethod: 1
+    m_priceGold: 3500
+    m_adsRequired: 1
+    m_payload: outfit_lv4_nhilo
+  - m_id: outfit_lv5_longdau
+    m_displayName: "Vest Long \u0110\u1EA7u"
+    m_subtitle: "Long \u0110\u1EA7u \u2022 +1200 HP"
+    m_groupLabel: 
+    m_previewSprite: {fileID: 21300000, guid: 26ec701336092ec4b826ef82aad08694, type: 3}
+    m_unlockMethod: 2
+    m_priceGold: 8000
+    m_adsRequired: 2
+    m_payload: outfit_lv5_longdau
