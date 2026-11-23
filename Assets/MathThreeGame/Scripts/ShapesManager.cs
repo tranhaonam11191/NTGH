@@ -31,11 +31,12 @@ public class ShapesManager : MonoBehaviour
     IEnumerable<GameObject> potentialMatches;
 
     public SoundManager soundManager;
+    [SerializeField] private float m_boardCenterY = -1.6f;
     void Awake()
     {
         DebugText.enabled = ShowDebugInfo;
 
-        BottomRight = new Vector2(Constants.ItemSize.x * -1 * ((Constants.Columns - 1) / 2 ),Constants.ItemSize.y * -1 * ((float)(Constants.Rows - 1) / 2 ) - 2);        
+        BottomRight = new Vector2(Constants.ItemSize.x * -1 * ((Constants.Columns - 1) / 2 ),Constants.ItemSize.y * -1 * ((float)(Constants.Rows - 1) / 2 ) + m_boardCenterY);        
     }    
     void resetMapFollowOffset()
     {

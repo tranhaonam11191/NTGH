@@ -25,17 +25,56 @@ public class CharacterOnGame
 
     public ParticleSystem m_effHit;
 
+    public TextMeshProUGUI m_txtName;
+
+    public TextMeshProUGUI m_txtLevel;
+
+    public TextMeshProUGUI m_txtHealth;
+
+    public TextMeshProUGUI m_txtMana;
+
     public void Setup(Character character)
     {
-        m_imgAvatar.sprite = character.avatar;
-        m_Health.fillAmount = 1f;
-
-        m_Skill.fillAmount = 0;
-
+        if (m_imgAvatar != null && character.avatar != null)
+        {
+            m_imgAvatar.sprite = character.avatar;
+        }
+        if (m_Health != null)
+        {
+            m_Health.fillAmount = 1f;
+        }
+        if (m_Skill != null)
+        {
+            m_Skill.fillAmount = 0f;
+        }
         if (m_timeToAttack != null)
         {
-            m_timeToAttack.fillAmount = 1;
+            m_timeToAttack.fillAmount = 1f;
         }
+        if (m_txtName != null && !string.IsNullOrEmpty(character.Name))
+        {
+            m_txtName.text = character.Name;
+        }
+        UpdateHealthText(character.health, character.health);
+    }
+
+    public void UpdateHealthText(float currentHp, int maxHp)
+    {
+        if (m_txtHealth == null) return;
+        int cur = Mathf.Max(0, Mathf.CeilToInt(currentHp));
+        m_txtHealth.text = $"{FormatNumber(cur)} / {FormatNumber(maxHp)}";
+    }
+
+    public void UpdateManaText(float fillAmount, int maxMana = 1200)
+    {
+        if (m_txtMana == null) return;
+        int cur = Mathf.Clamp(Mathf.RoundToInt(fillAmount * maxMana), 0, maxMana);
+        m_txtMana.text = $"{FormatNumber(cur)} / {FormatNumber(maxMana)}";
+    }
+
+    private static string FormatNumber(int value)
+    {
+        return value.ToString("N0").Replace(",", ".");
     }
 }
 
@@ -180,7 +219,9 @@ public class GameController : MonoBehaviour
     void OnDestroy()
     {
         Player.m_Health?.DOKill();
+        Player.m_Mana?.DOKill();
         Enemy.m_Health?.DOKill();
+        Enemy.m_Mana?.DOKill();
     }
 
     void SetupWeapon()
@@ -500,6 +541,7 @@ public class GameController : MonoBehaviour
         hp = Mathf.Clamp(hp - damage, minimumHp, maxHp);
         target.m_Health.DOKill();
         target.m_Health.DOFillAmount(hp / maxHp, 1f);
+        target.UpdateHealthText(hp, maxHp);
         QueueConversations(trigger, previous / maxHp, hp / maxHp);
         if (target == Enemy && minimumHp > 0f && hp <= minimumHp && !m_FinalStand)
         {
@@ -548,6 +590,7 @@ public class GameController : MonoBehaviour
             m_PlayerHp = Mathf.Min(maxHp, m_PlayerHp + maxHp * .01f);
             Player.m_Health.DOKill();
             Player.m_Health.DOFillAmount(m_PlayerHp / maxHp, 1f);
+            Player.UpdateHealthText(m_PlayerHp, maxHp);
         }        
     }
 
@@ -560,12 +603,14 @@ public class GameController : MonoBehaviour
             SoundManager.instance.PlaySfx(_manaAudio);            
             float value = Player.m_Mana.fillAmount + .1f;
             Debug.Log("Mana: " + value);
+            Player.UpdateManaText(value);
             Player.m_Mana.DOFillAmount(value, 1f).OnComplete(() =>
             {
                 if (Player.m_Mana.fillAmount >= 1)
                 {
                     Debug.Log("FullMana");
                     Player.m_Mana.fillAmount = 0;
+                    Player.UpdateManaText(0f);
                     SkillSpecial();
                 }
             });
