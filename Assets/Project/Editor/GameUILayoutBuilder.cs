@@ -52,6 +52,7 @@ namespace NTGH.Editor
         {
             public Image HealthFill;
             public Image ManaFill;
+            public Image AttackTimerFill;
             public TextMeshProUGUI TxtName;
             public TextMeshProUGUI TxtLevel;
             public TextMeshProUGUI TxtHealth;
@@ -111,7 +112,7 @@ namespace NTGH.Editor
                 DefaultName = "Hồng Côn",
                 DefaultLevel = "Lv.100",
                 DefaultHealthText = "100.000 / 100.000",
-                DefaultManaText = "10.000 / 10.000",
+                DefaultManaText = "0 / 100",
                 DefaultAvatarSprite = "Assets/Project/Textures/temp_enemy.png",
                 TeammateSprites = new[]
                 {
@@ -133,7 +134,7 @@ namespace NTGH.Editor
                 DefaultName = "Lương Phi",
                 DefaultLevel = "Lv.1",
                 DefaultHealthText = "12.800 / 12.800",
-                DefaultManaText = "1.200 / 1.200",
+                DefaultManaText = "0 / 100",
                 DefaultAvatarSprite = "Assets/Project/Textures/temp_player.png",
                 TeammateSprites = new[]
                 {
@@ -337,9 +338,10 @@ namespace NTGH.Editor
             Color goldBorder = new Color(0.85f, 0.67f, 0.28f, 1f);
             Color slotBg = new Color(0.07f, 0.08f, 0.11f, 0.95f);
 
-            // --- LEFT COLUMN: Leader Avatar + 2 Equipment Slots ---
+            // --- LEFT COLUMN: Leader Avatar + (optional Enemy Attack Timer) + 2 Equipment Slots ---
             var avatarFrame = GetOrCreateChild(panel, "AvatarFrame");
-            SetTopLeft(avatarFrame, 18f, -18f, 162f, 162f);
+            float avatarHeight = isTop ? 150f : 162f;
+            SetTopLeft(avatarFrame, 18f, -16f, 162f, avatarHeight);
             AssignSlicedSprite(GetOrAddComponent<Image>(avatarFrame), PanelFillPath, slotBg);
 
             var avatarMask = GetOrCreateChild(avatarFrame, "AvatarMask");
@@ -353,11 +355,39 @@ namespace NTGH.Editor
             avatarBorderImg.raycastTarget = false;
             avatarBorder.SetAsLastSibling();
 
+            // Dedicated Enemy Attack Countdown Timer bar (separate from NỘ/MP bar)
+            Image attackTimerFillImg = null;
+            if (isTop)
+            {
+                var timerBar = GetOrCreateChild(panel, "AttackTimerBar");
+                SetTopLeft(timerBar, 18f, -172f, 162f, 14f);
+                var timerBgImg = GetOrAddComponent<Image>(timerBar);
+                AssignSprite(timerBar, "Assets/Project/Textures/bar_frame.png");
+                timerBgImg.color = new Color(0.16f, 0.14f, 0.16f, 0.95f);
+
+                var timerFillRect = GetOrCreateChild(timerBar, "Fill");
+                StretchFull(timerFillRect, 2f);
+                attackTimerFillImg = GetOrAddComponent<Image>(timerFillRect);
+                AssignSprite(timerFillRect, "Assets/Project/Textures/bar_fill_orange.png");
+                attackTimerFillImg.color = Color.white;
+                attackTimerFillImg.type = Image.Type.Filled;
+                attackTimerFillImg.fillMethod = Image.FillMethod.Horizontal;
+                attackTimerFillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
+                attackTimerFillImg.fillAmount = 1f;
+            }
+            else
+            {
+                var oldTimer = panel.Find("AttackTimerBar");
+                if (oldTimer != null) Object.DestroyImmediate(oldTimer.gameObject);
+            }
+
             // 2 Equipment Slots below Avatar
             var equipRow = GetOrCreateChild(panel, "EquipSlots");
-            SetTopLeft(equipRow, 18f, -190f, 162f, 84f);
-            BuildEquipSlot(equipRow, "Slot_Weapon", 0f, 77f, 77f, IconWeaponPath, goldBorder, slotBg);
-            BuildEquipSlot(equipRow, "Slot_Outfit", 85f, 77f, 77f, IconOutfitPath, goldBorder, slotBg);
+            float equipY = isTop ? -192f : -190f;
+            float equipSize = isTop ? 76f : 77f;
+            SetTopLeft(equipRow, 18f, equipY, 162f, equipSize + 4f);
+            BuildEquipSlot(equipRow, "Slot_Weapon", 0f, equipSize, equipSize, IconWeaponPath, goldBorder, slotBg);
+            BuildEquipSlot(equipRow, "Slot_Outfit", 162f - equipSize, equipSize, equipSize, IconOutfitPath, goldBorder, slotBg);
 
             // --- RIGHT COLUMN: Name/Lv/HP + MP + 4 Teammate Cards ---
             var rightCol = GetOrCreateChild(panel, "RightColumn");
@@ -410,13 +440,13 @@ namespace NTGH.Editor
             var txtHealth = ConfigureTMP(txtHpRect, theme.DefaultHealthText, 15f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.MidlineRight, Color.white);
             AddTextShadow(txtHpRect);
 
-            // Row 2: MP Label + Cyan MP Bar
+            // Row 2: NỘ (Skill Rage) Label + Cyan Bar
             var manaRow = GetOrCreateChild(rightCol, "ManaRow");
             SetTopLeft(manaRow, 0f, -38f, 476f, 26f);
 
             var mpLabelRect = GetOrCreateChild(manaRow, "TxtMPLabel");
             SetTopLeft(mpLabelRect, 0f, 0f, 44f, 26f);
-            ConfigureTMP(mpLabelRect, "MP", 17f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.MidlineLeft, Color.white);
+            ConfigureTMP(mpLabelRect, "NỘ", 17f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.MidlineLeft, Color.white);
 
             var mpBar = GetOrCreateChild(manaRow, "ManaBar");
             SetTopLeft(mpBar, 48f, -2f, 428f, 22f);
@@ -432,7 +462,7 @@ namespace NTGH.Editor
             mpFillImg.type = Image.Type.Filled;
             mpFillImg.fillMethod = Image.FillMethod.Horizontal;
             mpFillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
-            mpFillImg.fillAmount = 1f;
+            mpFillImg.fillAmount = 0f;
 
             var txtMpRect = GetOrCreateChild(mpBar, "TxtMana");
             StretchFull(txtMpRect);
@@ -468,6 +498,7 @@ namespace NTGH.Editor
             {
                 HealthFill = hpFillImg,
                 ManaFill = mpFillImg,
+                AttackTimerFill = attackTimerFillImg,
                 TxtName = txtName,
                 TxtLevel = txtLevel,
                 TxtHealth = txtHealth,
@@ -664,10 +695,7 @@ namespace NTGH.Editor
             SetObjRef(charProp, "m_Health", refs.HealthFill);
             SetObjRef(charProp, "m_Mana", refs.ManaFill);
             SetObjRef(charProp, "m_Skill", refs.ManaFill);
-            if (wireAttackTimer)
-            {
-                SetObjRef(charProp, "m_timeToAttack", refs.ManaFill);
-            }
+            SetObjRef(charProp, "m_timeToAttack", wireAttackTimer ? refs.AttackTimerFill : null);
             SetObjRef(charProp, "m_txtName", refs.TxtName);
             SetObjRef(charProp, "m_txtLevel", refs.TxtLevel);
             SetObjRef(charProp, "m_txtHealth", refs.TxtHealth);

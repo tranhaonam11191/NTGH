@@ -43,11 +43,15 @@ public class CharacterOnGame
         {
             m_Health.fillAmount = 1f;
         }
+        if (m_Mana != null)
+        {
+            m_Mana.fillAmount = 0f;
+        }
         if (m_Skill != null)
         {
             m_Skill.fillAmount = 0f;
         }
-        if (m_timeToAttack != null)
+        if (m_timeToAttack != null && m_timeToAttack != m_Mana)
         {
             m_timeToAttack.fillAmount = 1f;
         }
@@ -56,6 +60,65 @@ public class CharacterOnGame
             m_txtName.text = character.Name;
         }
         UpdateHealthText(character.health, character.health);
+        UpdateManaText(0f);
+    }
+
+    public void UpdateAttackTimer(float progress)
+    {
+        float clamped = Mathf.Clamp01(progress);
+        Image timer = EnsureAttackTimer();
+        if (timer == null) return;
+
+        if (timer.sprite != null && timer.type == Image.Type.Filled)
+        {
+            timer.fillAmount = clamped;
+        }
+        else
+        {
+            RectTransform rect = timer.rectTransform;
+            rect.anchorMax = new Vector2(clamped, rect.anchorMax.y);
+        }
+    }
+
+    private Image EnsureAttackTimer()
+    {
+        if (m_timeToAttack != null && m_timeToAttack != m_Mana)
+        {
+            return m_timeToAttack;
+        }
+
+        if (m_imgAvatar == null)
+        {
+            return null;
+        }
+
+        GameObject timerObj = new GameObject("AttackTimer", typeof(RectTransform), typeof(Image));
+        RectTransform rect = timerObj.GetComponent<RectTransform>();
+        rect.SetParent(m_imgAvatar.rectTransform, false);
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
+        rect.pivot = new Vector2(0f, 0f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(0f, 10f);
+
+        Image timer = timerObj.GetComponent<Image>();
+        timer.color = new Color(1f, 0.55f, 0f, 1f);
+        timer.raycastTarget = false;
+
+        Sprite barSprite = m_Health != null && m_Health.sprite != null
+            ? m_Health.sprite
+            : (m_Mana != null ? m_Mana.sprite : null);
+        if (barSprite != null)
+        {
+            timer.sprite = barSprite;
+            timer.type = Image.Type.Filled;
+            timer.fillMethod = Image.FillMethod.Horizontal;
+            timer.fillOrigin = (int)Image.OriginHorizontal.Left;
+            timer.fillAmount = 1f;
+        }
+
+        m_timeToAttack = timer;
+        return m_timeToAttack;
     }
 
     public void UpdateHealthText(float currentHp, int maxHp)
@@ -65,7 +128,7 @@ public class CharacterOnGame
         m_txtHealth.text = $"{FormatNumber(cur)} / {FormatNumber(maxHp)}";
     }
 
-    public void UpdateManaText(float fillAmount, int maxMana = 1200)
+    public void UpdateManaText(float fillAmount, int maxMana = 100)
     {
         if (m_txtMana == null) return;
         int cur = Mathf.Clamp(Mathf.RoundToInt(fillAmount * maxMana), 0, maxMana);
@@ -135,6 +198,8 @@ public class GameController : MonoBehaviour
     readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
     bool m_ShowingStory;
     float m_PlayerHp, m_EnemyHp;
+    float m_PlayerMana;
+    float m_EnemyAttackProgress = 1f;
     bool m_FinalStand;
     bool m_HasClicked;
     float m_SecondsSinceFirstClick;
@@ -268,17 +333,18 @@ public class GameController : MonoBehaviour
 
     void EnemyAttack()
     {
-        float fillAmount = Enemy.m_timeToAttack.fillAmount;
-        if (fillAmount > 0)
+        if (m_EnemyAttackProgress > 0f)
         {
-            Enemy.m_timeToAttack.fillAmount -= .001f;
+            m_EnemyAttackProgress = Mathf.Max(0f, m_EnemyAttackProgress - .001f);
         }
         else
         {
             Attack(Player, ref m_PlayerHp, Data.defaultPlayer.Character.health,
                 Data.enemy.Character.attack, enemyWeapon, ConversationTrigger.PlayerHealth);
-            Enemy.m_timeToAttack.fillAmount = 1;
+            m_EnemyAttackProgress = 1f;
         }
+
+        Enemy?.UpdateAttackTimer(m_EnemyAttackProgress);
     }
 
     #region oldCode
@@ -546,7 +612,8 @@ public class GameController : MonoBehaviour
         if (target == Enemy && minimumHp > 0f && hp <= minimumHp && !m_FinalStand)
         {
             m_FinalStand = true;
-            Enemy.m_timeToAttack.fillAmount = .25f;
+            m_EnemyAttackProgress = .25f;
+            Enemy?.UpdateAttackTimer(m_EnemyAttackProgress);
         }
         bool survivedFinalHit = m_FinalStand && target == Player && hp > 0;
         if (hp > 0 && !survivedFinalHit) return;
@@ -597,24 +664,34 @@ public class GameController : MonoBehaviour
     [SerializeField] string _manaAudio;
     public void PlayerInCreaseMana()
     {
-        if(!endGame)
+        if (!endGame)
         {
             m_effMana.Play();
-            SoundManager.instance.PlaySfx(_manaAudio);            
-            float value = Player.m_Mana.fillAmount + .1f;
-            Debug.Log("Mana: " + value);
-            Player.UpdateManaText(value);
-            Player.m_Mana.DOFillAmount(value, 1f).OnComplete(() =>
+            SoundManager.instance.PlaySfx(_manaAudio);
+            m_PlayerMana = Mathf.Clamp01(m_PlayerMana + .1f);
+            Debug.Log("Mana: " + m_PlayerMana);
+
+            if (m_PlayerMana >= 1f - 0.0001f)
             {
-                if (Player.m_Mana.fillAmount >= 1)
+                Debug.Log("FullMana");
+                m_PlayerMana = 0f;
+                if (Player.m_Mana != null)
                 {
-                    Debug.Log("FullMana");
-                    Player.m_Mana.fillAmount = 0;
-                    Player.UpdateManaText(0f);
-                    SkillSpecial();
+                    Player.m_Mana.DOKill();
+                    Player.m_Mana.fillAmount = 0f;
                 }
-            });
-        }                
+                Player.UpdateManaText(0f);
+                SkillSpecial();
+                return;
+            }
+
+            Player.UpdateManaText(m_PlayerMana);
+            if (Player.m_Mana != null)
+            {
+                Player.m_Mana.DOKill();
+                Player.m_Mana.DOFillAmount(m_PlayerMana, 1f);
+            }
+        }
     }
 
     public void PlayerInCreaseGold()
