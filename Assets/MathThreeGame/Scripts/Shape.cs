@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class Shape : MonoBehaviour
 {
-    GameController gameController;
-
     public BonusType Bonus { get; set; }
     public int Column { get; set; }
     public int Row { get; set; }
@@ -19,11 +17,6 @@ public class Shape : MonoBehaviour
     public Shape()
     {
         Bonus = BonusType.None;
-    }
-
-    private void Start()
-    {
-        gameController = GameController.instance;
     }
 
     /// <summary>
@@ -73,33 +66,4 @@ public class Shape : MonoBehaviour
         b.Column = temp;
     }
 
-
-    public void Action()
-    {
-        switch(typeShape)
-        {
-            case typeShape.Attack:
-                Debug.Log("Player Attack");
-                gameController.PlayerAttack();
-                break;
-            case typeShape.Health:
-                GetComponent<ItemEffect>().PlayEff();
-                gameController.PlayerInCreaseHealth();
-                break;
-            case typeShape.Mana:
-                gameController.PlayerInCreaseMana();
-                break;
-            case typeShape.Gold:
-                GetComponent<GoldItem>().InCreaseValue();
-                gameController.PlayerInCreaseGold();
-                break;
-            case typeShape.Exp:
-                //GetComponent<GoldItem>().InCreaseValue();
-                gameController.PlayerInCreaseEXP();
-                break;
-        }
-    }
 }
-
-
-

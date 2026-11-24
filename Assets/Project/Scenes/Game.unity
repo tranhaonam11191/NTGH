@@ -25854,16 +25854,13 @@ MonoBehaviour:
   lstGameCompleteHorizontal: []
   lstGameItemCompleteVertical: []
   Player:
-    m_Mana: {fileID: 388285005}
     m_imgAvatar: {fileID: 1063782931}
     m_Health: {fileID: 2037759750}
-    m_Skill: {fileID: 388285005}
     m_timeToAttack: {fileID: 0}
     m_effHit: {fileID: 0}
     m_txtName: {fileID: 1123748107}
     m_txtLevel: {fileID: 1456505178}
     m_txtHealth: {fileID: 142665490}
-    m_txtMana: {fileID: 205648120}
     m_imgWeaponSlot: {fileID: 1052094770}
     m_imgOutfitSlot: {fileID: 382914580}
     m_teammateSlots:
@@ -25872,16 +25869,13 @@ MonoBehaviour:
     - {fileID: 1837564176}
     - {fileID: 1133669295}
   Enemy:
-    m_Mana: {fileID: 96628887}
     m_imgAvatar: {fileID: 2108312365}
     m_Health: {fileID: 1524364997}
-    m_Skill: {fileID: 96628887}
     m_timeToAttack: {fileID: 1005536256}
     m_effHit: {fileID: 0}
     m_txtName: {fileID: 1410448236}
     m_txtLevel: {fileID: 1038592894}
     m_txtHealth: {fileID: 974978130}
-    m_txtMana: {fileID: 1403053638}
     m_imgWeaponSlot: {fileID: 1733202957}
     m_imgOutfitSlot: {fileID: 1282296759}
     m_teammateSlots:
@@ -25889,27 +25883,16 @@ MonoBehaviour:
     - {fileID: 1818191965}
     - {fileID: 784143916}
     - {fileID: 685517578}
-  m_textGold: {fileID: 959494556}
-  m_textEXP: {fileID: 741917022}
-  m_textLEVEL: {fileID: 1284363451}
   m_StageTitle: {fileID: 990000013}
   m_effAttack: {fileID: 1442257714}
-  m_effHealth: {fileID: 1458392186}
-  m_effExp: {fileID: 932080684}
-  m_effMana: {fileID: 1288552647}
   m_WeaponImage: {fileID: 1261228872}
   enemyWeapon: {fileID: 131014697}
-  playerWeapon: {fileID: 999716474}
+  m_MatchSword: {fileID: 21300000, guid: c69135ca92e44027a45665df2f9ab56f, type: 3}
   lstOK: []
   lstMove: []
   rowCheckFalling: 8
   lstCompleteAll: []
   _attackAudio: sfxAttack
-  _increaseAudio: sfxHealth
-  _manaAudio: sfxManaExp
-  _effExpAudio: sfxManaExp
-  SpecialAttack: {fileID: 948616084}
-  Gun: {fileID: 1553534956}
 --- !u!224 &351622723
 RectTransform:
   m_ObjectHideFlags: 0
@@ -64780,7 +64763,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &743208844
 RectTransform:
   m_ObjectHideFlags: 0
@@ -79632,7 +79615,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &948616085
 SpriteRenderer:
   serializedVersion: 3
@@ -79953,7 +79936,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &965168367
 RectTransform:
   m_ObjectHideFlags: 0
@@ -121983,7 +121966,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1553534958
 Transform:
   m_ObjectHideFlags: 0

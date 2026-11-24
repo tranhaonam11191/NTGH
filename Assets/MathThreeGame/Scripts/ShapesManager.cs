@@ -276,11 +276,13 @@ public class ShapesManager : MonoBehaviour
         var hitGomatchesInfo = shapes.GetMatches(hitGo);
         var hitGo2matchesInfo = shapes.GetMatches(hitGo2);
 
-        var totalMatches = hitGomatchesInfo.MatchedCandy
-            .Union(hitGo2matchesInfo.MatchedCandy).Distinct();
+        var groups = new List<HashSet<GameObject>>();
+        AddMatchGroup(groups, hitGomatchesInfo);
+        AddMatchGroup(groups, hitGo2matchesInfo);
+        var totalMatches = groups.SelectMany(group => group).ToList();
 
         //if user's swap didn't create at least a 3-match, undo their swap
-        if (totalMatches.Count() < Constants.MinimumMatches)
+        if (totalMatches.Count < Constants.MinimumMatches)
         {
             hitGo.transform.positionTo(Constants.AnimationDuration, hitGo2.transform.position);
             hitGo2.transform.positionTo(Constants.AnimationDuration, hitGo.transform.position);
@@ -290,7 +292,7 @@ public class ShapesManager : MonoBehaviour
         }
 
         //if more than 3 matches and no Bonus is contained in the line, we will award a new Bonus
-        bool addBonus = totalMatches.Count() >= Constants.MinimumMatchesForBonus &&
+        bool addBonus = totalMatches.Count >= Constants.MinimumMatchesForBonus &&
             !BonusTypeUtilities.ContainsDestroyWholeRowColumn(hitGomatchesInfo.BonusesContained) &&
             !BonusTypeUtilities.ContainsDestroyWholeRowColumn(hitGo2matchesInfo.BonusesContained);
 
@@ -303,21 +305,27 @@ public class ShapesManager : MonoBehaviour
         }
 
         int timesRun = 1;
-        while (totalMatches.Count() >= Constants.MinimumMatches)
+        while (totalMatches.Count >= Constants.MinimumMatches)
         {
             //increase score
-            IncreaseScore((totalMatches.Count() - 2) * Constants.Match3Score);
+            IncreaseScore((totalMatches.Count - 2) * Constants.Match3Score);
 
             if (timesRun >= 2)
                 IncreaseScore(Constants.SubsequentMatchScore);
             
             SoundManager.instance.PlaySfx("ClearSFX");
 
+            foreach (var group in groups)
+            {
+                Vector3 center = Vector3.zero;
+                foreach (var tile in group)
+                    center += tile.transform.position;
+                GameController.instance?.AttackWithMatch(group.Count, center / group.Count);
+            }
             foreach (var item in totalMatches)
             {
-                item.GetComponent<Shape>().Action();
                 shapes.Remove(item);
-                RemoveFromScene(item);
+                Destroy(item);
             }
 
             //check and instantiate Bonus if needed
@@ -346,8 +354,10 @@ public class ShapesManager : MonoBehaviour
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
 
             //search if there are matches with the new/collapsed items
-            totalMatches = shapes.GetMatches(collapsedCandyInfo.AlteredCandy).
-                Union(shapes.GetMatches(newCandyInfo.AlteredCandy)).Distinct();
+            groups.Clear();
+            foreach (var tile in collapsedCandyInfo.AlteredCandy.Union(newCandyInfo.AlteredCandy))
+                AddMatchGroup(groups, shapes.GetMatches(tile));
+            totalMatches = groups.SelectMany(group => group).ToList();
 
 
 
@@ -424,16 +434,18 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Destroys the item from the scene and instantiates a new explosion gameobject
-    /// </summary>
-    /// <param name="item"></param>
-    private void RemoveFromScene(GameObject item)
+    // Crossing runs and overlapping bonus clears share one projectile and count each tile once.
+    private static void AddMatchGroup(List<HashSet<GameObject>> groups, MatchesInfo match)
     {
-        GameObject explosion = GetRandomExplosion();
-        var newExplosion = Instantiate(explosion, item.transform.position, Quaternion.identity) as GameObject;
-        Destroy(newExplosion, Constants.ExplosionDuration);
-        Destroy(item);
+        var tiles = new HashSet<GameObject>(match.MatchedCandy);
+        if (tiles.Count == 0) return;
+        for (int i = groups.Count - 1; i >= 0; i--)
+        {
+            if (!tiles.Overlaps(groups[i])) continue;
+            tiles.UnionWith(groups[i]);
+            groups.RemoveAt(i);
+        }
+        groups.Add(tiles);
     }
 
     /// <summary>
@@ -460,15 +472,6 @@ public class ShapesManager : MonoBehaviour
     private void ShowScore()
     {
         ScoreText.text = "Score: " + score.ToString();
-    }
-
-    /// <summary>
-    /// Get a random explosion
-    /// </summary>
-    /// <returns></returns>
-    private GameObject GetRandomExplosion()
-    {
-        return ExplosionPrefabs[Random.Range(0, ExplosionPrefabs.Length)];
     }
 
     /// <summary>

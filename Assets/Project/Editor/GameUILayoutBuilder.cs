@@ -44,7 +44,6 @@ namespace NTGH.Editor
             public string DefaultName;
             public string DefaultLevel;
             public string DefaultHealthText;
-            public string DefaultManaText;
             public string DefaultAvatarSprite;
             public string[] TeammateSprites;
         }
@@ -52,7 +51,6 @@ namespace NTGH.Editor
         private struct HudRefs
         {
             public Image HealthFill;
-            public Image ManaFill;
             public Image AttackTimerFill;
             public Image WeaponSlotIcon;
             public Image OutfitSlotIcon;
@@ -60,7 +58,6 @@ namespace NTGH.Editor
             public TextMeshProUGUI TxtName;
             public TextMeshProUGUI TxtLevel;
             public TextMeshProUGUI TxtHealth;
-            public TextMeshProUGUI TxtMana;
             public RectTransform AvatarContainer;
         }
 
@@ -116,7 +113,6 @@ namespace NTGH.Editor
                 DefaultName = "Hồng Côn",
                 DefaultLevel = "Lv.100",
                 DefaultHealthText = "100.000 / 100.000",
-                DefaultManaText = "0 / 100",
                 DefaultAvatarSprite = "Assets/Project/Textures/temp_enemy.png",
                 TeammateSprites = new[]
                 {
@@ -138,7 +134,6 @@ namespace NTGH.Editor
                 DefaultName = "Lương Phi",
                 DefaultLevel = "Lv.1",
                 DefaultHealthText = "12.800 / 12.800",
-                DefaultManaText = "0 / 100",
                 DefaultAvatarSprite = "Assets/Project/Textures/temp_player.png",
                 TeammateSprites = new[]
                 {
@@ -444,38 +439,6 @@ namespace NTGH.Editor
             var txtHealth = ConfigureTMP(txtHpRect, theme.DefaultHealthText, 15f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.MidlineRight, Color.white);
             AddTextShadow(txtHpRect);
 
-            // Row 2: NỘ (Skill Rage) Label + Cyan Bar
-            var manaRow = GetOrCreateChild(rightCol, "ManaRow");
-            SetTopLeft(manaRow, 0f, -38f, 476f, 26f);
-
-            var mpLabelRect = GetOrCreateChild(manaRow, "TxtMPLabel");
-            SetTopLeft(mpLabelRect, 0f, 0f, 44f, 26f);
-            ConfigureTMP(mpLabelRect, "NỘ", 17f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.MidlineLeft, Color.white);
-
-            var mpBar = GetOrCreateChild(manaRow, "ManaBar");
-            SetTopLeft(mpBar, 48f, -2f, 428f, 22f);
-            var mpFrameImg = GetOrAddComponent<Image>(mpBar);
-            AssignSprite(mpBar, "Assets/Project/Textures/bar_frame.png");
-            mpFrameImg.color = new Color(0.18f, 0.20f, 0.24f, 0.95f);
-
-            var mpFillRect = GetOrCreateChild(mpBar, "Fill");
-            StretchFull(mpFillRect, 2f);
-            var mpFillImg = GetOrAddComponent<Image>(mpFillRect);
-            AssignSprite(mpFillRect, "Assets/Project/Textures/bar_fill_blue.png");
-            mpFillImg.color = Color.white;
-            mpFillImg.type = Image.Type.Filled;
-            mpFillImg.fillMethod = Image.FillMethod.Horizontal;
-            mpFillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
-            mpFillImg.fillAmount = 0f;
-
-            var txtMpRect = GetOrCreateChild(mpBar, "TxtMana");
-            StretchFull(txtMpRect);
-            txtMpRect.offsetMin = new Vector2(8f, 0f);
-            txtMpRect.offsetMax = new Vector2(-10f, 0f);
-            var txtMana = ConfigureTMP(txtMpRect, theme.DefaultManaText, 14f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.MidlineRight, Color.white);
-            AddTextShadow(txtMpRect);
-
-            // Row 3: 4 Teammate Cards
             var teamRow = GetOrCreateChild(rightCol, "TeammatesRow");
             SetTopLeft(teamRow, 0f, -72f, 476f, 186f);
             var hlg = GetOrAddComponent<HorizontalLayoutGroup>(teamRow);
@@ -502,7 +465,6 @@ namespace NTGH.Editor
             return new HudRefs
             {
                 HealthFill = hpFillImg,
-                ManaFill = mpFillImg,
                 AttackTimerFill = attackTimerFillImg,
                 WeaponSlotIcon = weaponSlotIcon,
                 OutfitSlotIcon = outfitSlotIcon,
@@ -510,7 +472,6 @@ namespace NTGH.Editor
                 TxtName = txtName,
                 TxtLevel = txtLevel,
                 TxtHealth = txtHealth,
-                TxtMana = txtMana,
                 AvatarContainer = avatarMask
             };
         }
@@ -716,13 +677,10 @@ namespace NTGH.Editor
 
             SetObjRef(charProp, "m_imgAvatar", avatarImg);
             SetObjRef(charProp, "m_Health", refs.HealthFill);
-            SetObjRef(charProp, "m_Mana", refs.ManaFill);
-            SetObjRef(charProp, "m_Skill", refs.ManaFill);
             SetObjRef(charProp, "m_timeToAttack", wireAttackTimer ? refs.AttackTimerFill : null);
             SetObjRef(charProp, "m_txtName", refs.TxtName);
             SetObjRef(charProp, "m_txtLevel", refs.TxtLevel);
             SetObjRef(charProp, "m_txtHealth", refs.TxtHealth);
-            SetObjRef(charProp, "m_txtMana", refs.TxtMana);
             SetObjRef(charProp, "m_imgWeaponSlot", refs.WeaponSlotIcon);
             SetObjRef(charProp, "m_imgOutfitSlot", refs.OutfitSlotIcon);
 

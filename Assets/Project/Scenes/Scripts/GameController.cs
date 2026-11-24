@@ -14,13 +14,11 @@ public delegate void callback();
 [Serializable]
 public class CharacterOnGame
 {
-    public Image m_Mana;
 
     public Image m_imgAvatar;
 
     public Image m_Health;
 
-    public Image m_Skill;
 
     public Image m_timeToAttack;
 
@@ -32,7 +30,6 @@ public class CharacterOnGame
 
     public TextMeshProUGUI m_txtHealth;
 
-    public TextMeshProUGUI m_txtMana;
 
     [Header("Support Loadout UI")]
     public Image m_imgWeaponSlot;
@@ -81,15 +78,7 @@ public class CharacterOnGame
         {
             m_Health.fillAmount = 1f;
         }
-        if (m_Mana != null)
-        {
-            m_Mana.fillAmount = 0f;
-        }
-        if (m_Skill != null)
-        {
-            m_Skill.fillAmount = 0f;
-        }
-        if (m_timeToAttack != null && m_timeToAttack != m_Mana)
+        if (m_timeToAttack != null)
         {
             m_timeToAttack.fillAmount = 1f;
         }
@@ -98,7 +87,6 @@ public class CharacterOnGame
             m_txtName.text = character.Name;
         }
         UpdateHealthText(character.health, character.health);
-        UpdateManaText(0f);
     }
 
     public void UpdateAttackTimer(float progress)
@@ -120,7 +108,7 @@ public class CharacterOnGame
 
     private Image EnsureAttackTimer()
     {
-        if (m_timeToAttack != null && m_timeToAttack != m_Mana)
+        if (m_timeToAttack != null)
         {
             return m_timeToAttack;
         }
@@ -143,9 +131,7 @@ public class CharacterOnGame
         timer.color = new Color(1f, 0.55f, 0f, 1f);
         timer.raycastTarget = false;
 
-        Sprite barSprite = m_Health != null && m_Health.sprite != null
-            ? m_Health.sprite
-            : (m_Mana != null ? m_Mana.sprite : null);
+        Sprite barSprite = m_Health != null ? m_Health.sprite : null;
         if (barSprite != null)
         {
             timer.sprite = barSprite;
@@ -164,13 +150,6 @@ public class CharacterOnGame
         if (m_txtHealth == null) return;
         int cur = Mathf.Max(0, Mathf.CeilToInt(currentHp));
         m_txtHealth.text = $"{FormatNumber(cur)} / {FormatNumber(maxHp)}";
-    }
-
-    public void UpdateManaText(float fillAmount, int maxMana = 100)
-    {
-        if (m_txtMana == null) return;
-        int cur = Mathf.Clamp(Mathf.RoundToInt(fillAmount * maxMana), 0, maxMana);
-        m_txtMana.text = $"{FormatNumber(cur)} / {FormatNumber(maxMana)}";
     }
 
     private static string FormatNumber(int value)
@@ -217,16 +196,12 @@ public class GameController : MonoBehaviour
 
     [SerializeField] CharacterOnGame Player, Enemy;
 
-    [SerializeField] TextMeshProUGUI m_textGold, m_textEXP, m_textLEVEL;
 
     [SerializeField] TextMeshProUGUI m_StageTitle;
 
     //Effect
     [Header("Effect")]
     [SerializeField] ParticleSystem m_effAttack;
-    [SerializeField] ParticleSystem m_effHealth;
-    [SerializeField] ParticleSystem m_effExp;
-    [SerializeField] ParticleSystem m_effMana;
 
     [Header("Weapon")]
     [SerializeField] Image m_WeaponImage;
@@ -238,7 +213,6 @@ public class GameController : MonoBehaviour
     float m_PlayerHp, m_EnemyHp;
     int m_PlayerMaxHp, m_EnemyMaxHp;
     BattleLoadout m_PlayerLoadout, m_EnemyLoadout;
-    float m_PlayerMana;
     float m_EnemyAttackProgress = 1f;
     bool m_FinalStand;
     bool m_HasClicked;
@@ -275,12 +249,8 @@ public class GameController : MonoBehaviour
         canClick = true;
         moving = false;
 
-        SpecialAttack.SetActive(false);
-        Gun.SetActive(false);
         m_StageTitle.text = $"STAGE {SOManager.instance.CurrentLevelNumber}\n{Data.displayName}";
         SetupCharacter();
-        SetupLevel();
-        SetupGold();
         SetupWeapon();
         if (!openingPlayed) QueueConversations(ConversationTrigger.Start);
         StartCoroutine(PrepareBoard());
@@ -318,7 +288,7 @@ public class GameController : MonoBehaviour
             m_ResultShown = true;
             Core.Load<Popup>("Popup", LoadSceneMode.Additive, popup =>
             {
-                popup.Setup(new PopupData(m_Result, gold, Exp));
+                popup.Setup(new PopupData(m_Result, 0, 0));
                 if (m_Result == resultType.win && Data.itemReward != null &&
                     AdsController.instance != null && AdsController.instance.checkReward())
                     StartCoroutine(coPopupReward());
@@ -329,9 +299,7 @@ public class GameController : MonoBehaviour
     void OnDestroy()
     {
         Player.m_Health?.DOKill();
-        Player.m_Mana?.DOKill();
         Enemy.m_Health?.DOKill();
-        Enemy.m_Mana?.DOKill();
     }
 
     void SetupWeapon()
@@ -342,22 +310,6 @@ public class GameController : MonoBehaviour
             m_WeaponImage.sprite = weapon.ItemReward.Sprite;
         }
     }
-
-    int valueFillAmount;
-
-    void SetupLevel()
-    {
-        //m_textLEVEL.text = GameManager.Level;
-        m_textEXP.text = Exp.ToString();                
-    }
-
-    int gold;
-
-    void SetupGold()
-    {
-        m_textGold.text = gold.ToString();
-    }
-
 
     private void Update()
     {
@@ -374,7 +326,8 @@ public class GameController : MonoBehaviour
         if (!BlocksBoard) EnemyAttack();
     }
 
-    [SerializeField] WeaponScripts enemyWeapon, playerWeapon;
+    [SerializeField] WeaponScripts enemyWeapon;
+    [SerializeField] Sprite m_MatchSword;
 
     void EnemyAttack()
     {
@@ -387,8 +340,10 @@ public class GameController : MonoBehaviour
             int rawDamage = Data.enemy.Character.attack + (m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalAttackBonus() : 0);
             int reduction = m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalDamageReduction() : 0;
             int finalDamage = Mathf.Max(1, rawDamage - reduction);
+            m_effAttack.Play();
+            enemyWeapon.Move(Player.m_imgAvatar.transform.position);
             Attack(Player, ref m_PlayerHp, m_PlayerMaxHp,
-                finalDamage, enemyWeapon, ConversationTrigger.PlayerHealth);
+                finalDamage, ConversationTrigger.PlayerHealth);
             m_EnemyAttackProgress = 1f;
         }
 
@@ -647,16 +602,11 @@ public class GameController : MonoBehaviour
     #endregion
     [SerializeField] string _attackAudio;
 
-    void Attack(CharacterOnGame target, ref float hp, int maxHp, int damage, WeaponScripts weapon,
-        ConversationTrigger trigger, bool special = false)
+    void Attack(CharacterOnGame target, ref float hp, int maxHp, int damage,
+        ConversationTrigger trigger)
     {
         if (endGame) return;
-        if (!special)
-        {
-            m_effAttack.Play();
-            SoundManager.instance.PlaySfx(_attackAudio);
-        }
-        weapon.Move(target.m_imgAvatar.transform.position);
+        SoundManager.instance.PlaySfx(_attackAudio);
         float previous = hp;
         float minimumHp = target == Enemy ? maxHp * Data.finalStandEnemyHealth : 0f;
         hp = Mathf.Clamp(hp - damage, minimumHp, maxHp);
@@ -683,132 +633,69 @@ public class GameController : MonoBehaviour
         QueueConversations(ConversationTrigger.End);
     }
 
-    int Gold, Exp;
 
     bool endGame;
 
     #region PlayerAction
-    public void PlayerAttack(bool specialAttack = false)
+    public void AttackWithMatch(int clearedItems, Vector3 boardPosition)
     {
-        if (Data == null) return;
-        int rawDamage = Data.defaultPlayer.Character.attack + (m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalAttackBonus() : 0);
-        int reduction = m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalDamageReduction() : 0;
-        int finalDamage = Mathf.Max(1, rawDamage - reduction);
-        Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp,
-            finalDamage, playerWeapon, ConversationTrigger.EnemyHealth, specialAttack);
+        if (Data == null || endGame || clearedItems < Constants.MinimumMatches) return;
+
+        Image avatar = Enemy.m_imgAvatar;
+        Canvas canvas = avatar.canvas.rootCanvas;
+        RectTransform layer = (RectTransform)canvas.transform;
+        Camera uiCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        Vector2 screenStart = RectTransformUtility.WorldToScreenPoint(Camera.main, boardPosition);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(layer, screenStart, uiCamera, out Vector2 start);
+        Vector2 target = layer.InverseTransformPoint(avatar.rectTransform.TransformPoint(avatar.rectTransform.rect.center));
+
+        var sword = new GameObject("MatchSword", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+        sword.rectTransform.SetParent(layer, false);
+        sword.sprite = m_MatchSword;
+        sword.raycastTarget = false;
+        RectTransform rect = sword.rectTransform;
+        rect.pivot = new Vector2(0.22f, 0.95f); // Tip in the approved diagonal sprite.
+        rect.sizeDelta = new Vector2(64f, 64f);
+        rect.localPosition = start;
+        float heading = Vector2.SignedAngle(Vector2.right, target - start);
+        rect.localRotation = Quaternion.Euler(0f, 0f, heading - 122f);
+
+        bool hit = false;
+        DOVirtual.Float(0f, 1f, 0.32f, progress =>
+        {
+            rect.localPosition = Vector2.LerpUnclamped(start, target, progress);
+            if (progress < 1f || hit || endGame) return;
+            hit = true;
+            Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, clearedItems, ConversationTrigger.EnemyHealth);
+            ShowMatchDamage(layer, target, clearedItems);
+        }).SetEase(Ease.OutBack, 0.9f).SetLink(sword.gameObject)
+            .OnComplete(() => Destroy(sword.gameObject));
+    }
+
+    private void ShowMatchDamage(RectTransform layer, Vector2 target, int amount)
+    {
+        var label = new GameObject("MatchDamage", typeof(RectTransform), typeof(TextMeshProUGUI))
+            .GetComponent<TextMeshProUGUI>();
+        label.rectTransform.SetParent(layer, false);
+        label.rectTransform.localPosition = target + new Vector2(28f, 12f);
+        label.rectTransform.sizeDelta = new Vector2(84f, 42f);
+        if (Enemy.m_txtHealth != null) label.font = Enemy.m_txtHealth.font;
+        label.text = "-" + amount;
+        label.fontSize = 30f;
+        label.fontStyle = FontStyles.Bold;
+        label.alignment = TextAlignmentOptions.Center;
+        label.color = new Color32(255, 210, 100, 255);
+        label.raycastTarget = false;
+        DOTween.Sequence().SetLink(label.gameObject)
+            .Append(label.rectTransform.DOLocalMoveY(label.rectTransform.localPosition.y + 24f, 0.4f))
+            .Insert(0.15f, label.DOFade(0f, 0.25f))
+            .OnComplete(() => Destroy(label.gameObject));
     }
 
     IEnumerator coPopupReward()
     {
         yield return new WaitForSeconds(.25f);        
         SS.UI.Core.Load<PopupReward>("PopupReward", LoadSceneMode.Additive, popup => popup.Setup(Data.itemReward.ItemReward));
-    }
-
-    [SerializeField] string _increaseAudio;
-    public void PlayerInCreaseHealth()
-    {
-        if(!endGame)
-        {
-            m_effHealth.Play();
-            SoundManager.instance.PlaySfx(_increaseAudio);            
-            int maxHp = m_PlayerMaxHp > 0 ? m_PlayerMaxHp : Data.defaultPlayer.Character.health;
-            m_PlayerHp = Mathf.Min(maxHp, m_PlayerHp + maxHp * .01f);
-            Player.m_Health.DOKill();
-            Player.m_Health.DOFillAmount(m_PlayerHp / maxHp, 1f);
-            Player.UpdateHealthText(m_PlayerHp, maxHp);
-        }        
-    }
-
-    [SerializeField] string _manaAudio;
-    public void PlayerInCreaseMana()
-    {
-        if (!endGame)
-        {
-            m_effMana.Play();
-            SoundManager.instance.PlaySfx(_manaAudio);
-            m_PlayerMana = Mathf.Clamp01(m_PlayerMana + .1f);
-            Debug.Log("Mana: " + m_PlayerMana);
-
-            if (m_PlayerMana >= 1f - 0.0001f)
-            {
-                Debug.Log("FullMana");
-                m_PlayerMana = 0f;
-                if (Player.m_Mana != null)
-                {
-                    Player.m_Mana.DOKill();
-                    Player.m_Mana.fillAmount = 0f;
-                }
-                Player.UpdateManaText(0f);
-                SkillSpecial();
-                return;
-            }
-
-            Player.UpdateManaText(m_PlayerMana);
-            if (Player.m_Mana != null)
-            {
-                Player.m_Mana.DOKill();
-                Player.m_Mana.DOFillAmount(m_PlayerMana, 1f);
-            }
-        }
-    }
-
-    public void PlayerInCreaseGold()
-    {
-        if(!endGame)
-        {
-            gold += 10;
-            SetupGold();
-        }        
-    }
-    [SerializeField] string _effExpAudio;
-    public void PlayerInCreaseEXP()
-    {
-        if(!endGame)
-        {
-            m_effExp.Play();
-            SoundManager.instance.PlaySfx(_effExpAudio);            
-            Exp += 1;
-            SetupLevel();
-        }                
-    }
-
-    [SerializeField] GameObject SpecialAttack;
-
-    [SerializeField] GameObject Gun;
-
-    bool isPlayingSpecialSkill;
-
-    public void SkillSpecial()
-    {
-        if(!isPlayingSpecialSkill)
-        {            
-            isPlayingSpecialSkill = true;
-            Vector3 oldPosImage = SpecialAttack.transform.localPosition;
-            SpecialAttack.transform.localPosition = new Vector3(SpecialAttack.transform.localPosition.x + 20, SpecialAttack.transform.localPosition.y, SpecialAttack.transform.localPosition.z);
-            SpecialAttack.SetActive(true);
-            SpecialAttack.transform.DOLocalMove(oldPosImage, 1f).SetEase(Ease.InOutBack).OnComplete(() =>
-            {
-                StartCoroutine(coSkillSpecial());
-            });
-        }        
-    }
-
-    IEnumerator coSkillSpecial()
-    {
-        yield return new WaitForSeconds(3f);
-        SpecialAttack.SetActive(false);
-        Gun.SetActive(true);
-        PlayerAttack(true);
-        PlayerAttack(true);
-        PlayerAttack(true);
-        StartCoroutine(coEndSpecial());
-    }
-
-    IEnumerator coEndSpecial()
-    {
-        yield return new WaitForSeconds(2f);
-        Gun.SetActive(false);
-        isPlayingSpecialSkill = false;
     }
 
     #endregion
@@ -818,5 +705,5 @@ public class GameController : MonoBehaviour
 
 public enum typeShape
 {
-    Attack, Health, Mana, Gold, Exp
+    HongCon, TuCuu, GiayCo, LongDau, QuatGiay
 }
