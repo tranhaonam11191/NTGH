@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 409fae2ec8308344891683ffa066baba, type: 3}
+  m_Name: Card_ADung
+  m_EditorClassIdentifier: Assembly-CSharp::NTGH.Teammates.TeammateCardSO
+  m_id: tm_a_dung
+  m_displayName: "A D\u0169ng"
+  m_cardType: 1
+  m_description: "Huynh \u0111\u1EC7 trung th\xE0nh, che ch\u1EAFn gi\u1EA3m s\xE1t th\u01B0\u01A1ng \u0111\u1ECBch g\xE2y ra."
+  m_avatar: {fileID: 21300000, guid: 9364fa68948686243a4106d55c914ef1, type: 3}
+  m_effectValue: 8
+  m_priceGold: 0
+  m_unlockedByDefault: 1

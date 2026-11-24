@@ -11,8 +11,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6efd2714193bde54e9b3a329c46d7f6d, type: 3}
   m_Name: Level01
-  m_EditorClassIdentifier:
-  displayName: "Sạp báo trong lửa"
+  m_EditorClassIdentifier: 
+  displayName: "S\u1EA1p b\xE1o trong l\u1EEDa"
   defaultPlayer: {fileID: 11400000, guid: d262b90a48fb4a058f92db58c736c2db, type: 2}
   enemy: {fileID: 11400000, guid: e09c54b907904368af7c2a500bc3a1f0, type: 2}
   finalStandEnemyHealth: 0
@@ -21,73 +21,93 @@ MonoBehaviour:
     healthThreshold: 0
     delaySeconds: 0
     lines:
-    - content: "A Dũng: Mai mốt tao đoạt đai quyền vương, mày khỏi phải dậy giao báo nữa."
+    - content: "A D\u0169ng: Mai m\u1ED1t tao \u0111o\u1EA1t \u0111ai quy\u1EC1n v\u01B0\u01A1ng, m\xE0y kh\u1ECFi ph\u1EA3i d\u1EADy giao b\xE1o n\u1EEFa."
       imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
       isPlayer: 0
-    - content: "Đầu Bự: Lo giao hết chồng này trước đi. Bà ngoại đang chờ tao về ăn sáng."
+      rewardTeammateCards: []
+    - content: "\u0110\u1EA7u B\u1EF1: Lo giao h\u1EBFt ch\u1ED3ng n\xE0y tr\u01B0\u1EDBc \u0111i. B\xE0 ngo\u1EA1i \u0111ang ch\u1EDD tao v\u1EC1 \u0103n s\xE1ng."
       imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
       isPlayer: 1
-    - content: "A Dũng: Bà ngoại, rồi Hân Hân… Mày không tính gì cho mình à?"
+      rewardTeammateCards: []
+    - content: "A D\u0169ng: B\xE0 ngo\u1EA1i, r\u1ED3i H\xE2n H\xE2n\u2026 M\xE0y kh\xF4ng t\xEDnh g\xEC cho m\xECnh \xE0?"
       imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
       isPlayer: 0
-    - content: "Đầu Bự: Bà khỏe, Hân Hân ở cạnh tao. Vậy cũng tốt rồi."
+      rewardTeammateCards: []
+    - content: "\u0110\u1EA7u B\u1EF1: B\xE0 kh\u1ECFe, H\xE2n H\xE2n \u1EDF c\u1EA1nh tao. V\u1EADy c\u0169ng t\u1ED1t r\u1ED3i."
       imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
       isPlayer: 1
-    - content: "Tên đầu xoăn: Tâm sự đủ chưa? Dọn sạp đi. Chỗ này bọn tao lấy!"
+      rewardTeammateCards: []
+    - content: "T\xEAn \u0111\u1EA7u xo\u0103n: T\xE2m s\u1EF1 \u0111\u1EE7 ch\u01B0a? D\u1ECDn s\u1EA1p \u0111i. Ch\u1ED7 n\xE0y b\u1ECDn tao l\u1EA5y!"
       imgCharacter: {fileID: 21300000, guid: 9a831d4180d5bb148a8d5a590d8ed01f, type: 3}
       isPlayer: 0
+      rewardTeammateCards:
+      - {fileID: 11400000, guid: fd0d2d1bf3ec67945987c28326001aa8, type: 2}
+      - {fileID: 11400000, guid: e1b9eeeb590f8db4c9c058e15064bd03, type: 2}
   - trigger: 0
     healthThreshold: 0
     delaySeconds: 0
     lines:
-    - content: "Đầu Bự: Báo thì tao bán. Sạp thì không."
+    - content: "\u0110\u1EA7u B\u1EF1: B\xE1o th\xEC tao b\xE1n. S\u1EA1p th\xEC kh\xF4ng."
       imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
       isPlayer: 1
+      rewardTeammateCards: []
   - trigger: 5
     healthThreshold: 0
     delaySeconds: 0
     lines:
-    - content: "Đêm đó, sạp báo cháy. Sáng ra, chỉ còn vài tờ báo đọc được."
+    - content: "\u0110\xEAm \u0111\xF3, s\u1EA1p b\xE1o ch\xE1y. S\xE1ng ra, ch\u1EC9 c\xF2n v\xE0i t\u1EDD b\xE1o \u0111\u1ECDc \u0111\u01B0\u1EE3c."
       imgCharacter: {fileID: 0}
       isPlayer: 0
-    - content: "A Dũng: Tao nhờ anh Quạ Đen xử bọn nó rồi. Chúng không dám quay lại đâu."
+      rewardTeammateCards: []
+    - content: "A D\u0169ng: Tao nh\u1EDD anh Qu\u1EA1 \u0110en x\u1EED b\u1ECDn n\xF3 r\u1ED3i. Ch\xFAng kh\xF4ng d\xE1m quay l\u1EA1i \u0111\xE2u."
       imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
       isPlayer: 0
-    - content: "Đầu Bự: Ông ta giúp mày… rồi muốn gì?"
+      rewardTeammateCards:
+      - {fileID: 11400000, guid: 9c3cbda344f26b148b16c2793c85d350, type: 2}
+    - content: "\u0110\u1EA7u B\u1EF1: \xD4ng ta gi\xFAp m\xE0y\u2026 r\u1ED3i mu\u1ED1n g\xEC?"
       imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
       isPlayer: 1
-    - content: "A Dũng: Ảnh cho tao một con đường. Từ mai tao nghỉ giao báo."
+      rewardTeammateCards: []
+    - content: "A D\u0169ng: \u1EA2nh cho tao m\u1ED9t con \u0111\u01B0\u1EDDng. T\u1EEB mai tao ngh\u1EC9 giao b\xE1o."
       imgCharacter: {fileID: 21300000, guid: 5357798ba1d866d4094521280d567425, type: 3}
       isPlayer: 0
-    - content: "Đầu Bự: Đi đâu thì đi. Có chuyện vẫn tìm tao."
+      rewardTeammateCards: []
+    - content: "\u0110\u1EA7u B\u1EF1: \u0110i \u0111\xE2u th\xEC \u0111i. C\xF3 chuy\u1EC7n v\u1EABn t\xECm tao."
       imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
       isPlayer: 1
+      rewardTeammateCards: []
   - trigger: 1
     healthThreshold: 0.7
     delaySeconds: 0
     lines:
-    - content: "Đầu Bự: Báo rơi hết rồi… còn cái sạp, tao giữ được."
+    - content: "\u0110\u1EA7u B\u1EF1: B\xE1o r\u01A1i h\u1EBFt r\u1ED3i\u2026 c\xF2n c\xE1i s\u1EA1p, tao gi\u1EEF \u0111\u01B0\u1EE3c."
       imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
       isPlayer: 1
+      rewardTeammateCards: []
   - trigger: 1
     healthThreshold: 0.3
     delaySeconds: 0
     lines:
-    - content: "Đầu Bự: A Dũng, đỡ giùm tao cái kệ!"
+    - content: "\u0110\u1EA7u B\u1EF1: A D\u0169ng, \u0111\u1EE1 gi\xF9m tao c\xE1i k\u1EC7!"
       imgCharacter: {fileID: 21300000, guid: 41a2146e49ca4f24296354a312e599f6, type: 3}
       isPlayer: 1
+      rewardTeammateCards: []
   - trigger: 2
     healthThreshold: 0.7
     delaySeconds: 0
     lines:
-    - content: "Tên đầu xoăn: Có mỗi cái sạp mà mày cũng liều thế à?"
+    - content: "T\xEAn \u0111\u1EA7u xo\u0103n: C\xF3 m\u1ED7i c\xE1i s\u1EA1p m\xE0 m\xE0y c\u0169ng li\u1EC1u th\u1EBF \xE0?"
       imgCharacter: {fileID: 21300000, guid: 9a831d4180d5bb148a8d5a590d8ed01f, type: 3}
       isPlayer: 0
+      rewardTeammateCards: []
   - trigger: 2
     healthThreshold: 0.3
     delaySeconds: 0
     lines:
-    - content: "Tên đầu xoăn: Thôi, để chồng báo đấy!"
+    - content: "T\xEAn \u0111\u1EA7u xo\u0103n: Th\xF4i, \u0111\u1EC3 ch\u1ED3ng b\xE1o \u0111\u1EA5y!"
       imgCharacter: {fileID: 21300000, guid: 9a831d4180d5bb148a8d5a590d8ed01f, type: 3}
       isPlayer: 0
+      rewardTeammateCards: []
   itemReward: {fileID: 0}
+  videoClip: {fileID: 32900000, guid: 56b959563915aed4d87ca990aa184d8e, type: 3}
+  textJson: {fileID: 4900000, guid: a2df87db1c584a140baebe17032c15ff, type: 3}

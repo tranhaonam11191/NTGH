@@ -63,6 +63,6 @@ public class PopupReward : PopupBase
 
     public void OnClickHome()
     {
-        SS.UI.Core.Load<HomeController>("Home");
+        SOManager.LoadHome();
     }
 }

@@ -1,0 +1,77 @@
+{
+  "scenes": [
+    0.0,
+    10.5,
+    19.5,
+    25.5,
+    32.0,
+    34.5,
+    39.566667,
+    44.566667
+  ],
+  "cues": [
+    {
+      "kind": "bottom",
+      "speaker": "B Ca",
+      "text": "Nam à, tao đã thu xếp xong, 2 ngày nữa mày sẽ được thả.",
+      "startSeconds": 0.433333,
+      "endSeconds": 3.6
+    },
+    {
+      "kind": "bottom",
+      "speaker": "A Nam",
+      "text": "Thật à đại ca, còn thằng Quỷ thì sao?",
+      "startSeconds": 3.7,
+      "endSeconds": 6.8
+    },
+    {
+      "kind": "bottom",
+      "speaker": "B Ca",
+      "text": "Thằng Quỷ bị bán đứng rồi, đành để nó 1 mình chịu tội.",
+      "startSeconds": 6.9,
+      "endSeconds": 10.2
+    },
+    {
+      "kind": "top",
+      "speaker": "",
+      "text": "NHÀ GIAM HONG KONG",
+      "startSeconds": 10.5,
+      "endSeconds": 13.5
+    },
+    {
+      "kind": "bottom",
+      "speaker": "A Nam",
+      "text": "Sir à, cho tôi vào thăm Dương Thiêm.",
+      "startSeconds": 13.7,
+      "endSeconds": 16.4
+    },
+    {
+      "kind": "bottom",
+      "speaker": "Cảnh sát",
+      "text": "Mày không có trong danh sách thăm nuôi, đi về đi.",
+      "startSeconds": 16.5,
+      "endSeconds": 19.266667
+    },
+    {
+      "kind": "bottom",
+      "speaker": "Đàn em",
+      "text": "Nam ca, bọn em có đến nhà thằng Quỷ, nhưng cả nhà nó đã dọn đi, không biết đi đâu.",
+      "startSeconds": 20.033333,
+      "endSeconds": 25.2
+    },
+    {
+      "kind": "bottom",
+      "speaker": "A Nam",
+      "text": "Haizz, thằng Quỷ, là tao không phải với mày.",
+      "startSeconds": 26.5,
+      "endSeconds": 30.066667
+    },
+    {
+      "kind": "center",
+      "speaker": "",
+      "text": "Vài năm sau",
+      "startSeconds": 32.333333,
+      "endSeconds": 34.4
+    }
+  ]
+}

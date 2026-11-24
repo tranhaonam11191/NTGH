@@ -50,6 +50,9 @@ MonoBehaviour:
   itemRewards:
   - {fileID: 11400000, guid: 5aee603ac393c4bc5b0846b220106b37, type: 2}
   - {fileID: 11400000, guid: b7781be4c5bc246f1a3e931e9f52d303, type: 2}
+  m_weaponCatalog: {fileID: 11400000, guid: b8e5997d9a9cc894faa1bc8ff329298f, type: 2}
+  m_outfitCatalog: {fileID: 11400000, guid: 830336830a0198b4ab8f9ef5faddaaf3, type: 2}
+  m_teammateDatabase: {fileID: 11400000, guid: f0382a2fecf512940972f10cc4570cac, type: 2}
   m_audioSource: {fileID: 6020146002141508088}
   m_imgFade: {fileID: 4720993061650786778}
 --- !u!1 &5424722394473701495

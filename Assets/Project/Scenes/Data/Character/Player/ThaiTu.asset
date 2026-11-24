@@ -19,3 +19,13 @@ MonoBehaviour:
     health: 150
     defence: 10
     isPlayer: 1
+  equippedWeaponId: Katana
+  weaponIcon: {fileID: 0}
+  weaponBonusAttack: 0
+  equippedOutfitId: outfit_lv2_hongcon
+  outfitIcon: {fileID: 0}
+  outfitBonusHealth: 0
+  equippedTeammates:
+  - {fileID: 11400000, guid: 9c3cbda344f26b148b16c2793c85d350, type: 2}
+  - {fileID: 11400000, guid: e1b9eeeb590f8db4c9c058e15064bd03, type: 2}
+  - {fileID: 11400000, guid: fd0d2d1bf3ec67945987c28326001aa8, type: 2}

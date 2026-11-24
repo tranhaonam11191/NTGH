@@ -1,3 +1,4 @@
+using NTGH.Teammates;
 using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -53,6 +54,9 @@ namespace NTGH.Editor
             public Image HealthFill;
             public Image ManaFill;
             public Image AttackTimerFill;
+            public Image WeaponSlotIcon;
+            public Image OutfitSlotIcon;
+            public TeammateCardView[] TeammateSlots;
             public TextMeshProUGUI TxtName;
             public TextMeshProUGUI TxtLevel;
             public TextMeshProUGUI TxtHealth;
@@ -386,8 +390,8 @@ namespace NTGH.Editor
             float equipY = isTop ? -192f : -190f;
             float equipSize = isTop ? 76f : 77f;
             SetTopLeft(equipRow, 18f, equipY, 162f, equipSize + 4f);
-            BuildEquipSlot(equipRow, "Slot_Weapon", 0f, equipSize, equipSize, IconWeaponPath, goldBorder, slotBg);
-            BuildEquipSlot(equipRow, "Slot_Outfit", 162f - equipSize, equipSize, equipSize, IconOutfitPath, goldBorder, slotBg);
+            var weaponSlotIcon = BuildEquipSlot(equipRow, "Slot_Weapon", 0f, equipSize, equipSize, IconWeaponPath, goldBorder, slotBg);
+            var outfitSlotIcon = BuildEquipSlot(equipRow, "Slot_Outfit", 162f - equipSize, equipSize, equipSize, IconOutfitPath, goldBorder, slotBg);
 
             // --- RIGHT COLUMN: Name/Lv/HP + MP + 4 Teammate Cards ---
             var rightCol = GetOrCreateChild(panel, "RightColumn");
@@ -482,12 +486,13 @@ namespace NTGH.Editor
             hlg.childForceExpandWidth = false;
             hlg.childForceExpandHeight = false;
 
+            var teammateViews = new TeammateCardView[4];
             for (int i = 0; i < 4; i++)
             {
                 string spritePath = (theme.TeammateSprites != null && i < theme.TeammateSprites.Length)
                     ? theme.TeammateSprites[i]
                     : null;
-                BuildTeammateCard(teamRow, $"Teammate_{i + 1}", $"Đồng đội {i + 1}", spritePath, goldBorder, slotBg);
+                teammateViews[i] = BuildTeammateCard(teamRow, $"Teammate_{i + 1}", $"Đồng đội {i + 1}", spritePath, goldBorder, slotBg);
             }
 
             // Ensure outer borders render on top
@@ -499,6 +504,9 @@ namespace NTGH.Editor
                 HealthFill = hpFillImg,
                 ManaFill = mpFillImg,
                 AttackTimerFill = attackTimerFillImg,
+                WeaponSlotIcon = weaponSlotIcon,
+                OutfitSlotIcon = outfitSlotIcon,
+                TeammateSlots = teammateViews,
                 TxtName = txtName,
                 TxtLevel = txtLevel,
                 TxtHealth = txtHealth,
@@ -507,7 +515,7 @@ namespace NTGH.Editor
             };
         }
 
-        private static void BuildEquipSlot(
+        private static Image BuildEquipSlot(
             RectTransform parent,
             string slotName,
             float x,
@@ -534,9 +542,10 @@ namespace NTGH.Editor
             AssignSlicedSprite(borderImg, BorderOuterPath, borderColor, 2.2f);
             borderImg.raycastTarget = false;
             border.SetAsLastSibling();
+            return iconImg;
         }
 
-        private static void BuildTeammateCard(
+        private static TeammateCardView BuildTeammateCard(
             RectTransform parent,
             string cardName,
             string label,
@@ -546,15 +555,16 @@ namespace NTGH.Editor
         {
             var card = GetOrCreateChild(parent, cardName);
             card.sizeDelta = new Vector2(113f, 184f);
-            AssignSlicedSprite(GetOrAddComponent<Image>(card), PanelFillPath, bgColor, 2.2f);
+            var cardBgImg = GetOrAddComponent<Image>(card);
+            AssignSlicedSprite(cardBgImg, PanelFillPath, bgColor, 2.2f);
 
-            // Portrait mask
+            // Portrait mask (fits inside upper window of card frame)
             var portraitMask = GetOrCreateChild(card, "PortraitMask");
             portraitMask.anchorMin = new Vector2(0f, 1f);
             portraitMask.anchorMax = new Vector2(1f, 1f);
             portraitMask.pivot = new Vector2(0.5f, 1f);
-            portraitMask.anchoredPosition = new Vector2(0f, -6f);
-            portraitMask.sizeDelta = new Vector2(-12f, 122f);
+            portraitMask.anchoredPosition = new Vector2(0f, -14f);
+            portraitMask.sizeDelta = new Vector2(-24f, 100f);
             GetOrAddComponent<RectMask2D>(portraitMask);
 
             var portrait = GetOrCreateChild(portraitMask, "Portrait");
@@ -578,20 +588,29 @@ namespace NTGH.Editor
             nameRect.anchorMin = new Vector2(0f, 0f);
             nameRect.anchorMax = new Vector2(1f, 0f);
             nameRect.pivot = new Vector2(0.5f, 0f);
-            nameRect.anchoredPosition = new Vector2(0f, 26f);
-            nameRect.sizeDelta = new Vector2(-12f, 24f);
-            var tmp = ConfigureTMP(nameRect, label, 13.5f, FontStyles.Bold, TextAlignmentOptions.Center, Color.white);
+            nameRect.anchoredPosition = new Vector2(0f, 36f);
+            nameRect.sizeDelta = new Vector2(-18f, 22f);
+            var tmp = ConfigureTMP(nameRect, label, 12.5f, FontStyles.Bold, TextAlignmentOptions.Center, Color.white);
             tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 10f;
-            tmp.fontSizeMax = 13.5f;
+            tmp.fontSizeMin = 9f;
+            tmp.fontSizeMax = 12.5f;
 
-            // Mini cyan charge bar at bottom
+            // Stat text (+X ST / -Y ST)
+            var statRect = GetOrCreateChild(card, "TxtStat");
+            statRect.anchorMin = new Vector2(0f, 0f);
+            statRect.anchorMax = new Vector2(1f, 0f);
+            statRect.pivot = new Vector2(0.5f, 0f);
+            statRect.anchoredPosition = new Vector2(0f, 20f);
+            statRect.sizeDelta = new Vector2(-18f, 16f);
+            var statTmp = ConfigureTMP(statRect, "", 11f, FontStyles.Bold, TextAlignmentOptions.Center, new Color(1f, 0.88f, 0.45f, 1f));
+
+            // Mini charge bar at bottom
             var barBg = GetOrCreateChild(card, "MiniBarBg");
             barBg.anchorMin = new Vector2(0f, 0f);
             barBg.anchorMax = new Vector2(1f, 0f);
             barBg.pivot = new Vector2(0.5f, 0f);
-            barBg.anchoredPosition = new Vector2(0f, 12f);
-            barBg.sizeDelta = new Vector2(-20f, 10f);
+            barBg.anchoredPosition = new Vector2(0f, 10f);
+            barBg.sizeDelta = new Vector2(-24f, 8f);
             var barBgImg = GetOrAddComponent<Image>(barBg);
             AssignSprite(barBg, "Assets/Project/Textures/bar_frame.png");
             barBgImg.color = new Color(0.12f, 0.16f, 0.22f, 0.95f);
@@ -605,13 +624,17 @@ namespace NTGH.Editor
             barFillImg.fillMethod = Image.FillMethod.Horizontal;
             barFillImg.fillAmount = 1f;
 
-            // Gold border on top
+            // Subtle outer border (toggled/tinted by TeammateCardView)
             var border = GetOrCreateChild(card, "GoldBorder");
             StretchFull(border);
             var borderImg = GetOrAddComponent<Image>(border);
             AssignSlicedSprite(borderImg, BorderOuterPath, borderColor, 2.2f);
             borderImg.raycastTarget = false;
             border.SetAsLastSibling();
+
+            var view = GetOrAddComponent<TeammateCardView>(card);
+            view.SetReferences(cardBgImg, borderImg, portraitImg, fitter, tmp, statTmp, null, null, barFillImg);
+            return view;
         }
 
         private static Image AttachExistingAvatar(
@@ -700,6 +723,18 @@ namespace NTGH.Editor
             SetObjRef(charProp, "m_txtLevel", refs.TxtLevel);
             SetObjRef(charProp, "m_txtHealth", refs.TxtHealth);
             SetObjRef(charProp, "m_txtMana", refs.TxtMana);
+            SetObjRef(charProp, "m_imgWeaponSlot", refs.WeaponSlotIcon);
+            SetObjRef(charProp, "m_imgOutfitSlot", refs.OutfitSlotIcon);
+
+            var slotsProp = charProp.FindPropertyRelative("m_teammateSlots");
+            if (slotsProp != null && refs.TeammateSlots != null)
+            {
+                slotsProp.arraySize = refs.TeammateSlots.Length;
+                for (int i = 0; i < refs.TeammateSlots.Length; i++)
+                {
+                    slotsProp.GetArrayElementAtIndex(i).objectReferenceValue = refs.TeammateSlots[i];
+                }
+            }
         }
 
         private static void SetObjRef(SerializedProperty parent, string childName, Object value)

@@ -1,4 +1,5 @@
 using DG.Tweening;
+using NTGH.Teammates;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,6 +33,43 @@ public class CharacterOnGame
     public TextMeshProUGUI m_txtHealth;
 
     public TextMeshProUGUI m_txtMana;
+
+    [Header("Support Loadout UI")]
+    public Image m_imgWeaponSlot;
+
+    public Image m_imgOutfitSlot;
+
+    public TeammateCardView[] m_teammateSlots;
+
+    public void ApplyLoadout(BattleLoadout loadout, TeammateCardDatabaseSO database)
+    {
+        if (loadout == null) return;
+
+        if (m_imgWeaponSlot != null && loadout.WeaponIcon != null)
+        {
+            m_imgWeaponSlot.sprite = loadout.WeaponIcon;
+            m_imgWeaponSlot.color = Color.white;
+        }
+
+        if (m_imgOutfitSlot != null && loadout.OutfitIcon != null)
+        {
+            m_imgOutfitSlot.sprite = loadout.OutfitIcon;
+            m_imgOutfitSlot.color = Color.white;
+        }
+
+        if (m_teammateSlots != null)
+        {
+            for (int i = 0; i < m_teammateSlots.Length; i++)
+            {
+                var slotView = m_teammateSlots[i];
+                if (slotView == null) continue;
+
+                TeammateCardSO card = i < loadout.Teammates.Length ? loadout.Teammates[i] : null;
+                TeammateCardThemeSO theme = (card != null && database != null) ? database.GetTheme(card.CardType) : null;
+                slotView.Bind(card, theme, $"Ô {i + 1}");
+            }
+        }
+    }
 
     public void Setup(Character character)
     {
@@ -198,6 +236,8 @@ public class GameController : MonoBehaviour
     readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
     bool m_ShowingStory;
     float m_PlayerHp, m_EnemyHp;
+    int m_PlayerMaxHp, m_EnemyMaxHp;
+    BattleLoadout m_PlayerLoadout, m_EnemyLoadout;
     float m_PlayerMana;
     float m_EnemyAttackProgress = 1f;
     bool m_FinalStand;
@@ -213,10 +253,10 @@ public class GameController : MonoBehaviour
         // SS supplies the level in its load callback. Also support opening Game directly.
         yield return null;
         if (Data == null && SOManager.instance != null)
-            Setup(SOManager.instance.CurrentLevelData);
+            Setup(SOManager.instance.CurrentLevelData, openingPlayed: false, playerLoadout: SOManager.instance.BuildPlayerBattleLoadout());
     }
 
-    public void Setup(LevelData level, bool openingPlayed = false)
+    public void Setup(LevelData level, bool openingPlayed = false, BattleLoadout playerLoadout = null)
     {
         if (Data != null) return;
         if (level == null || !level.HasCombatants)
@@ -225,8 +265,13 @@ public class GameController : MonoBehaviour
             return;
         }
         Data = level;
-        m_PlayerHp = Data.defaultPlayer.Character.health;
-        m_EnemyHp = Data.enemy.Character.health;
+        m_PlayerLoadout = playerLoadout ?? (SOManager.instance != null ? SOManager.instance.BuildPlayerBattleLoadout() : new BattleLoadout());
+        m_EnemyLoadout = SOManager.instance != null ? SOManager.instance.BuildEnemyBattleLoadout(Data.enemy) : new BattleLoadout();
+
+        m_PlayerMaxHp = Mathf.Max(1, Data.defaultPlayer.Character.health + m_PlayerLoadout.OutfitBonusHealth);
+        m_EnemyMaxHp = Mathf.Max(1, Data.enemy.Character.health + m_EnemyLoadout.OutfitBonusHealth);
+        m_PlayerHp = m_PlayerMaxHp;
+        m_EnemyHp = m_EnemyMaxHp;
         canClick = true;
         moving = false;
 
@@ -335,12 +380,15 @@ public class GameController : MonoBehaviour
     {
         if (m_EnemyAttackProgress > 0f)
         {
-            m_EnemyAttackProgress = Mathf.Max(0f, m_EnemyAttackProgress - .001f);
+            m_EnemyAttackProgress = Mathf.Max(0f, m_EnemyAttackProgress - Time.deltaTime * 0.06f);
         }
         else
         {
-            Attack(Player, ref m_PlayerHp, Data.defaultPlayer.Character.health,
-                Data.enemy.Character.attack, enemyWeapon, ConversationTrigger.PlayerHealth);
+            int rawDamage = Data.enemy.Character.attack + (m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalAttackBonus() : 0);
+            int reduction = m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalDamageReduction() : 0;
+            int finalDamage = Mathf.Max(1, rawDamage - reduction);
+            Attack(Player, ref m_PlayerHp, m_PlayerMaxHp,
+                finalDamage, enemyWeapon, ConversationTrigger.PlayerHealth);
             m_EnemyAttackProgress = 1f;
         }
 
@@ -378,8 +426,15 @@ public class GameController : MonoBehaviour
     void SetupCharacter()
     {
         Player.Setup(Data.defaultPlayer.Character);
-
         Enemy.Setup(Data.enemy.Character);
+
+        var db = SOManager.instance != null ? SOManager.instance.TeammateDatabase : null;
+        Player.ApplyLoadout(m_PlayerLoadout, db);
+        Enemy.ApplyLoadout(m_EnemyLoadout, db);
+
+        Player.UpdateHealthText(m_PlayerHp, m_PlayerMaxHp);
+        Enemy.UpdateHealthText(m_EnemyHp, m_EnemyMaxHp);
+        Enemy.UpdateAttackTimer(m_EnemyAttackProgress);
     }
 
     public List<GameItem> lstOK = new List<GameItem>();
@@ -636,8 +691,11 @@ public class GameController : MonoBehaviour
     public void PlayerAttack(bool specialAttack = false)
     {
         if (Data == null) return;
-        Attack(Enemy, ref m_EnemyHp, Data.enemy.Character.health,
-            Data.defaultPlayer.Character.attack, playerWeapon, ConversationTrigger.EnemyHealth, specialAttack);
+        int rawDamage = Data.defaultPlayer.Character.attack + (m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalAttackBonus() : 0);
+        int reduction = m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalDamageReduction() : 0;
+        int finalDamage = Mathf.Max(1, rawDamage - reduction);
+        Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp,
+            finalDamage, playerWeapon, ConversationTrigger.EnemyHealth, specialAttack);
     }
 
     IEnumerator coPopupReward()
@@ -653,7 +711,7 @@ public class GameController : MonoBehaviour
         {
             m_effHealth.Play();
             SoundManager.instance.PlaySfx(_increaseAudio);            
-            int maxHp = Data.defaultPlayer.Character.health;
+            int maxHp = m_PlayerMaxHp > 0 ? m_PlayerMaxHp : Data.defaultPlayer.Character.health;
             m_PlayerHp = Mathf.Min(maxHp, m_PlayerHp + maxHp * .01f);
             Player.m_Health.DOKill();
             Player.m_Health.DOFillAmount(m_PlayerHp / maxHp, 1f);

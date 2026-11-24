@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0ee38b741a819648ace45ef80b9008b, type: 3}
+  m_Name: CardTheme_Support
+  m_EditorClassIdentifier: Assembly-CSharp::NTGH.Teammates.TeammateCardThemeSO
+  m_cardType: 1
+  m_typeLabel: "TH\u1EE6"
+  m_cardBackgroundSprite: {fileID: 21300000, guid: 2c666c3480f9ccb43a0c4e37a6271ec9, type: 3}
+  m_cardBorderSprite: {fileID: 0}
+  m_backgroundTint: {r: 1, g: 1, b: 1, a: 1}
+  m_borderTint: {r: 0, g: 0, b: 0, a: 0}
+  m_badgeColor: {r: 0.14, g: 0.66, b: 0.9, a: 1}
+  m_barFillColor: {r: 0.2, g: 0.8, b: 0.96, a: 1}

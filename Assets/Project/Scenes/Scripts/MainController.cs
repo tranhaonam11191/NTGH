@@ -65,7 +65,7 @@ public class MainController : MonoBehaviour
         m_RawImage.DOFade(0, .1f);
         m_Background.DOFade(1, .1f).OnComplete(() =>
                 {
-                    SS.UI.Core.Load<HomeController>("Home");
+                    SOManager.LoadHome();
                 });
         //SS.UI.Core.Load<HomeController>("Home");
     }

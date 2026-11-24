@@ -7,12 +7,12 @@ public class ContinueScene : MonoBehaviour
 {
     public void OnClickBackToHome()
     {        
-        SS.UI.Core.Load<HomeController>("Home");
+        SOManager.LoadHome();
     }
 
     public void OnClickRePlay()
     {
         User.ResetData();
-        SS.UI.Core.Load<HomeController>("Home");
+        SOManager.LoadHome();
     }
 }

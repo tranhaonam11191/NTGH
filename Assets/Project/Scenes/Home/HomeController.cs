@@ -1,3 +1,4 @@
+using NTGH.Teammates;
 using NTGH.UI;
 using TMPro;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class HomeController : MonoBehaviour
     [SerializeField] private ItemCatalogSO m_outfitCatalog;
     [SerializeField] private ItemCatalogSO m_houseCatalog;
     [SerializeField] private ItemCatalogSO m_weaponCatalog;
+    [SerializeField] private TeammateCardDatabaseSO m_teammateDatabase;
 
     public HomeHouseTheme HouseTheme => m_houseTheme;
     public OutfitProgression Outfits => m_outfitView != null ? m_outfitView.Progression : null;
@@ -194,7 +196,25 @@ public class HomeController : MonoBehaviour
 
     public void OnCLickPeople()
     {
+        OnClickTeammates();
+    }
 
+    public void OnClickTeammates()
+    {
+        var db = m_teammateDatabase != null
+            ? m_teammateDatabase
+            : (SOManager.instance != null ? SOManager.instance.TeammateDatabase : null);
+
+        if (db == null)
+        {
+            Debug.LogWarning("[HomeController] TeammateCardDatabaseSO is not assigned.");
+            return;
+        }
+
+        TeammateSquadPopupController.Open(
+            db,
+            onChanged: SetData,
+            callerCanvas: GetComponentInChildren<Canvas>());
     }
 
     [SerializeField] SoundSettings _soundSettings;

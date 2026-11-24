@@ -107,7 +107,7 @@ public class Popup : PopupBase
     public void OnClickHome()
     {
         InCreaseValue();
-        SS.UI.Core.Load<HomeController>("Home");
+        SOManager.LoadHome();
     }
 
     void InCreaseValue(int coefficient = 1)

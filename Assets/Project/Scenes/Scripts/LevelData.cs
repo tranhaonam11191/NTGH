@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Video;
 
 public enum ConversationTrigger
 {
@@ -36,7 +37,40 @@ public class LevelData : ScriptableObject
     public List<LevelConversation> conversations = new List<LevelConversation>();
     public CreateItemReward itemReward;
 
+    [Header("Story Video (Optional)")]
+    public VideoClip videoClip;
+    public TextAsset textJson;
+
+    public bool HasStoryVideo => videoClip != null;
+    public string GetStoryVideoKey() => videoClip != null ? $"{name}_{videoClip.name}" : string.Empty;
+
     public bool HasCombatants => defaultPlayer != null && defaultPlayer.Character != null &&
         defaultPlayer.Character.health > 0 && enemy != null && enemy.Character != null &&
         enemy.Character.health > 0;
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (conversations == null) return;
+
+        for (int i = 0; i < conversations.Count; i++)
+        {
+            var group = conversations[i];
+            if (group == null || group.lines == null) continue;
+
+            for (int j = 0; j < group.lines.Count; j++)
+            {
+                var line = group.lines[j];
+                if (line?.rewardTeammateCards == null) continue;
+
+                if (line.rewardTeammateCards.Count > ConversationData.MaxRewardCardsPerLine)
+                {
+                    Debug.LogWarning(
+                        $"[LevelData] '{name}' conversation[{i}].lines[{j}] có {line.rewardTeammateCards.Count} thẻ thưởng, vượt giới hạn {ConversationData.MaxRewardCardsPerLine} thẻ/lần.",
+                        this);
+                }
+            }
+        }
+    }
+#endif
 }

@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using NTGH.Teammates;
+using NTGH.UI;
 using UnityEngine;
 using UnityEngine.UI;
 using SS.UI;
@@ -17,6 +19,15 @@ public class SOManager : MonoBehaviour
 
     [SerializeField] CreateItemReward[] itemRewards;
 
+    [Header("Loadout Catalogs & Teammate Database")]
+    [SerializeField] ItemCatalogSO m_weaponCatalog;
+    [SerializeField] ItemCatalogSO m_outfitCatalog;
+    [SerializeField] TeammateCardDatabaseSO m_teammateDatabase;
+
+    public ItemCatalogSO WeaponCatalog => m_weaponCatalog;
+    public ItemCatalogSO OutfitCatalog => m_outfitCatalog;
+    public TeammateCardDatabaseSO TeammateDatabase => m_teammateDatabase;
+
     [SerializeField] AudioSource m_audioSource;
 
     void Awake()
@@ -29,6 +40,10 @@ public class SOManager : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);
         User.EnsureLoaded();
+        if (User.data != null && User.data.EnsureTeammateDefaults(m_teammateDatabase))
+        {
+            User.Save();
+        }
         MigrateLegacyWeapons();
         m_Levels = m_ArcsData != null ? m_ArcsData.GetOrderedLevels() : new List<LevelData>();
         if (m_Levels.Count > 0)
@@ -75,17 +90,50 @@ public class SOManager : MonoBehaviour
             return;
         }
 
-        Core.Load<Canvas>("StoryIntro", onSceneLoaded: _ =>
-            StoryController.Show(opening, () => LoadBattle(level)));
+        Core.Load<Canvas>("StoryIntro", onSceneLoaded: canvas =>
+            StoryController.Show(opening, newlyUnlockedIds =>
+                OnStoryIntroCompleted(level, newlyUnlockedIds, canvas)));
+    }
+
+    void OnStoryIntroCompleted(LevelData level, IReadOnlyList<string> newlyUnlockedIds, Canvas callerCanvas)
+    {
+        if (newlyUnlockedIds != null && newlyUnlockedIds.Count > 0 && m_teammateDatabase != null)
+        {
+            TeammateSquadPopupController.OpenForPreBattle(
+                m_teammateDatabase,
+                newlyUnlockedIds,
+                onConfirmBattle: () => LoadBattle(level),
+                callerCanvas: callerCanvas);
+            return;
+        }
+
+        LoadBattle(level);
     }
 
     void LoadBattle(LevelData level)
     {
+        var playerLoadout = BuildPlayerBattleLoadout();
         Core.Load<GameController>(GameController.SCENE_NAME, onSceneLoaded: game =>
         {
             m_Loading = false;
-            game.Setup(level, openingPlayed: true);
+            game.Setup(level, openingPlayed: true, playerLoadout: playerLoadout);
         });
+    }
+
+    public BattleLoadout BuildPlayerBattleLoadout()
+    {
+        User.EnsureLoaded();
+        return BattleLoadout.FromUserData(
+            User.data,
+            m_weaponCatalog,
+            m_outfitCatalog,
+            m_teammateDatabase,
+            GetWeapon());
+    }
+
+    public BattleLoadout BuildEnemyBattleLoadout(CharacterData enemyData)
+    {
+        return BattleLoadout.FromCharacterData(enemyData, m_weaponCatalog, m_outfitCatalog);
     }
 
     public void AdvanceAfterWin(LevelData completed)
@@ -95,6 +143,47 @@ public class SOManager : MonoBehaviour
         m_LevelIndex = (m_LevelIndex + 1) % m_Levels.Count;
         User.data.level = m_LevelIndex;
         User.Save();
+    }
+
+    public static void LoadHome()
+    {
+        Core.Init();
+        if (instance != null && instance.TryPlayPendingStoryVideoBeforeHome())
+        {
+            return;
+        }
+
+        Core.Load<HomeController>("Home");
+    }
+
+    private bool TryPlayPendingStoryVideoBeforeHome()
+    {
+        User.EnsureLoaded();
+        if (m_Levels != null && m_Levels.Count > 0 && User.data != null)
+        {
+            m_LevelIndex = Mathf.Max(0, User.data.level) % m_Levels.Count;
+        }
+
+        var level = CurrentLevelData;
+        if (level == null || !level.HasStoryVideo || User.data == null)
+        {
+            return false;
+        }
+
+        string videoKey = level.GetStoryVideoKey();
+        if (User.data.IsStoryVideoWatched(videoKey))
+        {
+            return false;
+        }
+
+        Core.Load<StoryVideoController>(StoryVideoController.SCENE_NAME, onSceneLoaded: controller =>
+        {
+            if (controller != null)
+            {
+                controller.Setup(level);
+            }
+        });
+        return true;
     }
 
     public void PlayAudio(string fileName)

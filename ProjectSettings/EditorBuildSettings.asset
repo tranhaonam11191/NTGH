@@ -32,4 +32,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Project/Scenes/PopupReward.unity
     guid: 67bba878926c8460fb59861364e14b48
+  - enabled: 1
+    path: Assets/Project/Scenes/StoryVideo/StoryVideo.unity
+    guid: 92055ad84b9c8204396331944580bfec
   m_configObjects: {}
