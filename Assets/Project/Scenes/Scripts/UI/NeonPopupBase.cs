@@ -2,6 +2,7 @@ using DG.Tweening;
 using SS.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace NTGH.UI
@@ -105,11 +106,21 @@ namespace NTGH.UI
         public static void EnsureSSCanvasAbove(Canvas callerCanvas)
         {
             Core.Init();
+            EnsureEventSystem();
             Canvas ssCanvas = Core.Canvas;
             if (callerCanvas != null && ssCanvas != null && ssCanvas.sortingOrder <= callerCanvas.sortingOrder)
             {
                 ssCanvas.sortingOrder = callerCanvas.sortingOrder + 10;
             }
+        }
+
+        public static void EnsureEventSystem()
+        {
+            if (EventSystem.current != null || Object.FindAnyObjectByType<EventSystem>() != null)
+                return;
+
+            var eventSystemGo = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+            eventSystemGo.GetComponent<EventSystem>().sendNavigationEvents = true;
         }
 
         public void ConfigureBaseReferences(

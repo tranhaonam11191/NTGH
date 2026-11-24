@@ -36,8 +36,12 @@ namespace NTGH.UI
         [SerializeField] private TextMeshProUGUI m_txtClaimLabel;
         [SerializeField] private CanvasGroup m_claimButtonGroup;
 
+        private TeammateCardDatabaseSO m_database;
+        private Canvas m_callerCanvas;
         private Action m_onClaimed;
+        private readonly List<string> m_displayedCardIds = new List<string>();
         private Sequence m_revealSequence;
+        private bool m_openSquadOnClose;
         private bool m_canClaim;
         private bool m_isClosing;
 
@@ -45,7 +49,9 @@ namespace NTGH.UI
             TeammateCardDatabaseSO database,
             IReadOnlyList<TeammateCardSO> cards,
             Action onClaimed = null,
-            Canvas callerCanvas = null)
+            Canvas callerCanvas = null,
+            bool openSquadOnClose = false,
+            string claimButtonLabel = null)
         {
             if (cards == null || cards.Count == 0)
             {
@@ -60,7 +66,13 @@ namespace NTGH.UI
                 showAnimation: "ScaleShow",
                 hideAnimation: "ScaleHide",
                 useExistingScreen: false,
-                onScreenLoad: screen => screen.Setup(database, cards, onClaimed),
+                onScreenLoad: screen => screen.Setup(
+                    database,
+                    cards,
+                    onClaimed,
+                    callerCanvas,
+                    openSquadOnClose,
+                    claimButtonLabel),
                 hasShield: true,
                 shieldAlpha: 0.78f,
                 hideTopScreen: false);
@@ -88,9 +100,16 @@ namespace NTGH.UI
         public void Setup(
             TeammateCardDatabaseSO database,
             IReadOnlyList<TeammateCardSO> cards,
-            Action onClaimed = null)
+            Action onClaimed = null,
+            Canvas callerCanvas = null,
+            bool openSquadOnClose = false,
+            string claimButtonLabel = null)
         {
+            m_database = database;
+            m_callerCanvas = callerCanvas;
             m_onClaimed = onClaimed;
+            m_openSquadOnClose = openSquadOnClose;
+            m_displayedCardIds.Clear();
             m_isClosing = false;
             m_canClaim = false;
 
@@ -101,6 +120,9 @@ namespace NTGH.UI
                 return;
             }
 
+            // Once TeammateCardRewardScreen is shown, cards are immediately granted and saved.
+            GrantAndSaveRewardCards(cards, count);
+
             if (m_txtTitle != null)
             {
                 m_txtTitle.text = count == 1 ? "CHIÊU MỘ ĐỒNG ĐỘI MỚI!" : "ĐỒNG ĐỘI MỚI GIA NHẬP!";
@@ -109,13 +131,15 @@ namespace NTGH.UI
             if (m_txtSubtitle != null)
             {
                 m_txtSubtitle.text = count == 1
-                    ? "Nhận miễn phí theo cốt truyện"
-                    : $"Nhận miễn phí {count} thẻ đồng đội theo cốt truyện";
+                    ? "Đã nhận miễn phí theo cốt truyện"
+                    : $"Đã nhận miễn phí {count} thẻ đồng đội theo cốt truyện";
             }
 
             if (m_txtClaimLabel != null)
             {
-                m_txtClaimLabel.text = "NHẬN THẺ";
+                m_txtClaimLabel.text = !string.IsNullOrWhiteSpace(claimButtonLabel)
+                    ? claimButtonLabel
+                    : (m_openSquadOnClose ? "XẾP ĐỘI HÌNH" : "ĐÓNG");
             }
 
             ApplyAdaptiveLayout(count);
@@ -284,14 +308,63 @@ namespace NTGH.UI
             CloseAndNotify();
         }
 
+        private void GrantAndSaveRewardCards(IReadOnlyList<TeammateCardSO> cards, int count)
+        {
+            if (cards == null || count <= 0) return;
+
+            User.EnsureLoaded();
+            bool changed = false;
+
+            for (int i = 0; i < count; i++)
+            {
+                var card = cards[i];
+                if (card == null || string.IsNullOrEmpty(card.Id)) continue;
+
+                if (!m_displayedCardIds.Contains(card.Id))
+                {
+                    m_displayedCardIds.Add(card.Id);
+                }
+
+                if (User.data != null && User.data.UnlockTeammate(card.Id, markAsNew: true))
+                {
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                User.Save();
+            }
+        }
+
         private void CloseAndNotify()
         {
             if (m_isClosing) return;
             m_isClosing = true;
 
             var callback = m_onClaimed;
+            var database = m_database;
+            var callerCanvas = m_callerCanvas;
+            bool openSquad = m_openSquadOnClose && database != null;
+            var grantedIds = openSquad ? new List<string>(m_displayedCardIds) : null;
+
             m_onClaimed = null;
-            Core.Close(this, () => callback?.Invoke());
+            Core.Close(this, () =>
+            {
+                if (openSquad)
+                {
+                    TeammateSquadPopupController.Open(
+                        database,
+                        onChanged: null,
+                        callerCanvas: callerCanvas,
+                        highlightedNewCardIds: grantedIds,
+                        onClosed: callback);
+                }
+                else
+                {
+                    callback?.Invoke();
+                }
+            });
         }
 
         public void SetEditorReferences(

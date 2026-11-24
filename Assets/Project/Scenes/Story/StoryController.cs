@@ -218,13 +218,15 @@ public class StoryController : MonoBehaviour, IKeyBack
             batch.Add(cards[startIndex + i]);
         }
 
+        // Cards are granted & saved immediately when TeammateCardRewardScreen is shown.
+        UnlockRewardBatch(batch);
+
         var database = SOManager.instance != null ? SOManager.instance.TeammateDatabase : null;
         TeammateCardRewardController.Open(
             database,
             batch,
             onClaimed: () =>
             {
-                UnlockRewardBatch(batch);
                 int nextIndex = startIndex + batchCount;
                 if (nextIndex < cards.Count)
                 {

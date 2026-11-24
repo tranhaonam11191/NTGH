@@ -56,11 +56,14 @@ namespace NTGH.UI
         public static void Open(
             TeammateCardDatabaseSO database,
             Action onChanged = null,
-            Canvas callerCanvas = null)
+            Canvas callerCanvas = null,
+            IReadOnlyList<string> highlightedNewCardIds = null,
+            Action onClosed = null)
         {
             if (database == null)
             {
                 Debug.LogWarning("[TeammateSquadPopupController] Cannot open popup: database is null.");
+                onClosed?.Invoke();
                 return;
             }
 
@@ -71,7 +74,12 @@ namespace NTGH.UI
                 showAnimation: "ScaleShow",
                 hideAnimation: "ScaleHide",
                 useExistingScreen: true,
-                onScreenLoad: popup => popup.Setup(database, onChanged),
+                onScreenLoad: popup => popup.Setup(
+                    database,
+                    onChanged: onChanged,
+                    isPreBattle: false,
+                    highlightedNewCardIds: highlightedNewCardIds,
+                    onClosed: onClosed),
                 hasShield: true,
                 hideTopScreen: false);
         }
