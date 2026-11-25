@@ -34,7 +34,7 @@ namespace NTGH.UI
         private Tween m_autoCloseTween;
 
         public static void Open(
-            int requiredGold,
+            int requiredGold = 0,
             int adRewardGold = 500,
             Action onRewardClaimed = null,
             Canvas callerCanvas = null)
@@ -104,7 +104,7 @@ namespace NTGH.UI
 
             if (m_popupBase != null)
             {
-                m_popupBase.SetTitle("KHÔNG ĐỦ TIỀN");                
+                m_popupBase.SetTitle("NHẬN TIỀN MIỄN PHÍ");
                 if (m_popupBase.CurrencyDisplay != null)
                 {
                     m_popupBase.CurrencyDisplay.RefreshFromUserData();
@@ -124,25 +124,11 @@ namespace NTGH.UI
 
         private void RefreshTexts()
         {
-            User.EnsureLoaded();
-            int currentGold = User.data.gold;
-            int missingGold = Mathf.Max(0, m_requiredGold - currentGold);
-
             if (m_messageText != null)
             {
-                if (missingGold > 0)
-                {
-                    m_messageText.text =
-                        $"Bạn cần <color=#FFD15C>{m_requiredGold:N0}</color> tiền để nâng cấp\n" +
-                        $"(còn thiếu <color=#FF5C77>{missingGold:N0}</color> tiền).\n\n" +
-                        $"Xem quảng cáo để nhận ngay <color=#29EBE0>+{m_adRewardGold:N0}</color> tiền!";
-                }
-                else
-                {
-                    m_messageText.text =
-                        $"Bạn đã đủ tiền để nâng cấp!\n" +
-                        $"Xem thêm quảng cáo để nhận <color=#29EBE0>+{m_adRewardGold:N0}</color> tiền.";
-                }
+                m_messageText.text =
+                    $"Xem quảng cáo để nhận ngay\n" +
+                    $"<color=#FFD15C>+{m_adRewardGold:N0}</color> tiền miễn phí!";
             }
 
             if (m_watchAdLabel != null)

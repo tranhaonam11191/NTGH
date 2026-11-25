@@ -3598,7 +3598,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HomeHouseUpgradeMode
   m_homeController: {fileID: 1074856097}
   m_houseTheme: {fileID: 1968100000}
-  m_topLeftHud: {fileID: 541729279}
+  m_topLeftHud: {fileID: 0}
   m_topCenterHud: {fileID: 932379283}
   m_topRightHud: {fileID: 474384212}
   m_leftMenuGroup: {fileID: 1956191444}

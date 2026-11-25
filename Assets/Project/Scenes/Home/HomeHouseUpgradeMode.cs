@@ -136,7 +136,8 @@ public class HomeHouseUpgradeMode : MonoBehaviour
         m_transitionSeq = DOTween.Sequence().SetUpdate(true);
 
         // Slide Home HUD elements out toward their nearest screen edges
-        AddSlideTween(m_transitionSeq, m_topLeftHud, m_topLeftOrigin + new Vector2(0f, m_topSlideOffset), m_slideDuration, Ease.InBack);
+        if (ShouldTweenTopLeftHud())
+            AddSlideTween(m_transitionSeq, m_topLeftHud, m_topLeftOrigin + new Vector2(0f, m_topSlideOffset), m_slideDuration, Ease.InBack);
         AddSlideTween(m_transitionSeq, m_topCenterHud, m_topCenterOrigin + new Vector2(0f, m_topSlideOffset), m_slideDuration, Ease.InBack);
         AddSlideTween(m_transitionSeq, m_topRightHud, m_topRightOrigin + new Vector2(0f, m_topSlideOffset), m_slideDuration, Ease.InBack);
         AddSlideTween(m_transitionSeq, m_leftMenuGroup, m_leftMenuOrigin + new Vector2(-m_leftSlideOffset, 0f), m_slideDuration, Ease.InBack);
@@ -194,7 +195,8 @@ public class HomeHouseUpgradeMode : MonoBehaviour
 
         // Slide Home HUD elements back IN from their respective edges
         float inStart = 0.10f;
-        InsertSlideTween(m_transitionSeq, inStart, m_topLeftHud, m_topLeftOrigin, m_slideDuration, Ease.OutBack);
+        if (ShouldTweenTopLeftHud())
+            InsertSlideTween(m_transitionSeq, inStart, m_topLeftHud, m_topLeftOrigin, m_slideDuration, Ease.OutBack);
         InsertSlideTween(m_transitionSeq, inStart, m_topCenterHud, m_topCenterOrigin, m_slideDuration, Ease.OutBack);
         InsertSlideTween(m_transitionSeq, inStart, m_topRightHud, m_topRightOrigin, m_slideDuration, Ease.OutBack);
         InsertSlideTween(m_transitionSeq, inStart, m_leftMenuGroup, m_leftMenuOrigin, m_slideDuration, Ease.OutBack);
@@ -314,12 +316,25 @@ public class HomeHouseUpgradeMode : MonoBehaviour
         }
     }
 
+    private bool ShouldTweenTopLeftHud()
+    {
+        if (m_topLeftHud == null)
+            return false;
+
+        // If BtnSettings lives inside LeftMenuGroup (VerticalLayoutGroup), LeftMenuGroup already
+        // slides it out/in cleanly. Tweening it separately fights the LayoutGroup and corrupts its position.
+        if (m_leftMenuGroup != null && m_topLeftHud.IsChildOf(m_leftMenuGroup))
+            return false;
+
+        return true;
+    }
+
     private void CaptureOriginalPositions()
     {
         if (m_hasCapturedPositions)
             return;
 
-        if (m_topLeftHud != null) m_topLeftOrigin = m_topLeftHud.anchoredPosition;
+        if (ShouldTweenTopLeftHud()) m_topLeftOrigin = m_topLeftHud.anchoredPosition;
         if (m_topCenterHud != null) m_topCenterOrigin = m_topCenterHud.anchoredPosition;
         if (m_topRightHud != null) m_topRightOrigin = m_topRightHud.anchoredPosition;
         if (m_leftMenuGroup != null) m_leftMenuOrigin = m_leftMenuGroup.anchoredPosition;

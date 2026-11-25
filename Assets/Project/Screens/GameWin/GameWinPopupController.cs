@@ -16,9 +16,6 @@ namespace NTGH.UI
     {
         public const string ScreenResourceName = "GameWinPopup";
 
-        [Header("Top Bar")]
-        [SerializeField] private HeartDisplayView m_heartDisplay;
-
         [Header("Header")]
         [SerializeField] private TextMeshProUGUI m_titleText;
 
@@ -39,6 +36,7 @@ namespace NTGH.UI
         private bool m_isResolved;
         private Action m_onNext;
         private Tween m_rewardPopTween;
+        private bool m_elevatedGameHeart;
 
         public static void Open(
             int rewardGold,
@@ -69,6 +67,8 @@ namespace NTGH.UI
 
         private void OnDestroy()
         {
+            ReleaseGameHeartDisplay();
+
             m_rewardPopTween?.Kill();
             m_rewardPopTween = null;
 
@@ -94,8 +94,7 @@ namespace NTGH.UI
                 User.Save();
             }
 
-            if (m_heartDisplay != null)
-                m_heartDisplay.RefreshFromUserData();
+            ElevateGameHeartDisplay();
 
             if (m_titleText != null)
                 m_titleText.text = "CHIẾN THẮNG";
@@ -194,9 +193,28 @@ namespace NTGH.UI
                 SOManager.instance.PlayAudio("Click2");
         }
 
-        public void SetHeartDisplayReference(HeartDisplayView heartDisplay)
+        private void ElevateGameHeartDisplay()
         {
-            m_heartDisplay = heartDisplay;
+            if (m_elevatedGameHeart)
+            {
+                GameController.instance?.GetGameHeartDisplay()?.RefreshFromUserData();
+                return;
+            }
+
+            if (GameController.instance != null)
+            {
+                GameController.instance.PushHeartDisplayOverShield();
+                m_elevatedGameHeart = true;
+            }
+        }
+
+        private void ReleaseGameHeartDisplay()
+        {
+            if (!m_elevatedGameHeart)
+                return;
+
+            m_elevatedGameHeart = false;
+            GameController.instance?.PopHeartDisplayOverShield();
         }
 
         public void SetEditorReferences(

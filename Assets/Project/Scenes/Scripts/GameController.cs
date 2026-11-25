@@ -310,10 +310,22 @@ public class GameController : MonoBehaviour
     CreateItemReward weapon;
 
     [Header("Battle Result Popups")]
+    [SerializeField] HeartDisplayView m_heartDisplay;
     [SerializeField] int m_winRewardGold = 350;
     [SerializeField] int m_loseGoldPenalty = 200;
     [SerializeField] int m_reviveGoldCost = 200;
     [SerializeField, Range(0.1f, 1f)] float m_reviveHealthPercent = 1f;
+
+    Transform m_heartOriginalParent;
+    int m_heartOriginalSiblingIndex;
+    Vector2 m_heartOriginalAnchorMin;
+    Vector2 m_heartOriginalAnchorMax;
+    Vector2 m_heartOriginalPivot;
+    Vector2 m_heartOriginalAnchoredPos;
+    Vector2 m_heartOriginalSizeDelta;
+    Vector3 m_heartOriginalScale;
+    int m_heartElevateRefCount;
+    bool m_heartIsElevated;
     
     readonly HashSet<LevelConversation> m_Played = new HashSet<LevelConversation>();
     readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
@@ -510,6 +522,7 @@ public class GameController : MonoBehaviour
 
     void OnDestroy()
     {
+        RestoreHeartDisplayImmediate();
         Player?.KillTweens();
         Enemy?.KillTweens();
         if (ObjectPoolManager.HasInstance)
@@ -522,6 +535,97 @@ public class GameController : MonoBehaviour
             {
                 ObjectPoolManager.Instance.ClearPool(m_effShield.gameObject);
             }
+        }
+    }
+
+    public HeartDisplayView GetGameHeartDisplay()
+    {
+        if (m_heartDisplay == null)
+        {
+            m_heartDisplay = GetComponentInChildren<HeartDisplayView>(true);
+        }
+        return m_heartDisplay;
+    }
+
+    public void PushHeartDisplayOverShield()
+    {
+        HeartDisplayView heart = GetGameHeartDisplay();
+        if (heart == null)
+            return;
+
+        Core.Init();
+        RectTransform topContainer = Core.Top;
+        if (topContainer == null)
+            return;
+
+        m_heartElevateRefCount++;
+        if (!m_heartIsElevated)
+        {
+            RectTransform rt = heart.transform as RectTransform;
+            if (rt != null)
+            {
+                m_heartOriginalParent = rt.parent;
+                m_heartOriginalSiblingIndex = rt.GetSiblingIndex();
+                m_heartOriginalAnchorMin = rt.anchorMin;
+                m_heartOriginalAnchorMax = rt.anchorMax;
+                m_heartOriginalPivot = rt.pivot;
+                m_heartOriginalAnchoredPos = rt.anchoredPosition;
+                m_heartOriginalSizeDelta = rt.sizeDelta;
+                m_heartOriginalScale = rt.localScale;
+
+                rt.SetParent(topContainer, false);
+                rt.anchorMin = m_heartOriginalAnchorMin;
+                rt.anchorMax = m_heartOriginalAnchorMax;
+                rt.pivot = m_heartOriginalPivot;
+                rt.sizeDelta = m_heartOriginalSizeDelta;
+                rt.anchoredPosition = m_heartOriginalAnchoredPos;
+                rt.localScale = m_heartOriginalScale;
+                rt.SetAsLastSibling();
+            }
+
+            m_heartIsElevated = true;
+        }
+
+        heart.RefreshFromUserData();
+    }
+
+    public void PopHeartDisplayOverShield()
+    {
+        if (m_heartElevateRefCount > 0)
+            m_heartElevateRefCount--;
+
+        if (m_heartElevateRefCount == 0 && m_heartIsElevated)
+        {
+            RestoreHeartDisplayImmediate();
+        }
+    }
+
+    void RestoreHeartDisplayImmediate()
+    {
+        if (!m_heartIsElevated)
+            return;
+
+        m_heartIsElevated = false;
+        m_heartElevateRefCount = 0;
+
+        if (m_heartDisplay == null)
+            return;
+
+        RectTransform rt = m_heartDisplay.transform as RectTransform;
+        if (m_heartOriginalParent != null && rt != null)
+        {
+            rt.SetParent(m_heartOriginalParent, false);
+            rt.SetSiblingIndex(m_heartOriginalSiblingIndex);
+            rt.anchorMin = m_heartOriginalAnchorMin;
+            rt.anchorMax = m_heartOriginalAnchorMax;
+            rt.pivot = m_heartOriginalPivot;
+            rt.sizeDelta = m_heartOriginalSizeDelta;
+            rt.anchoredPosition = m_heartOriginalAnchoredPos;
+            rt.localScale = m_heartOriginalScale;
+        }
+        else if (m_heartDisplay.gameObject != null)
+        {
+            Destroy(m_heartDisplay.gameObject);
         }
     }
 

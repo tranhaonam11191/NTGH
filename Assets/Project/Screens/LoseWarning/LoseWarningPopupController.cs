@@ -17,7 +17,6 @@ namespace NTGH.UI
 
         [Header("Top Bar")]
         [SerializeField] private CurrencyDisplayView m_currencyDisplay;
-        [SerializeField] private HeartDisplayView m_heartDisplay;
 
         [Header("Header")]
         [SerializeField] private TextMeshProUGUI m_titleText;
@@ -42,6 +41,7 @@ namespace NTGH.UI
         private Action m_onCloseToLose;
         private Canvas m_callerCanvas;
         private bool m_isResolved;
+        private bool m_elevatedGameHeart;
 
         public static void Open(
             int goldPenalty,
@@ -77,6 +77,8 @@ namespace NTGH.UI
 
         private void OnDestroy()
         {
+            ReleaseGameHeartDisplay();
+
             if (m_closeButton != null)
                 m_closeButton.onClick.RemoveListener(OnClickClose);
 
@@ -104,8 +106,7 @@ namespace NTGH.UI
             if (m_currencyDisplay != null)
                 m_currencyDisplay.RefreshFromUserData();
 
-            if (m_heartDisplay != null)
-                m_heartDisplay.RefreshFromUserData();
+            ElevateGameHeartDisplay();
 
             if (m_titleText != null)
                 m_titleText.text = "WARNING";
@@ -217,9 +218,28 @@ namespace NTGH.UI
                 SOManager.instance.PlayAudio("Click2");
         }
 
-        public void SetHeartDisplayReference(HeartDisplayView heartDisplay)
+        private void ElevateGameHeartDisplay()
         {
-            m_heartDisplay = heartDisplay;
+            if (m_elevatedGameHeart)
+            {
+                GameController.instance?.GetGameHeartDisplay()?.RefreshFromUserData();
+                return;
+            }
+
+            if (GameController.instance != null)
+            {
+                GameController.instance.PushHeartDisplayOverShield();
+                m_elevatedGameHeart = true;
+            }
+        }
+
+        private void ReleaseGameHeartDisplay()
+        {
+            if (!m_elevatedGameHeart)
+                return;
+
+            m_elevatedGameHeart = false;
+            GameController.instance?.PopHeartDisplayOverShield();
         }
 
         public void SetEditorReferences(
