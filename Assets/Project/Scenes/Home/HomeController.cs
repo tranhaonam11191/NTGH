@@ -12,6 +12,7 @@ public class HomeController : MonoBehaviour
     [SerializeField] private HomeOutfitView m_outfitView;
     [SerializeField] private HomeHouseTheme m_houseTheme;
     [SerializeField] private CurrencyDisplayView m_currencyDisplay;
+    [SerializeField] private HeartDisplayView m_heartDisplay;
     [SerializeField] private HomeHouseUpgradeMode m_houseUpgradeMode;
 
     [Header("Item Catalogs (ScriptableObjects)")]
@@ -59,10 +60,34 @@ public class HomeController : MonoBehaviour
             m_currencyDisplay.SetAmount(gold);
         else if (m_textGold != null)
             m_textGold.text = gold.ToString("N0");
+
+        if (m_heartDisplay != null)
+            m_heartDisplay.RefreshFromUserData();
     }
     public void onCLickPlay()
     {
-        SOManager.instance.PlayCurrentLevel();
+        User.RefreshHeartsAndSave();
+        if (User.data != null && !User.data.HasHeart())
+        {
+            BuyHeartPopupController.Open(
+                onHeartsUpdated: SetData,
+                callerCanvas: GetComponentInChildren<Canvas>());
+            return;
+        }
+
+        SOManager.instance.PlayCurrentLevel(GetComponentInChildren<Canvas>());
+    }
+
+    public void OnClickHeart()
+    {
+        BuyHeartPopupController.Open(
+            onHeartsUpdated: SetData,
+            callerCanvas: GetComponentInChildren<Canvas>());
+    }
+
+    public void SetHeartDisplayReference(HeartDisplayView heartDisplay)
+    {
+        m_heartDisplay = heartDisplay;
     }
 
     public void OnClickWeapon()

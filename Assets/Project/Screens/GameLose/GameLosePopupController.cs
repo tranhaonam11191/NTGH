@@ -17,6 +17,7 @@ namespace NTGH.UI
 
         [Header("Top Bar")]
         [SerializeField] private CurrencyDisplayView m_currencyDisplay;
+        [SerializeField] private HeartDisplayView m_heartDisplay;
 
         [Header("Header")]
         [SerializeField] private TextMeshProUGUI m_titleText;
@@ -80,6 +81,9 @@ namespace NTGH.UI
             if (m_currencyDisplay != null)
                 m_currencyDisplay.RefreshFromUserData();
 
+            if (m_heartDisplay != null)
+                m_heartDisplay.RefreshFromUserData();
+
             if (m_titleText != null)
                 m_titleText.text = "THẤT BẠI";
 
@@ -121,9 +125,16 @@ namespace NTGH.UI
         public void OnClickRetry()
         {
             if (m_isResolved) return;
-            m_isResolved = true;
 
             PlayClickSfx();
+            User.RefreshHeartsAndSave();
+            if (User.data != null && !User.data.HasHeart())
+            {
+                BuyHeartPopupController.Open(callerCanvas: GetComponentInParent<Canvas>());
+                return;
+            }
+
+            m_isResolved = true;
             Action callback = m_onRetry;
             m_onRetry = null;
             m_onHome = null;
@@ -141,6 +152,11 @@ namespace NTGH.UI
         {
             if (SOManager.instance != null)
                 SOManager.instance.PlayAudio("Click2");
+        }
+
+        public void SetHeartDisplayReference(HeartDisplayView heartDisplay)
+        {
+            m_heartDisplay = heartDisplay;
         }
 
         public void SetEditorReferences(

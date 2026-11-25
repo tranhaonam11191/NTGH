@@ -66,10 +66,18 @@ public class SOManager : MonoBehaviour
         User.MigrateLegacyUnlockedItems(ids);
     }
 
-    public void PlayCurrentLevel()
+    public void PlayCurrentLevel(Canvas callerCanvas = null)
     {
         var level = CurrentLevelData;
         if (m_Loading) return;
+
+        User.RefreshHeartsAndSave();
+        if (User.data != null && !User.data.HasHeart())
+        {
+            BuyHeartPopupController.Open(callerCanvas: callerCanvas);
+            return;
+        }
+
         if (level == null || !level.HasCombatants)
         {
             Debug.LogError("Assign a level with two characters and positive HP in ArcsData.", this);

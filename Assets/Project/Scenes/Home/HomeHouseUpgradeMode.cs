@@ -23,6 +23,7 @@ public class HomeHouseUpgradeMode : MonoBehaviour
 
     [Header("Home HUD Elements to Slide Out")]
     [SerializeField] private RectTransform m_topLeftHud;      // BtnSettings -> slides UP
+    [SerializeField] private RectTransform m_topCenterHud;    // HeartDisplay -> slides UP
     [SerializeField] private RectTransform m_topRightHud;     // CurrencyDisplay -> slides UP
     [SerializeField] private RectTransform m_leftMenuGroup;   // LeftMenuGroup -> slides LEFT
     [SerializeField] private RectTransform m_bottomLeftBtn;   // BtnPlay -> slides DOWN
@@ -48,6 +49,7 @@ public class HomeHouseUpgradeMode : MonoBehaviour
     private bool m_isHouseMode;
     private bool m_hasCapturedPositions;
     private Vector2 m_topLeftOrigin;
+    private Vector2 m_topCenterOrigin;
     private Vector2 m_topRightOrigin;
     private Vector2 m_leftMenuOrigin;
     private Vector2 m_bottomLeftOrigin;
@@ -135,6 +137,7 @@ public class HomeHouseUpgradeMode : MonoBehaviour
 
         // Slide Home HUD elements out toward their nearest screen edges
         AddSlideTween(m_transitionSeq, m_topLeftHud, m_topLeftOrigin + new Vector2(0f, m_topSlideOffset), m_slideDuration, Ease.InBack);
+        AddSlideTween(m_transitionSeq, m_topCenterHud, m_topCenterOrigin + new Vector2(0f, m_topSlideOffset), m_slideDuration, Ease.InBack);
         AddSlideTween(m_transitionSeq, m_topRightHud, m_topRightOrigin + new Vector2(0f, m_topSlideOffset), m_slideDuration, Ease.InBack);
         AddSlideTween(m_transitionSeq, m_leftMenuGroup, m_leftMenuOrigin + new Vector2(-m_leftSlideOffset, 0f), m_slideDuration, Ease.InBack);
         AddSlideTween(m_transitionSeq, m_bottomLeftBtn, m_bottomLeftOrigin + new Vector2(0f, -m_bottomSlideOffset), m_slideDuration, Ease.InBack);
@@ -192,6 +195,7 @@ public class HomeHouseUpgradeMode : MonoBehaviour
         // Slide Home HUD elements back IN from their respective edges
         float inStart = 0.10f;
         InsertSlideTween(m_transitionSeq, inStart, m_topLeftHud, m_topLeftOrigin, m_slideDuration, Ease.OutBack);
+        InsertSlideTween(m_transitionSeq, inStart, m_topCenterHud, m_topCenterOrigin, m_slideDuration, Ease.OutBack);
         InsertSlideTween(m_transitionSeq, inStart, m_topRightHud, m_topRightOrigin, m_slideDuration, Ease.OutBack);
         InsertSlideTween(m_transitionSeq, inStart, m_leftMenuGroup, m_leftMenuOrigin, m_slideDuration, Ease.OutBack);
         InsertSlideTween(m_transitionSeq, inStart, m_bottomLeftBtn, m_bottomLeftOrigin, m_slideDuration, Ease.OutBack);
@@ -316,6 +320,7 @@ public class HomeHouseUpgradeMode : MonoBehaviour
             return;
 
         if (m_topLeftHud != null) m_topLeftOrigin = m_topLeftHud.anchoredPosition;
+        if (m_topCenterHud != null) m_topCenterOrigin = m_topCenterHud.anchoredPosition;
         if (m_topRightHud != null) m_topRightOrigin = m_topRightHud.anchoredPosition;
         if (m_leftMenuGroup != null) m_leftMenuOrigin = m_leftMenuGroup.anchoredPosition;
         if (m_bottomLeftBtn != null) m_bottomLeftOrigin = m_bottomLeftBtn.anchoredPosition;
@@ -335,6 +340,11 @@ public class HomeHouseUpgradeMode : MonoBehaviour
     {
         if (target == null) return;
         seq.Insert(atPosition, target.DOAnchorPos(endPos, duration).SetEase(ease));
+    }
+
+    public void SetTopCenterHud(RectTransform topCenterHud)
+    {
+        m_topCenterHud = topCenterHud;
     }
 
     public void ConfigureReferences(

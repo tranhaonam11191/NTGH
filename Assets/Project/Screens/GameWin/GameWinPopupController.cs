@@ -16,6 +16,9 @@ namespace NTGH.UI
     {
         public const string ScreenResourceName = "GameWinPopup";
 
+        [Header("Top Bar")]
+        [SerializeField] private HeartDisplayView m_heartDisplay;
+
         [Header("Header")]
         [SerializeField] private TextMeshProUGUI m_titleText;
 
@@ -90,6 +93,9 @@ namespace NTGH.UI
                 User.data.AddGold(m_baseRewardGold);
                 User.Save();
             }
+
+            if (m_heartDisplay != null)
+                m_heartDisplay.RefreshFromUserData();
 
             if (m_titleText != null)
                 m_titleText.text = "CHIẾN THẮNG";
@@ -186,6 +192,11 @@ namespace NTGH.UI
         {
             if (SOManager.instance != null)
                 SOManager.instance.PlayAudio("Click2");
+        }
+
+        public void SetHeartDisplayReference(HeartDisplayView heartDisplay)
+        {
+            m_heartDisplay = heartDisplay;
         }
 
         public void SetEditorReferences(

@@ -484,24 +484,28 @@ public class GameController : MonoBehaviour
     void HandleConfirmDefeat(int goldPenalty)
     {
         int deducted = 0;
-        if (goldPenalty > 0)
+        User.EnsureLoaded();
+        if (User.data != null)
         {
-            User.EnsureLoaded();
-            if (User.data != null)
+            if (goldPenalty > 0)
             {
                 deducted = Mathf.Min(User.data.gold, goldPenalty);
-                if (deducted > 0 && User.data.TrySpendGold(deducted))
+                if (deducted > 0)
                 {
-                    User.Save();
+                    User.data.TrySpendGold(deducted);
                 }
             }
+
+            User.data.ConsumeHeart(1);
+            User.Save();
         }
 
+        Canvas battleCanvas = GetBattleCanvas();
         GameLosePopupController.Open(
             deducted,
-            onRetry: () => SOManager.instance?.PlayCurrentLevel(),
+            onRetry: () => SOManager.instance?.PlayCurrentLevel(battleCanvas),
             onHome: SOManager.LoadHome,
-            callerCanvas: GetBattleCanvas());
+            callerCanvas: battleCanvas);
     }
 
     void OnDestroy()

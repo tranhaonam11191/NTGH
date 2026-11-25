@@ -157,8 +157,10 @@ public static partial class User
         };
         data.EnsureInventoryInitialized();
         data.EnsureHomeDefaults();
+        data.EnsureHeartDefaults();
         Save();
         NotifyGoldChanged(data.gold);
+        NotifyHeartsChanged(data.hearts);
     }
 
     public static void MigrateLegacyPlayerPrefs()
@@ -172,6 +174,11 @@ public static partial class User
 
         data.EnsureInventoryInitialized();
         if (data.EnsureHomeDefaults())
+        {
+            changed = true;
+        }
+
+        if (data.EnsureHeartDefaults())
         {
             changed = true;
         }
