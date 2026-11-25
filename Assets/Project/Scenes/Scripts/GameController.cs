@@ -407,8 +407,19 @@ public class GameController : MonoBehaviour
     bool m_ResultShown;
     float m_LastPlayerShieldTime = -10f;
     float m_LastEnemyShieldTime = -10f;
+    int m_BoosterPopupOpenCount;
 
-    public bool BlocksBoard => Data == null || endGame || m_ShowingStory || m_PendingLines.Count > 0;
+    public bool BlocksBoard => Data == null || endGame || m_ShowingStory || m_PendingLines.Count > 0 || m_BoosterPopupOpenCount > 0;
+
+    public void PushBoosterPopupBlock()
+    {
+        m_BoosterPopupOpenCount++;
+    }
+
+    public void PopBoosterPopupBlock()
+    {
+        m_BoosterPopupOpenCount = Mathf.Max(0, m_BoosterPopupOpenCount - 1);
+    }
 
     IEnumerator Start()
     {
@@ -1035,6 +1046,21 @@ public class GameController : MonoBehaviour
     public void AttackWithMatch(int clearedItems, Vector3 boardPosition)
     {
         if (Data == null || endGame || clearedItems < Constants.MinimumMatches) return;
+
+        int remainingReduction = m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalDamageReduction() : 0;
+        int mainDamage = ConsumeDamageReduction(clearedItems, ref remainingReduction);
+
+        LaunchAttackEffect(boardPosition, Enemy, mainDamage, () =>
+        {
+            Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, mainDamage, ConversationTrigger.EnemyHealth);
+        });
+
+        LaunchAttackCardSwords(Player, Enemy, ref remainingReduction, targetIsPlayer: false);
+    }
+
+    public void AttackFromBooster(int clearedItems, Vector3 boardPosition)
+    {
+        if (Data == null || endGame || clearedItems <= 0) return;
 
         int remainingReduction = m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalDamageReduction() : 0;
         int mainDamage = ConsumeDamageReduction(clearedItems, ref remainingReduction);

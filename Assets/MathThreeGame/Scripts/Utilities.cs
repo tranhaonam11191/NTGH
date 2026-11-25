@@ -19,9 +19,12 @@ public static class Utilities
         {
             foreach (var item in potentialMatches)
             {
-                Color c = item.GetComponent<SpriteRenderer>().color;
+                if (item == null) yield break;
+                SpriteRenderer sr = item.GetComponent<SpriteRenderer>();
+                if (sr == null) continue;
+                Color c = sr.color;
                 c.a = i;
-                item.GetComponent<SpriteRenderer>().color = c;
+                sr.color = c;
             }
             yield return new WaitForSeconds(Constants.OpacityAnimationFrameDelay);
         }
@@ -29,9 +32,12 @@ public static class Utilities
         {
             foreach (var item in potentialMatches)
             {
-                Color c = item.GetComponent<SpriteRenderer>().color;
+                if (item == null) yield break;
+                SpriteRenderer sr = item.GetComponent<SpriteRenderer>();
+                if (sr == null) continue;
+                Color c = sr.color;
                 c.a = i;
-                item.GetComponent<SpriteRenderer>().color = c;
+                sr.color = c;
             }
             yield return new WaitForSeconds(Constants.OpacityAnimationFrameDelay);
         }

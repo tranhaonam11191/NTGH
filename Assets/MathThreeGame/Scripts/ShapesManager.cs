@@ -1,7 +1,10 @@
-using UnityEngine;
+using System;
 using System.Collections;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using NTGH.Boosters;
+using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
@@ -32,6 +35,135 @@ public class ShapesManager : MonoBehaviour
 
     public SoundManager soundManager;
     [SerializeField] private float m_boardCenterY = -1.6f;
+
+    // Booster runtime state & concurrency guards
+    private bool m_isBoosterExecuting;
+    private BoosterType? m_activeBooster;
+    private Func<BoosterType, bool> m_boosterConsumeCallback;
+    private GameObject m_freeSwapFirstGo;
+    private Vector3 m_freeSwapFirstBaseScale = Vector3.one;
+    private Color m_freeSwapFirstBaseColor = Color.white;
+    private bool m_freeSwapDragging;
+
+    public bool IsBoardBusy => state == GameState.Animating || m_isBoosterExecuting;
+    public BoosterType? ActiveBoosterMode => m_activeBooster;
+
+    public event Action<BoosterType?> OnBoosterModeChanged;
+    public event Action<BoosterType> OnBoosterExecuted;
+
+    private bool IsBoardBlocked => GameController.instance != null && GameController.instance.BlocksBoard;
+
+    private Vector2 GetCellWorldPosition(int row, int column)
+    {
+        return BottomRight + new Vector2(column * Constants.ItemSize.x, row * Constants.ItemSize.y);
+    }
+
+    private static bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) return false;
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+        if (Input.touchCount > 0 && EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId))
+            return true;
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to activate or toggle a booster. Returns false if the board is busy (falling/animating) or blocked.
+    /// </summary>
+    public bool TryActivateBooster(BoosterType type, Func<BoosterType, bool> consumeCallback)
+    {
+        if (IsBoardBlocked || IsBoardBusy || shapes == null)
+        {
+            return false;
+        }
+
+        // Toggle off if player taps the same active targeting booster again.
+        if (m_activeBooster.HasValue && m_activeBooster.Value == type)
+        {
+            CancelBoosterMode();
+            return true;
+        }
+
+        // Reset any unfinished normal drag selection cleanly.
+        if (state == GameState.SelectionStarted)
+        {
+            hitGo = null;
+            state = GameState.None;
+        }
+
+        ClearFreeSwapSelection();
+
+        if (type == BoosterType.Shuffle)
+        {
+            CancelBoosterMode();
+
+            if (consumeCallback != null && !consumeCallback(BoosterType.Shuffle))
+            {
+                return false;
+            }
+
+            // Lock board synchronously before starting coroutine to prevent same-frame double-triggers.
+            m_isBoosterExecuting = true;
+            state = GameState.Animating;
+            StopCheckForPotentialMatches();
+            StartCoroutine(ExecuteShuffleCoroutine());
+            return true;
+        }
+
+        m_activeBooster = type;
+        m_boosterConsumeCallback = consumeCallback;
+        StopCheckForPotentialMatches();
+        OnBoosterModeChanged?.Invoke(m_activeBooster);
+        return true;
+    }
+
+    public void CancelBoosterMode()
+    {
+        ClearFreeSwapSelection();
+        bool hadActive = m_activeBooster.HasValue;
+        m_activeBooster = null;
+        m_boosterConsumeCallback = null;
+
+        if (hadActive)
+        {
+            OnBoosterModeChanged?.Invoke(null);
+            if (!IsBoardBusy && !IsBoardBlocked)
+            {
+                StartCheckForPotentialMatches();
+            }
+        }
+    }
+
+    private void ClearFreeSwapSelection()
+    {
+        m_freeSwapDragging = false;
+        if (m_freeSwapFirstGo != null)
+        {
+            m_freeSwapFirstGo.transform.localScale = m_freeSwapFirstBaseScale;
+            SpriteRenderer sr = m_freeSwapFirstGo.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.color = m_freeSwapFirstBaseColor;
+            }
+            m_freeSwapFirstGo = null;
+        }
+    }
+
+    private void SelectFreeSwapFirst(GameObject targetGo)
+    {
+        ClearFreeSwapSelection();
+        if (targetGo == null) return;
+
+        m_freeSwapFirstGo = targetGo;
+        m_freeSwapFirstBaseScale = targetGo.transform.localScale;
+        SpriteRenderer sr = targetGo.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            m_freeSwapFirstBaseColor = sr.color;
+            sr.color = new Color(0.55f, 1f, 1f, 1f);
+        }
+        targetGo.transform.localScale = m_freeSwapFirstBaseScale * 1.12f;
+    }
     void Awake()
     {
         DebugText.enabled = ShowDebugInfo;
@@ -190,38 +322,68 @@ public class ShapesManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GameController.instance != null && GameController.instance.BlocksBoard) return;
+        if (IsBoardBlocked)
+        {
+            if (m_activeBooster.HasValue)
+            {
+                CancelBoosterMode();
+            }
+            return;
+        }
 
         if (ShowDebugInfo)
             DebugText.text = DebugUtilities.GetArrayContents(shapes);
+
+        // Hard concurrency guard: never process board clicks or boosters while items are falling/animating.
+        if (IsBoardBusy)
+        {
+            return;
+        }
+
+        if (m_activeBooster.HasValue)
+        {
+            HandleBoosterTargetingInput();
+            return;
+        }
 
         if (state == GameState.None)
         {
             //user has clicked or touched
             if (Input.GetMouseButtonDown(0))
             {
+                if (IsPointerOverUI()) return;
+
                 //get the hit position
                 var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-                if (hit.collider != null) //we have a hit!!!
+                if (hit.collider != null && hit.collider.GetComponent<Shape>() != null) //we have a hit!!!
                 {
                     hitGo = hit.collider.gameObject;
                     state = GameState.SelectionStarted;
                 }
-                
             }
         }
         else if (state == GameState.SelectionStarted)
         {
+            if (Input.GetMouseButtonUp(0))
+            {
+                hitGo = null;
+                state = GameState.None;
+                return;
+            }
+
             //user dragged
             if (Input.GetMouseButton(0))
             {
-                
+                if (hitGo == null)
+                {
+                    state = GameState.None;
+                    return;
+                }
 
                 var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
                 //we have a hit
-                if (hit.collider != null && hitGo != hit.collider.gameObject)
+                if (hit.collider != null && hitGo != hit.collider.gameObject && hit.collider.GetComponent<Shape>() != null)
                 {
-
                     //user did a hit, no need to show him hints 
                     StopCheckForPotentialMatches();
 
@@ -229,6 +391,7 @@ public class ShapesManager : MonoBehaviour
                     if (!Utilities.AreVerticalOrHorizontalNeighbors(hitGo.GetComponent<Shape>(),
                         hit.collider.gameObject.GetComponent<Shape>()))
                     {
+                        hitGo = null;
                         state = GameState.None;
                     }
                     else
@@ -240,6 +403,161 @@ public class ShapesManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void HandleBoosterTargetingInput()
+    {
+        if (!m_activeBooster.HasValue || IsBoardBusy || IsBoardBlocked)
+        {
+            return;
+        }
+
+        BoosterType active = m_activeBooster.Value;
+
+        if (active == BoosterType.FreeSwap)
+        {
+            HandleFreeSwapInput();
+            return;
+        }
+
+        if (!Input.GetMouseButtonDown(0) || IsPointerOverUI())
+        {
+            return;
+        }
+
+        var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        if (hit.collider == null)
+        {
+            return;
+        }
+
+        GameObject targetGo = hit.collider.gameObject;
+        Shape targetShape = targetGo.GetComponent<Shape>();
+        if (targetShape == null || shapes == null)
+        {
+            return;
+        }
+
+        // Verify the clicked object is actually still registered at its grid cell.
+        if (targetShape.Row < 0 || targetShape.Row >= Constants.Rows ||
+            targetShape.Column < 0 || targetShape.Column >= Constants.Columns ||
+            shapes[targetShape.Row, targetShape.Column] != targetGo)
+        {
+            return;
+        }
+
+        var consume = m_boosterConsumeCallback;
+        if (consume != null && !consume(active))
+        {
+            CancelBoosterMode();
+            return;
+        }
+
+        m_activeBooster = null;
+        m_boosterConsumeCallback = null;
+        OnBoosterModeChanged?.Invoke(null);
+
+        // Lock board synchronously before starting coroutine.
+        m_isBoosterExecuting = true;
+        state = GameState.Animating;
+        StopCheckForPotentialMatches();
+
+        if (active == BoosterType.Hammer)
+        {
+            StartCoroutine(ExecuteClearTargetsCoroutine(new List<GameObject> { targetGo }, BoosterType.Hammer));
+        }
+        else if (active == BoosterType.LineBlast)
+        {
+            var targets = new List<GameObject>();
+            targets.AddRange(shapes.GetRow(targetShape.Row));
+            targets.AddRange(shapes.GetColumn(targetShape.Column));
+            StartCoroutine(ExecuteClearTargetsCoroutine(targets, BoosterType.LineBlast));
+        }
+    }
+
+    private void HandleFreeSwapInput()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (IsPointerOverUI()) return;
+
+            var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            if (hit.collider == null) return;
+
+            GameObject clickedGo = hit.collider.gameObject;
+            Shape clickedShape = clickedGo.GetComponent<Shape>();
+            if (clickedShape == null) return;
+
+            if (m_freeSwapFirstGo == null)
+            {
+                SelectFreeSwapFirst(clickedGo);
+                m_freeSwapDragging = true;
+                return;
+            }
+
+            if (m_freeSwapFirstGo == clickedGo)
+            {
+                ClearFreeSwapSelection();
+                return;
+            }
+
+            Shape firstShape = m_freeSwapFirstGo.GetComponent<Shape>();
+            if (firstShape != null && Utilities.AreVerticalOrHorizontalNeighbors(firstShape, clickedShape))
+            {
+                CommitFreeSwap(m_freeSwapFirstGo, clickedGo);
+            }
+            else
+            {
+                SelectFreeSwapFirst(clickedGo);
+                m_freeSwapDragging = true;
+            }
+        }
+        else if (m_freeSwapDragging && Input.GetMouseButton(0) && m_freeSwapFirstGo != null)
+        {
+            var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+            if (hit.collider == null || hit.collider.gameObject == m_freeSwapFirstGo) return;
+
+            GameObject secondGo = hit.collider.gameObject;
+            Shape firstShape = m_freeSwapFirstGo.GetComponent<Shape>();
+            Shape secondShape = secondGo.GetComponent<Shape>();
+            if (firstShape != null && secondShape != null &&
+                Utilities.AreVerticalOrHorizontalNeighbors(firstShape, secondShape))
+            {
+                CommitFreeSwap(m_freeSwapFirstGo, secondGo);
+            }
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            m_freeSwapDragging = false;
+        }
+    }
+
+    private void CommitFreeSwap(GameObject firstGo, GameObject secondGo)
+    {
+        if (firstGo == null || secondGo == null || IsBoardBusy || IsBoardBlocked)
+        {
+            ClearFreeSwapSelection();
+            return;
+        }
+
+        ClearFreeSwapSelection();
+
+        var consume = m_boosterConsumeCallback;
+        if (consume != null && !consume(BoosterType.FreeSwap))
+        {
+            CancelBoosterMode();
+            return;
+        }
+
+        m_activeBooster = null;
+        m_boosterConsumeCallback = null;
+        OnBoosterModeChanged?.Invoke(null);
+
+        m_isBoosterExecuting = true;
+        state = GameState.Animating;
+        StopCheckForPotentialMatches();
+        FixSortingLayer(firstGo, secondGo);
+        StartCoroutine(ExecuteFreeSwapCoroutine(firstGo, secondGo));
     }
 
     /// <summary>
@@ -258,114 +576,463 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-
-
-
     private IEnumerator FindMatchesAndCollapse(RaycastHit2D hit2)
-    {        
-        //get the second item that was part of the swipe
-        var hitGo2 = hit2.collider.gameObject;
-        shapes.Swap(hitGo, hitGo2);
-
-        //move the swapped ones
-        hitGo.transform.positionTo(Constants.AnimationDuration, hitGo2.transform.position);
-        hitGo2.transform.positionTo(Constants.AnimationDuration, hitGo.transform.position);
-        yield return new WaitForSeconds(Constants.AnimationDuration);
-        Debug.Log("InCreasePoint");
-        //get the matches via the helper methods
-        var hitGomatchesInfo = shapes.GetMatches(hitGo);
-        var hitGo2matchesInfo = shapes.GetMatches(hitGo2);
-
-        var groups = new List<HashSet<GameObject>>();
-        AddMatchGroup(groups, hitGomatchesInfo);
-        AddMatchGroup(groups, hitGo2matchesInfo);
-        var totalMatches = groups.SelectMany(group => group).ToList();
-
-        //if user's swap didn't create at least a 3-match, undo their swap
-        if (totalMatches.Count < Constants.MinimumMatches)
+    {
+        try
         {
-            hitGo.transform.positionTo(Constants.AnimationDuration, hitGo2.transform.position);
-            hitGo2.transform.positionTo(Constants.AnimationDuration, hitGo.transform.position);
+            //get the second item that was part of the swipe
+            var hitGo2 = hit2.collider != null ? hit2.collider.gameObject : null;
+            if (hitGo == null || hitGo2 == null)
+            {
+                yield break;
+            }
+
+            shapes.Swap(hitGo, hitGo2);
+
+            //move the swapped ones
+            Vector3 pos1 = hitGo.transform.position;
+            Vector3 pos2 = hitGo2.transform.position;
+            Go.killAllTweensWithTarget(hitGo.transform);
+            Go.killAllTweensWithTarget(hitGo2.transform);
+            hitGo.transform.positionTo(Constants.AnimationDuration, pos2);
+            hitGo2.transform.positionTo(Constants.AnimationDuration, pos1);
             yield return new WaitForSeconds(Constants.AnimationDuration);
 
-            shapes.UndoSwap();
+            //get the matches via the helper methods
+            var hitGomatchesInfo = shapes.GetMatches(hitGo);
+            var hitGo2matchesInfo = shapes.GetMatches(hitGo2);
+
+            var groups = new List<HashSet<GameObject>>();
+            AddMatchGroup(groups, hitGomatchesInfo);
+            AddMatchGroup(groups, hitGo2matchesInfo);
+            var totalMatches = groups.SelectMany(group => group).ToList();
+
+            //if user's swap didn't create at least a 3-match, undo their swap
+            if (totalMatches.Count < Constants.MinimumMatches)
+            {
+                Go.killAllTweensWithTarget(hitGo.transform);
+                Go.killAllTweensWithTarget(hitGo2.transform);
+                hitGo.transform.positionTo(Constants.AnimationDuration, pos1);
+                hitGo2.transform.positionTo(Constants.AnimationDuration, pos2);
+                yield return new WaitForSeconds(Constants.AnimationDuration);
+
+                shapes.UndoSwap();
+                SnapBoardPositions();
+                yield break;
+            }
+
+            //if more than 3 matches and no Bonus is contained in the line, we will award a new Bonus
+            bool addBonus = totalMatches.Count >= Constants.MinimumMatchesForBonus &&
+                !BonusTypeUtilities.ContainsDestroyWholeRowColumn(hitGomatchesInfo.BonusesContained) &&
+                !BonusTypeUtilities.ContainsDestroyWholeRowColumn(hitGo2matchesInfo.BonusesContained);
+
+            Shape hitGoCache = null;
+            if (addBonus)
+            {
+                //get the game object that was of the same type
+                var sameTypeGo = hitGomatchesInfo.MatchedCandy.Count() > 0 ? hitGo : hitGo2;
+                hitGoCache = sameTypeGo.GetComponent<Shape>();
+            }
+
+            yield return StartCoroutine(ResolveMatchesAndCollapseLoop(groups, addBonus, hitGoCache));
         }
-
-        //if more than 3 matches and no Bonus is contained in the line, we will award a new Bonus
-        bool addBonus = totalMatches.Count >= Constants.MinimumMatchesForBonus &&
-            !BonusTypeUtilities.ContainsDestroyWholeRowColumn(hitGomatchesInfo.BonusesContained) &&
-            !BonusTypeUtilities.ContainsDestroyWholeRowColumn(hitGo2matchesInfo.BonusesContained);
-
-        Shape hitGoCache = null;
-        if (addBonus)
+        finally
         {
-            //get the game object that was of the same type
-            var sameTypeGo = hitGomatchesInfo.MatchedCandy.Count() > 0 ? hitGo : hitGo2;
-            hitGoCache = sameTypeGo.GetComponent<Shape>();
+            hitGo = null;
+            state = GameState.None;
+            StartCheckForPotentialMatches();
+        }
+    }
+
+    private IEnumerator ExecuteFreeSwapCoroutine(GameObject firstGo, GameObject secondGo)
+    {
+        try
+        {
+            if (firstGo == null || secondGo == null)
+            {
+                yield break;
+            }
+
+            shapes.Swap(firstGo, secondGo);
+
+            Shape s1 = firstGo.GetComponent<Shape>();
+            Shape s2 = secondGo.GetComponent<Shape>();
+            Vector2 target1 = GetCellWorldPosition(s1.Row, s1.Column);
+            Vector2 target2 = GetCellWorldPosition(s2.Row, s2.Column);
+
+            Go.killAllTweensWithTarget(firstGo.transform);
+            Go.killAllTweensWithTarget(secondGo.transform);
+            firstGo.transform.positionTo(Constants.AnimationDuration, target1);
+            secondGo.transform.positionTo(Constants.AnimationDuration, target2);
+            yield return new WaitForSeconds(Constants.AnimationDuration);
+
+            SnapBoardPositions();
+            OnBoosterExecuted?.Invoke(BoosterType.FreeSwap);
+
+            // FreeSwap never undoes! If a match was formed, resolve & cascade normally.
+            var firstMatches = shapes.GetMatches(firstGo);
+            var secondMatches = shapes.GetMatches(secondGo);
+
+            var groups = new List<HashSet<GameObject>>();
+            AddMatchGroup(groups, firstMatches);
+            AddMatchGroup(groups, secondMatches);
+            var totalMatches = groups.SelectMany(group => group).ToList();
+
+            if (totalMatches.Count >= Constants.MinimumMatches)
+            {
+                bool addBonus = totalMatches.Count >= Constants.MinimumMatchesForBonus &&
+                    !BonusTypeUtilities.ContainsDestroyWholeRowColumn(firstMatches.BonusesContained) &&
+                    !BonusTypeUtilities.ContainsDestroyWholeRowColumn(secondMatches.BonusesContained);
+
+                Shape bonusAnchor = null;
+                if (addBonus)
+                {
+                    var sameTypeGo = firstMatches.MatchedCandy.Count() > 0 ? firstGo : secondGo;
+                    bonusAnchor = sameTypeGo.GetComponent<Shape>();
+                }
+
+                yield return StartCoroutine(ResolveMatchesAndCollapseLoop(groups, addBonus, bonusAnchor));
+            }
+        }
+        finally
+        {
+            m_isBoosterExecuting = false;
+            hitGo = null;
+            state = GameState.None;
+            StartCheckForPotentialMatches();
+        }
+    }
+
+    private IEnumerator ExecuteClearTargetsCoroutine(List<GameObject> initialTargets, BoosterType boosterType)
+    {
+        try
+        {
+            // Expand chain reactions if any targeted tile carries a DestroyWholeRowColumn bonus.
+            var expanded = new HashSet<GameObject>();
+            var queue = new Queue<GameObject>();
+
+            for (int i = 0; i < initialTargets.Count; i++)
+            {
+                GameObject go = initialTargets[i];
+                if (go != null && expanded.Add(go))
+                {
+                    queue.Enqueue(go);
+                }
+            }
+
+            while (queue.Count > 0)
+            {
+                GameObject current = queue.Dequeue();
+                if (current == null) continue;
+                Shape s = current.GetComponent<Shape>();
+                if (s == null) continue;
+
+                if (BonusTypeUtilities.ContainsDestroyWholeRowColumn(s.Bonus))
+                {
+                    foreach (var extra in shapes.GetRow(s.Row))
+                    {
+                        if (extra != null && expanded.Add(extra)) queue.Enqueue(extra);
+                    }
+                    foreach (var extra in shapes.GetColumn(s.Column))
+                    {
+                        if (extra != null && expanded.Add(extra)) queue.Enqueue(extra);
+                    }
+                }
+            }
+
+            if (expanded.Count == 0)
+            {
+                yield break;
+            }
+
+            if (SoundManager.instance != null)
+            {
+                SoundManager.instance.PlaySfx("ClearSFX");
+            }
+
+            Vector3 center = Vector3.zero;
+            var affectedColumns = new HashSet<int>();
+            foreach (var item in expanded)
+            {
+                if (item == null) continue;
+                center += item.transform.position;
+                Shape shape = item.GetComponent<Shape>();
+                if (shape != null)
+                {
+                    affectedColumns.Add(shape.Column);
+                }
+                SpawnTileExplosion(item.transform.position);
+                Go.killAllTweensWithTarget(item.transform);
+                shapes.Remove(item);
+                Destroy(item);
+            }
+
+            IncreaseScore(expanded.Count * Constants.Match3Score);
+            GameController.instance?.AttackFromBooster(expanded.Count, center / expanded.Count);
+            OnBoosterExecuted?.Invoke(boosterType);
+
+            yield return StartCoroutine(CollapseSpawnAndCascadeCoroutine(affectedColumns));
+        }
+        finally
+        {
+            m_isBoosterExecuting = false;
+            hitGo = null;
+            state = GameState.None;
+            StartCheckForPotentialMatches();
+        }
+    }
+
+    private IEnumerator ExecuteShuffleCoroutine()
+    {
+        try
+        {
+            var allTiles = new List<GameObject>(Constants.Rows * Constants.Columns);
+            for (int row = 0; row < Constants.Rows; row++)
+            {
+                for (int col = 0; col < Constants.Columns; col++)
+                {
+                    if (shapes[row, col] != null)
+                    {
+                        allTiles.Add(shapes[row, col]);
+                    }
+                }
+            }
+
+            if (allTiles.Count < 2)
+            {
+                yield break;
+            }
+
+            List<GameObject> bestOrder = null;
+            List<GameObject> fallbackNoMatchOrder = null;
+            const int maxAttempts = 40;
+
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                var candidate = new List<GameObject>(allTiles);
+                for (int i = candidate.Count - 1; i > 0; i--)
+                {
+                    int j = UnityEngine.Random.Range(0, i + 1);
+                    (candidate[i], candidate[j]) = (candidate[j], candidate[i]);
+                }
+
+                ApplyPermutationToArray(candidate);
+                bool hasImmediate = shapes.HasImmediateMatch();
+                bool hasPotential = Utilities.GetPotentialMatches(shapes) != null;
+
+                if (!hasImmediate && hasPotential)
+                {
+                    bestOrder = candidate;
+                    break;
+                }
+
+                if (!hasImmediate && fallbackNoMatchOrder == null)
+                {
+                    fallbackNoMatchOrder = candidate;
+                }
+            }
+
+            List<GameObject> chosen = bestOrder ?? fallbackNoMatchOrder ?? allTiles;
+            ApplyPermutationToArray(chosen);
+
+            if (SoundManager.instance != null)
+            {
+                SoundManager.instance.PlaySfx("ClearSFX");
+            }
+
+            const float shuffleDuration = 0.32f;
+            for (int row = 0; row < Constants.Rows; row++)
+            {
+                for (int col = 0; col < Constants.Columns; col++)
+                {
+                    GameObject tile = shapes[row, col];
+                    if (tile == null) continue;
+                    Go.killAllTweensWithTarget(tile.transform);
+                    tile.transform.positionTo(shuffleDuration, GetCellWorldPosition(row, col));
+                }
+            }
+
+            yield return new WaitForSeconds(shuffleDuration);
+            SnapBoardPositions();
+            OnBoosterExecuted?.Invoke(BoosterType.Shuffle);
+
+            // Safety: if board had too few distinct colors and an immediate match still exists, resolve it cleanly.
+            var cascadeGroups = new List<HashSet<GameObject>>();
+            for (int row = 0; row < Constants.Rows; row++)
+            {
+                for (int col = 0; col < Constants.Columns; col++)
+                {
+                    GameObject tile = shapes[row, col];
+                    if (tile != null)
+                    {
+                        AddMatchGroup(cascadeGroups, shapes.GetMatches(tile));
+                    }
+                }
+            }
+
+            if (cascadeGroups.Count > 0)
+            {
+                yield return StartCoroutine(ResolveMatchesAndCollapseLoop(cascadeGroups, false, null));
+            }
+        }
+        finally
+        {
+            m_isBoosterExecuting = false;
+            hitGo = null;
+            state = GameState.None;
+            StartCheckForPotentialMatches();
+        }
+    }
+
+    private void ApplyPermutationToArray(List<GameObject> orderedTiles)
+    {
+        int idx = 0;
+        for (int row = 0; row < Constants.Rows; row++)
+        {
+            for (int col = 0; col < Constants.Columns; col++)
+            {
+                if (idx < orderedTiles.Count)
+                {
+                    GameObject tile = orderedTiles[idx++];
+                    shapes[row, col] = tile;
+                    Shape shape = tile.GetComponent<Shape>();
+                    if (shape != null)
+                    {
+                        shape.Row = row;
+                        shape.Column = col;
+                    }
+                }
+                else
+                {
+                    shapes[row, col] = null;
+                }
+            }
+        }
+    }
+
+    private IEnumerator CollapseSpawnAndCascadeCoroutine(IEnumerable<int> affectedColumns)
+    {
+        var collapsedCandyInfo = shapes.Collapse(affectedColumns);
+        var newCandyInfo = CreateNewCandyInSpecificColumns(affectedColumns);
+
+        int maxDistance = Mathf.Max(1, Mathf.Max(collapsedCandyInfo.MaxDistance, newCandyInfo.MaxDistance));
+        MoveAndAnimate(newCandyInfo.AlteredCandy, maxDistance);
+        MoveAndAnimate(collapsedCandyInfo.AlteredCandy, maxDistance);
+
+        yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
+        SnapBoardPositions();
+
+        var groups = new List<HashSet<GameObject>>();
+        foreach (var tile in collapsedCandyInfo.AlteredCandy.Union(newCandyInfo.AlteredCandy))
+        {
+            if (tile != null)
+            {
+                AddMatchGroup(groups, shapes.GetMatches(tile));
+            }
         }
 
+        if (groups.Count > 0)
+        {
+            yield return StartCoroutine(ResolveMatchesAndCollapseLoop(groups, false, null));
+        }
+    }
+
+    private IEnumerator ResolveMatchesAndCollapseLoop(List<HashSet<GameObject>> groups, bool addBonus, Shape hitGoCache)
+    {
+        var totalMatches = groups.SelectMany(group => group).Where(go => go != null).Distinct().ToList();
         int timesRun = 1;
+
         while (totalMatches.Count >= Constants.MinimumMatches)
         {
-            //increase score
             IncreaseScore((totalMatches.Count - 2) * Constants.Match3Score);
 
             if (timesRun >= 2)
                 IncreaseScore(Constants.SubsequentMatchScore);
-            
-            SoundManager.instance.PlaySfx("ClearSFX");
+
+            if (SoundManager.instance != null)
+                SoundManager.instance.PlaySfx("ClearSFX");
 
             foreach (var group in groups)
             {
                 Vector3 center = Vector3.zero;
+                int validCount = 0;
                 foreach (var tile in group)
+                {
+                    if (tile == null) continue;
                     center += tile.transform.position;
-                GameController.instance?.AttackWithMatch(group.Count, center / group.Count);
+                    validCount++;
+                }
+                if (validCount > 0)
+                {
+                    GameController.instance?.AttackWithMatch(validCount, center / validCount);
+                }
             }
+
+            var columns = new HashSet<int>();
             foreach (var item in totalMatches)
             {
+                if (item == null) continue;
+                Shape s = item.GetComponent<Shape>();
+                if (s != null) columns.Add(s.Column);
+                Go.killAllTweensWithTarget(item.transform);
                 shapes.Remove(item);
                 Destroy(item);
             }
 
             //check and instantiate Bonus if needed
-            if (addBonus)
+            if (addBonus && hitGoCache != null)
                 CreateBonus(hitGoCache);
 
             addBonus = false;
 
-            //get the columns that we had a collapse
-            var columns = totalMatches.Select(go => go.GetComponent<Shape>().Column).Distinct();
-
             //the order the 2 methods below get called is important!!!
-            //collapse the ones gone
             var collapsedCandyInfo = shapes.Collapse(columns);
-            //create new ones
             var newCandyInfo = CreateNewCandyInSpecificColumns(columns);
 
-            int maxDistance = Mathf.Max(collapsedCandyInfo.MaxDistance, newCandyInfo.MaxDistance);
+            int maxDistance = Mathf.Max(1, Mathf.Max(collapsedCandyInfo.MaxDistance, newCandyInfo.MaxDistance));
 
             MoveAndAnimate(newCandyInfo.AlteredCandy, maxDistance);
             MoveAndAnimate(collapsedCandyInfo.AlteredCandy, maxDistance);
 
-
-
             //will wait for both of the above animations
             yield return new WaitForSeconds(Constants.MoveAnimationMinDuration * maxDistance);
+            SnapBoardPositions();
 
             //search if there are matches with the new/collapsed items
             groups.Clear();
             foreach (var tile in collapsedCandyInfo.AlteredCandy.Union(newCandyInfo.AlteredCandy))
-                AddMatchGroup(groups, shapes.GetMatches(tile));
-            totalMatches = groups.SelectMany(group => group).ToList();
-
-
+            {
+                if (tile != null)
+                    AddMatchGroup(groups, shapes.GetMatches(tile));
+            }
+            totalMatches = groups.SelectMany(group => group).Where(go => go != null).Distinct().ToList();
 
             timesRun++;
         }
+    }
 
-        state = GameState.None;
-        StartCheckForPotentialMatches();
+    private void SnapBoardPositions()
+    {
+        if (shapes == null) return;
+        for (int row = 0; row < Constants.Rows; row++)
+        {
+            for (int col = 0; col < Constants.Columns; col++)
+            {
+                GameObject tile = shapes[row, col];
+                if (tile == null) continue;
+                Go.killAllTweensWithTarget(tile.transform);
+                tile.transform.position = GetCellWorldPosition(row, col);
+            }
+        }
+    }
+
+    private void SpawnTileExplosion(Vector3 worldPos)
+    {
+        if (ExplosionPrefabs == null || ExplosionPrefabs.Length == 0) return;
+        GameObject prefab = ExplosionPrefabs[UnityEngine.Random.Range(0, ExplosionPrefabs.Length)];
+        if (prefab == null) return;
+        GameObject fx = Instantiate(prefab, worldPos, Quaternion.identity);
+        Destroy(fx, Constants.ExplosionDuration + 0.25f);
     }
 
     /// <summary>
@@ -408,6 +1075,10 @@ public class ShapesManager : MonoBehaviour
                 var go = GetRandomCandy();
                 GameObject newCandy = Instantiate(go, SpawnPositions[column], Quaternion.identity)
                     as GameObject;
+                if (_content != null)
+                {
+                    newCandy.transform.SetParent(_content.transform);
+                }
 
                 newCandy.GetComponent<Shape>().Assign(go.GetComponent<Shape>().Type, item.Row, item.Column);
 
@@ -427,10 +1098,14 @@ public class ShapesManager : MonoBehaviour
     /// <param name="movedGameObjects"></param>
     private void MoveAndAnimate(IEnumerable<GameObject> movedGameObjects, int distance)
     {
+        float duration = Constants.MoveAnimationMinDuration * Mathf.Max(1, distance);
         foreach (var item in movedGameObjects)
         {
-            item.transform.positionTo(Constants.MoveAnimationMinDuration * distance, BottomRight +
-                new Vector2(item.GetComponent<Shape>().Column * Constants.ItemSize.x, item.GetComponent<Shape>().Row * Constants.ItemSize.y));
+            if (item == null) continue;
+            Shape shape = item.GetComponent<Shape>();
+            if (shape == null) continue;
+            Go.killAllTweensWithTarget(item.transform);
+            item.transform.positionTo(duration, GetCellWorldPosition(shape.Row, shape.Column));
         }
     }
 

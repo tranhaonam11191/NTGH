@@ -110,6 +110,7 @@ public class ShapesArray
     public MatchesInfo GetMatches(GameObject go)
     {
         MatchesInfo matchesInfo = new MatchesInfo();
+        if (go == null) return matchesInfo;
 
         var horizontalMatches = GetMatchesHorizontally(go);
         if (ContainsDestroyRowColumnBonus(horizontalMatches))
@@ -130,6 +131,61 @@ public class ShapesArray
         matchesInfo.AddObjectRange(verticalMatches);
 
         return matchesInfo;
+    }
+
+    public List<GameObject> GetRow(int row)
+    {
+        List<GameObject> result = new List<GameObject>();
+        if (row < 0 || row >= Constants.Rows) return result;
+        for (int column = 0; column < Constants.Columns; column++)
+        {
+            if (shapes[row, column] != null)
+                result.Add(shapes[row, column]);
+        }
+        return result;
+    }
+
+    public List<GameObject> GetColumn(int column)
+    {
+        List<GameObject> result = new List<GameObject>();
+        if (column < 0 || column >= Constants.Columns) return result;
+        for (int row = 0; row < Constants.Rows; row++)
+        {
+            if (shapes[row, column] != null)
+                result.Add(shapes[row, column]);
+        }
+        return result;
+    }
+
+    public bool HasImmediateMatch()
+    {
+        for (int row = 0; row < Constants.Rows; row++)
+        {
+            for (int col = 0; col < Constants.Columns; col++)
+            {
+                GameObject current = shapes[row, col];
+                if (current == null) continue;
+                Shape s0 = current.GetComponent<Shape>();
+                if (s0 == null) continue;
+
+                if (col + 2 < Constants.Columns &&
+                    shapes[row, col + 1] != null && shapes[row, col + 2] != null &&
+                    s0.IsSameType(shapes[row, col + 1].GetComponent<Shape>()) &&
+                    s0.IsSameType(shapes[row, col + 2].GetComponent<Shape>()))
+                {
+                    return true;
+                }
+
+                if (row + 2 < Constants.Rows &&
+                    shapes[row + 1, col] != null && shapes[row + 2, col] != null &&
+                    s0.IsSameType(shapes[row + 1, col].GetComponent<Shape>()) &&
+                    s0.IsSameType(shapes[row + 2, col].GetComponent<Shape>()))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private bool ContainsDestroyRowColumnBonus(IEnumerable<GameObject> matches)
@@ -183,7 +239,8 @@ public class ShapesArray
         if (shape.Column != 0)
             for (int column = shape.Column - 1; column >= 0; column--)
             {
-                if (shapes[shape.Row, column].GetComponent<Shape>().IsSameType(shape))
+                if (shapes[shape.Row, column] != null &&
+                    shapes[shape.Row, column].GetComponent<Shape>().IsSameType(shape))
                 {
                     matches.Add(shapes[shape.Row, column]);
                 }
@@ -195,7 +252,8 @@ public class ShapesArray
         if (shape.Column != Constants.Columns - 1)
             for (int column = shape.Column + 1; column < Constants.Columns; column++)
             {
-                if (shapes[shape.Row, column].GetComponent<Shape>().IsSameType(shape))
+                if (shapes[shape.Row, column] != null &&
+                    shapes[shape.Row, column].GetComponent<Shape>().IsSameType(shape))
                 {
                     matches.Add(shapes[shape.Row, column]);
                 }
@@ -259,7 +317,15 @@ public class ShapesArray
     /// <param name="item"></param>
     public void Remove(GameObject item)
     {
-        shapes[item.GetComponent<Shape>().Row, item.GetComponent<Shape>().Column] = null;
+        if (item == null) return;
+        Shape shape = item.GetComponent<Shape>();
+        if (shape == null) return;
+        if (shape.Row >= 0 && shape.Row < Constants.Rows &&
+            shape.Column >= 0 && shape.Column < Constants.Columns &&
+            shapes[shape.Row, shape.Column] == item)
+        {
+            shapes[shape.Row, shape.Column] = null;
+        }
     }
 
     /// <summary>

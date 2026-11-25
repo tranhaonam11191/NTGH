@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NTGH.Boosters;
 using NTGH.Teammates;
 using NTGH.UI;
 using UnityEngine;
@@ -23,10 +24,12 @@ public class SOManager : MonoBehaviour
     [SerializeField] ItemCatalogSO m_weaponCatalog;
     [SerializeField] ItemCatalogSO m_outfitCatalog;
     [SerializeField] TeammateCardDatabaseSO m_teammateDatabase;
+    [SerializeField] BoosterDatabaseSO m_boosterDatabase;
 
     public ItemCatalogSO WeaponCatalog => m_weaponCatalog;
     public ItemCatalogSO OutfitCatalog => m_outfitCatalog;
     public TeammateCardDatabaseSO TeammateDatabase => m_teammateDatabase;
+    public BoosterDatabaseSO BoosterDatabase => m_boosterDatabase;
 
     [SerializeField] AudioSource m_audioSource;
 

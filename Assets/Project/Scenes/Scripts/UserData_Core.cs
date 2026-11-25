@@ -158,6 +158,7 @@ public static partial class User
         data.EnsureInventoryInitialized();
         data.EnsureHomeDefaults();
         data.EnsureHeartDefaults();
+        data.EnsureBoosterStorage();
         Save();
         NotifyGoldChanged(data.gold);
         NotifyHeartsChanged(data.hearts);
@@ -173,6 +174,7 @@ public static partial class User
         bool changed = false;
 
         data.EnsureInventoryInitialized();
+        data.EnsureBoosterStorage();
         if (data.EnsureHomeDefaults())
         {
             changed = true;
