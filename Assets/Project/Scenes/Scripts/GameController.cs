@@ -327,7 +327,6 @@ public class GameController : MonoBehaviour
     }
 
     [SerializeField] WeaponScripts enemyWeapon;
-    [SerializeField] Sprite m_MatchSword;
 
     void EnemyAttack()
     {
@@ -340,7 +339,7 @@ public class GameController : MonoBehaviour
             int rawDamage = Data.enemy.Character.attack + (m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalAttackBonus() : 0);
             int reduction = m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalDamageReduction() : 0;
             int finalDamage = Mathf.Max(1, rawDamage - reduction);
-            m_effAttack.Play();
+            PlayAttackEffect();
             enemyWeapon.Move(Player.m_imgAvatar.transform.position);
             Attack(Player, ref m_PlayerHp, m_PlayerMaxHp,
                 finalDamage, ConversationTrigger.PlayerHealth);
@@ -641,35 +640,75 @@ public class GameController : MonoBehaviour
     {
         if (Data == null || endGame || clearedItems < Constants.MinimumMatches) return;
 
-        Image avatar = Enemy.m_imgAvatar;
-        Canvas canvas = avatar.canvas.rootCanvas;
-        RectTransform layer = (RectTransform)canvas.transform;
-        Camera uiCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
-        Vector2 screenStart = RectTransformUtility.WorldToScreenPoint(Camera.main, boardPosition);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(layer, screenStart, uiCamera, out Vector2 start);
-        Vector2 target = layer.InverseTransformPoint(avatar.rectTransform.TransformPoint(avatar.rectTransform.rect.center));
+        Image avatar = Enemy != null ? Enemy.m_imgAvatar : null;
+        Canvas canvas = avatar != null && avatar.canvas != null ? avatar.canvas.rootCanvas : null;
+        RectTransform layer = canvas != null ? (RectTransform)canvas.transform : null;
+        Vector3 avatarCenterWorld = avatar != null
+            ? avatar.rectTransform.TransformPoint(avatar.rectTransform.rect.center)
+            : Vector3.zero;
+        Vector2 targetLocal = layer != null ? (Vector2)layer.InverseTransformPoint(avatarCenterWorld) : Vector2.zero;
 
-        var sword = new GameObject("MatchSword", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
-        sword.rectTransform.SetParent(layer, false);
-        sword.sprite = m_MatchSword;
-        sword.raycastTarget = false;
-        RectTransform rect = sword.rectTransform;
-        rect.pivot = new Vector2(0.22f, 0.95f); // Tip in the approved diagonal sprite.
-        rect.sizeDelta = new Vector2(64f, 64f);
-        rect.localPosition = start;
-        float heading = Vector2.SignedAngle(Vector2.right, target - start);
-        rect.localRotation = Quaternion.Euler(0f, 0f, heading - 122f);
-
-        bool hit = false;
-        DOVirtual.Float(0f, 1f, 0.32f, progress =>
+        if (m_effAttack == null || avatar == null)
         {
-            rect.localPosition = Vector2.LerpUnclamped(start, target, progress);
-            if (progress < 1f || hit || endGame) return;
-            hit = true;
             Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, clearedItems, ConversationTrigger.EnemyHealth);
-            ShowMatchDamage(layer, target, clearedItems);
-        }).SetEase(Ease.OutBack, 0.9f).SetLink(sword.gameObject)
-            .OnComplete(() => Destroy(sword.gameObject));
+            if (layer != null) ShowMatchDamage(layer, targetLocal, clearedItems);
+            return;
+        }
+
+        float effectZ = m_effAttack.transform.position.z;
+        Vector3 startWorld = new Vector3(boardPosition.x, boardPosition.y, effectZ);
+        Camera mainCamera = Camera.main;
+        Camera uiCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+        Vector2 targetScreen = RectTransformUtility.WorldToScreenPoint(uiCamera, avatarCenterWorld);
+        Vector3 targetWorld = mainCamera != null
+            ? mainCamera.ScreenToWorldPoint(new Vector3(targetScreen.x, targetScreen.y, Mathf.Abs(effectZ - mainCamera.transform.position.z)))
+            : avatarCenterWorld;
+        targetWorld.z = effectZ;
+
+        Vector2 dir = new Vector2(targetWorld.x - startWorld.x, targetWorld.y - startWorld.y);
+        // BuffAttack_01 sword texture points straight up (+Y); Billboard startRotation is clockwise in radians.
+        float swordRotationRad = dir.sqrMagnitude > 0.0001f ? Mathf.Atan2(dir.x, dir.y) : 0f;
+
+        ParticleSystem effect = Instantiate(m_effAttack, startWorld, m_effAttack.transform.rotation);
+        effect.name = "MatchAttackEffect";
+        effect.gameObject.SetActive(true);
+        foreach (ParticleSystem ps in effect.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            var main = ps.main;
+            main.simulationSpace = ps.name == "Star"
+                ? ParticleSystemSimulationSpace.World
+                : ParticleSystemSimulationSpace.Local;
+            if (ps == effect || ps.name == "Sword")
+            {
+                main.startRotation = swordRotationRad;
+            }
+        }
+        var rootMain = effect.main;
+        rootMain.stopAction = ParticleSystemStopAction.Destroy;
+        effect.Play(true);
+
+        Vector3 approachDir = dir.sqrMagnitude > 0.0001f ? (Vector3)dir.normalized : Vector3.up;
+        Vector3 windUpWorld = startWorld - approachDir * 0.9f;
+        Vector3 recoilWorld = targetWorld - approachDir * 0.35f;
+
+        DOTween.Sequence().SetLink(effect.gameObject)
+            .AppendInterval(0.25f)
+            .Append(effect.transform.DOMove(windUpWorld, 0.18f).SetEase(Ease.OutCubic))
+            .Append(effect.transform.DOMove(targetWorld, 0.28f).SetEase(Ease.InCubic))
+            .AppendCallback(() =>
+            {
+                if (endGame) return;
+                Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, clearedItems, ConversationTrigger.EnemyHealth);
+                if (layer != null) ShowMatchDamage(layer, targetLocal, clearedItems);
+            })
+            .Append(effect.transform.DOMove(recoilWorld, 0.12f).SetEase(Ease.OutBack));
+    }
+
+    private void PlayAttackEffect()
+    {
+        if (m_effAttack == null) return;
+        m_effAttack.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        m_effAttack.Play(true);
     }
 
     private void ShowMatchDamage(RectTransform layer, Vector2 target, int amount)
