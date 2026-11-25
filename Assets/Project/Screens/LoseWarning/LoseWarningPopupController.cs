@@ -15,9 +15,6 @@ namespace NTGH.UI
     {
         public const string ScreenResourceName = "LoseWarningPopup";
 
-        [Header("Top Bar")]
-        [SerializeField] private CurrencyDisplayView m_currencyDisplay;
-
         [Header("Header")]
         [SerializeField] private TextMeshProUGUI m_titleText;
         [SerializeField] private Button m_closeButton;
@@ -103,10 +100,7 @@ namespace NTGH.UI
             m_callerCanvas = callerCanvas;
             m_isResolved = false;
 
-            if (m_currencyDisplay != null)
-                m_currencyDisplay.RefreshFromUserData();
-
-            ElevateGameHeartDisplay();
+            ElevateGameHud();
 
             if (m_titleText != null)
                 m_titleText.text = "WARNING";
@@ -176,8 +170,7 @@ namespace NTGH.UI
                 adRewardGold: Mathf.Max(200, m_reviveGoldCost),
                 onRewardClaimed: () =>
                 {
-                    if (m_currencyDisplay != null)
-                        m_currencyDisplay.RefreshFromUserData();
+                    GameController.instance?.GetGameCurrencyDisplay()?.RefreshFromUserData();
                 },
                 callerCanvas: m_callerCanvas);
         }
@@ -218,17 +211,18 @@ namespace NTGH.UI
                 SOManager.instance.PlayAudio("Click2");
         }
 
-        private void ElevateGameHeartDisplay()
+        private void ElevateGameHud()
         {
             if (m_elevatedGameHeart)
             {
+                GameController.instance?.GetGameCurrencyDisplay()?.RefreshFromUserData();
                 GameController.instance?.GetGameHeartDisplay()?.RefreshFromUserData();
                 return;
             }
 
             if (GameController.instance != null)
             {
-                GameController.instance.PushHeartDisplayOverShield();
+                GameController.instance.PushBattleHudOverShield();
                 m_elevatedGameHeart = true;
             }
         }
@@ -239,7 +233,7 @@ namespace NTGH.UI
                 return;
 
             m_elevatedGameHeart = false;
-            GameController.instance?.PopHeartDisplayOverShield();
+            GameController.instance?.PopBattleHudOverShield();
         }
 
         public void SetEditorReferences(
@@ -253,7 +247,6 @@ namespace NTGH.UI
             TextMeshProUGUI reviveByGoldCostText,
             Button reviveByAdButton)
         {
-            m_currencyDisplay = currencyDisplay;
             m_titleText = titleText;
             m_closeButton = closeButton;
             m_penaltyBadgeText = penaltyBadgeText;

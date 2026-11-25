@@ -309,23 +309,89 @@ public class GameController : MonoBehaviour
     [SerializeField] Image m_WeaponImage;
     CreateItemReward weapon;
 
+    struct ElevatedHudSlot
+    {
+        public RectTransform Target;
+        public Transform OriginalParent;
+        public int OriginalSiblingIndex;
+        public Vector2 OriginalAnchorMin;
+        public Vector2 OriginalAnchorMax;
+        public Vector2 OriginalPivot;
+        public Vector2 OriginalAnchoredPos;
+        public Vector2 OriginalSizeDelta;
+        public Vector3 OriginalScale;
+        public bool IsElevated;
+
+        public void Elevate(RectTransform target, RectTransform topContainer)
+        {
+            if (target == null || topContainer == null || IsElevated)
+                return;
+
+            Target = target;
+            OriginalParent = target.parent;
+            OriginalSiblingIndex = target.GetSiblingIndex();
+            OriginalAnchorMin = target.anchorMin;
+            OriginalAnchorMax = target.anchorMax;
+            OriginalPivot = target.pivot;
+            OriginalAnchoredPos = target.anchoredPosition;
+            OriginalSizeDelta = target.sizeDelta;
+            OriginalScale = target.localScale;
+
+            target.SetParent(topContainer, false);
+            target.anchorMin = OriginalAnchorMin;
+            target.anchorMax = OriginalAnchorMax;
+            target.pivot = OriginalPivot;
+            target.sizeDelta = OriginalSizeDelta;
+            target.anchoredPosition = OriginalAnchoredPos;
+            target.localScale = OriginalScale;
+            target.SetAsLastSibling();
+
+            IsElevated = true;
+        }
+
+        public void Restore()
+        {
+            if (!IsElevated)
+                return;
+
+            IsElevated = false;
+
+            if (Target == null)
+                return;
+
+            if (OriginalParent != null)
+            {
+                Target.SetParent(OriginalParent, false);
+                Target.SetSiblingIndex(OriginalSiblingIndex);
+                Target.anchorMin = OriginalAnchorMin;
+                Target.anchorMax = OriginalAnchorMax;
+                Target.pivot = OriginalPivot;
+                Target.sizeDelta = OriginalSizeDelta;
+                Target.anchoredPosition = OriginalAnchoredPos;
+                Target.localScale = OriginalScale;
+            }
+            else if (Target.gameObject != null)
+            {
+                Destroy(Target.gameObject);
+            }
+
+            Target = null;
+            OriginalParent = null;
+        }
+    }
+
     [Header("Battle Result Popups")]
     [SerializeField] HeartDisplayView m_heartDisplay;
+    [SerializeField] CurrencyDisplayView m_currencyDisplay;
     [SerializeField] int m_winRewardGold = 350;
     [SerializeField] int m_loseGoldPenalty = 200;
     [SerializeField] int m_reviveGoldCost = 200;
     [SerializeField, Range(0.1f, 1f)] float m_reviveHealthPercent = 1f;
 
-    Transform m_heartOriginalParent;
-    int m_heartOriginalSiblingIndex;
-    Vector2 m_heartOriginalAnchorMin;
-    Vector2 m_heartOriginalAnchorMax;
-    Vector2 m_heartOriginalPivot;
-    Vector2 m_heartOriginalAnchoredPos;
-    Vector2 m_heartOriginalSizeDelta;
-    Vector3 m_heartOriginalScale;
-    int m_heartElevateRefCount;
-    bool m_heartIsElevated;
+    ElevatedHudSlot m_heartHudSlot;
+    ElevatedHudSlot m_currencyHudSlot;
+    int m_battleHudElevateRefCount;
+    bool m_battleHudIsElevated;
     
     readonly HashSet<LevelConversation> m_Played = new HashSet<LevelConversation>();
     readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
@@ -522,7 +588,7 @@ public class GameController : MonoBehaviour
 
     void OnDestroy()
     {
-        RestoreHeartDisplayImmediate();
+        RestoreBattleHudImmediate();
         Player?.KillTweens();
         Enemy?.KillTweens();
         if (ObjectPoolManager.HasInstance)
@@ -547,10 +613,30 @@ public class GameController : MonoBehaviour
         return m_heartDisplay;
     }
 
+    public CurrencyDisplayView GetGameCurrencyDisplay()
+    {
+        if (m_currencyDisplay == null)
+        {
+            m_currencyDisplay = GetComponentInChildren<CurrencyDisplayView>(true);
+        }
+        return m_currencyDisplay;
+    }
+
     public void PushHeartDisplayOverShield()
     {
+        PushBattleHudOverShield();
+    }
+
+    public void PopHeartDisplayOverShield()
+    {
+        PopBattleHudOverShield();
+    }
+
+    public void PushBattleHudOverShield()
+    {
         HeartDisplayView heart = GetGameHeartDisplay();
-        if (heart == null)
+        CurrencyDisplayView currency = GetGameCurrencyDisplay();
+        if (heart == null && currency == null)
             return;
 
         Core.Init();
@@ -558,75 +644,46 @@ public class GameController : MonoBehaviour
         if (topContainer == null)
             return;
 
-        m_heartElevateRefCount++;
-        if (!m_heartIsElevated)
+        m_battleHudElevateRefCount++;
+        if (!m_battleHudIsElevated)
         {
-            RectTransform rt = heart.transform as RectTransform;
-            if (rt != null)
-            {
-                m_heartOriginalParent = rt.parent;
-                m_heartOriginalSiblingIndex = rt.GetSiblingIndex();
-                m_heartOriginalAnchorMin = rt.anchorMin;
-                m_heartOriginalAnchorMax = rt.anchorMax;
-                m_heartOriginalPivot = rt.pivot;
-                m_heartOriginalAnchoredPos = rt.anchoredPosition;
-                m_heartOriginalSizeDelta = rt.sizeDelta;
-                m_heartOriginalScale = rt.localScale;
+            if (currency != null)
+                m_currencyHudSlot.Elevate(currency.transform as RectTransform, topContainer);
 
-                rt.SetParent(topContainer, false);
-                rt.anchorMin = m_heartOriginalAnchorMin;
-                rt.anchorMax = m_heartOriginalAnchorMax;
-                rt.pivot = m_heartOriginalPivot;
-                rt.sizeDelta = m_heartOriginalSizeDelta;
-                rt.anchoredPosition = m_heartOriginalAnchoredPos;
-                rt.localScale = m_heartOriginalScale;
-                rt.SetAsLastSibling();
-            }
+            if (heart != null)
+                m_heartHudSlot.Elevate(heart.transform as RectTransform, topContainer);
 
-            m_heartIsElevated = true;
+            m_battleHudIsElevated = true;
         }
 
-        heart.RefreshFromUserData();
+        if (currency != null)
+            currency.RefreshFromUserData();
+
+        if (heart != null)
+            heart.RefreshFromUserData();
     }
 
-    public void PopHeartDisplayOverShield()
+    public void PopBattleHudOverShield()
     {
-        if (m_heartElevateRefCount > 0)
-            m_heartElevateRefCount--;
+        if (m_battleHudElevateRefCount > 0)
+            m_battleHudElevateRefCount--;
 
-        if (m_heartElevateRefCount == 0 && m_heartIsElevated)
+        if (m_battleHudElevateRefCount == 0 && m_battleHudIsElevated)
         {
-            RestoreHeartDisplayImmediate();
+            RestoreBattleHudImmediate();
         }
     }
 
-    void RestoreHeartDisplayImmediate()
+    void RestoreBattleHudImmediate()
     {
-        if (!m_heartIsElevated)
+        if (!m_battleHudIsElevated)
             return;
 
-        m_heartIsElevated = false;
-        m_heartElevateRefCount = 0;
+        m_battleHudIsElevated = false;
+        m_battleHudElevateRefCount = 0;
 
-        if (m_heartDisplay == null)
-            return;
-
-        RectTransform rt = m_heartDisplay.transform as RectTransform;
-        if (m_heartOriginalParent != null && rt != null)
-        {
-            rt.SetParent(m_heartOriginalParent, false);
-            rt.SetSiblingIndex(m_heartOriginalSiblingIndex);
-            rt.anchorMin = m_heartOriginalAnchorMin;
-            rt.anchorMax = m_heartOriginalAnchorMax;
-            rt.pivot = m_heartOriginalPivot;
-            rt.sizeDelta = m_heartOriginalSizeDelta;
-            rt.anchoredPosition = m_heartOriginalAnchoredPos;
-            rt.localScale = m_heartOriginalScale;
-        }
-        else if (m_heartDisplay.gameObject != null)
-        {
-            Destroy(m_heartDisplay.gameObject);
-        }
+        m_currencyHudSlot.Restore();
+        m_heartHudSlot.Restore();
     }
 
     void SetupWeapon()

@@ -15,9 +15,6 @@ namespace NTGH.UI
     {
         public const string ScreenResourceName = "GameLosePopup";
 
-        [Header("Top Bar")]
-        [SerializeField] private CurrencyDisplayView m_currencyDisplay;
-
         [Header("Header")]
         [SerializeField] private TextMeshProUGUI m_titleText;
         [SerializeField] private Button m_closeButton;
@@ -79,9 +76,6 @@ namespace NTGH.UI
             m_onRetry = onRetry;
             m_onHome = onHome;
             m_isResolved = false;
-
-            if (m_currencyDisplay != null)
-                m_currencyDisplay.RefreshFromUserData();
 
             ElevateGameHeartDisplay();
 
@@ -159,13 +153,14 @@ namespace NTGH.UI
         {
             if (m_elevatedGameHeart)
             {
+                GameController.instance?.GetGameCurrencyDisplay()?.RefreshFromUserData();
                 GameController.instance?.GetGameHeartDisplay()?.RefreshFromUserData();
                 return;
             }
 
             if (GameController.instance != null)
             {
-                GameController.instance.PushHeartDisplayOverShield();
+                GameController.instance.PushBattleHudOverShield();
                 m_elevatedGameHeart = true;
             }
         }
@@ -176,7 +171,7 @@ namespace NTGH.UI
                 return;
 
             m_elevatedGameHeart = false;
-            GameController.instance?.PopHeartDisplayOverShield();
+            GameController.instance?.PopBattleHudOverShield();
         }
 
         public void SetEditorReferences(
@@ -188,7 +183,6 @@ namespace NTGH.UI
             TextMeshProUGUI goldLostText,
             Button retryButton)
         {
-            m_currencyDisplay = currencyDisplay;
             m_titleText = titleText;
             m_closeButton = closeButton;
             m_statusText = statusText;

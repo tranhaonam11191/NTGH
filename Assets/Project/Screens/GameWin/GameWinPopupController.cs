@@ -197,13 +197,14 @@ namespace NTGH.UI
         {
             if (m_elevatedGameHeart)
             {
+                GameController.instance?.GetGameCurrencyDisplay()?.RefreshFromUserData();
                 GameController.instance?.GetGameHeartDisplay()?.RefreshFromUserData();
                 return;
             }
 
             if (GameController.instance != null)
             {
-                GameController.instance.PushHeartDisplayOverShield();
+                GameController.instance.PushBattleHudOverShield();
                 m_elevatedGameHeart = true;
             }
         }
@@ -214,7 +215,7 @@ namespace NTGH.UI
                 return;
 
             m_elevatedGameHeart = false;
-            GameController.instance?.PopHeartDisplayOverShield();
+            GameController.instance?.PopBattleHudOverShield();
         }
 
         public void SetEditorReferences(
