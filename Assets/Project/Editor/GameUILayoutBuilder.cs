@@ -21,8 +21,8 @@ namespace NTGH.Editor
 
         // 7x7 grid with ItemSize = (0.9, 0.9) => 6.3 x 6.3 world units => 630 x 630 px inside 664 x 664 BoardFrame.
         private const float BoardFrameSizePx = 664f;
-        private const float BoardCenterYPx = 118f;
-        private const float BoardWorldCenterY = 1.18f;
+        private const float BoardCenterYPx = 54f;
+        private const float BoardWorldCenterY = BoardCenterYPx / 100f;
 
         [MenuItem("NTGH/UI/Apply Game Layout Battle HUD (7x7)")]
         public static void ApplyBattleHudLayout()
@@ -106,7 +106,7 @@ namespace NTGH.Editor
 
         private static void ConfigureWeaponObjects(RectTransform canvasRect)
         {
-            ConfigureSingleWeapon(canvasRect.Find("Knife_Enemy") as RectTransform, new Vector2(-246f, 620f));
+            ConfigureSingleWeapon(canvasRect.Find("Knife_Enemy") as RectTransform, new Vector2(-246f, 556f));
             ConfigureSingleWeapon(canvasRect.Find("Knife_Player") as RectTransform, new Vector2(-246f, -387f));
         }
 

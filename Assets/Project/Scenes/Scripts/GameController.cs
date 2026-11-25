@@ -258,6 +258,11 @@ public class GameController : MonoBehaviour
     private void Awake()
     {
         instance = this;
+        if (m_EnemyPanel != null)
+        {
+            m_EnemyPanelParent = (RectTransform)m_EnemyPanel.parent;
+            m_EnemyTopMargin = -m_EnemyPanel.anchoredPosition.y;
+        }
         Core.Init();
     }
     [SerializeField] GameItem gameItemBase;
@@ -286,6 +291,10 @@ public class GameController : MonoBehaviour
 
     [SerializeField] CharacterOnGame Player, Enemy;
 
+
+    [SerializeField] RectTransform m_EnemyPanel;
+    RectTransform m_EnemyPanelParent;
+    float m_EnemyTopMargin;
 
     [SerializeField] TextMeshProUGUI m_StageTitle;
 
@@ -375,8 +384,22 @@ public class GameController : MonoBehaviour
         }
     }
 
+    void FitEnemyPanelToSafeArea()
+    {
+        if (m_EnemyPanelParent == null || Screen.height <= 0) return;
+
+        float topInset = (Screen.height - Screen.safeArea.yMax) / Screen.height * m_EnemyPanelParent.rect.height;
+        float topMargin = Mathf.Max(m_EnemyTopMargin, topInset + 16f);
+        Vector2 position = m_EnemyPanel.anchoredPosition;
+        if (Mathf.Approximately(position.y, -topMargin)) return;
+
+        position.y = -topMargin;
+        m_EnemyPanel.anchoredPosition = position;
+    }
+
     void LateUpdate()
     {
+        FitEnemyPanelToSafeArea();
         if (m_ShowingStory) return;
         if (m_PendingLines.Count > 0)
         {
