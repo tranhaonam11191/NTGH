@@ -1,5 +1,6 @@
 using DG.Tweening;
 using NTGH.Teammates;
+using NTGH.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -307,6 +308,12 @@ public class GameController : MonoBehaviour
     [Header("Weapon")]
     [SerializeField] Image m_WeaponImage;
     CreateItemReward weapon;
+
+    [Header("Battle Result Popups")]
+    [SerializeField] int m_winRewardGold = 350;
+    [SerializeField] int m_loseGoldPenalty = 200;
+    [SerializeField] int m_reviveGoldCost = 200;
+    [SerializeField, Range(0.1f, 1f)] float m_reviveHealthPercent = 1f;
     
     readonly HashSet<LevelConversation> m_Played = new HashSet<LevelConversation>();
     readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
@@ -411,14 +418,90 @@ public class GameController : MonoBehaviour
         else if (endGame && !m_ResultShown)
         {
             m_ResultShown = true;
-            Core.Load<Popup>("Popup", LoadSceneMode.Additive, popup =>
-            {
-                popup.Setup(new PopupData(m_Result, 0, 0));
-                if (m_Result == resultType.win && Data.itemReward != null &&
-                    AdsController.instance != null && AdsController.instance.checkReward())
-                    StartCoroutine(coPopupReward());
-            });
+            ShowBattleResultPopup();
         }
+    }
+
+    Canvas GetBattleCanvas()
+    {
+        return GetComponentInChildren<Canvas>();
+    }
+
+    void ShowBattleResultPopup()
+    {
+        Canvas battleCanvas = GetBattleCanvas();
+
+        if (m_Result == resultType.win)
+        {
+            GameWinPopupController.Open(
+                m_winRewardGold,
+                onNext: () => SOManager.instance?.PlayCurrentLevel(),
+                callerCanvas: battleCanvas);
+
+            if (Data != null && Data.itemReward != null &&
+                AdsController.instance != null && AdsController.instance.checkReward())
+            {
+                StartCoroutine(coPopupReward());
+            }
+            return;
+        }
+
+        User.EnsureLoaded();
+        int actualPenalty = User.data != null
+            ? Mathf.Min(User.data.gold, Mathf.Max(0, m_loseGoldPenalty))
+            : 0;
+
+        LoseWarningPopupController.Open(
+            actualPenalty,
+            m_reviveGoldCost,
+            onRevive: HandleReviveFromWarning,
+            onCloseToLose: () => HandleConfirmDefeat(actualPenalty),
+            callerCanvas: battleCanvas);
+    }
+
+    void HandleReviveFromWarning(bool viaAd)
+    {
+        m_PlayerHp = Mathf.Clamp(m_PlayerMaxHp * m_reviveHealthPercent, 1f, m_PlayerMaxHp);
+        if (Player != null)
+        {
+            if (Player.m_Health != null)
+            {
+                Player.m_Health.DOKill();
+                Player.m_Health.fillAmount = m_PlayerHp / m_PlayerMaxHp;
+            }
+            Player.UpdateHealthText(m_PlayerHp, m_PlayerMaxHp);
+        }
+
+        m_EnemyAttackProgress = 1f;
+        Enemy?.UpdateAttackTimer(m_EnemyAttackProgress);
+
+        endGame = false;
+        m_ResultShown = false;
+        canClick = true;
+        moving = false;
+    }
+
+    void HandleConfirmDefeat(int goldPenalty)
+    {
+        int deducted = 0;
+        if (goldPenalty > 0)
+        {
+            User.EnsureLoaded();
+            if (User.data != null)
+            {
+                deducted = Mathf.Min(User.data.gold, goldPenalty);
+                if (deducted > 0 && User.data.TrySpendGold(deducted))
+                {
+                    User.Save();
+                }
+            }
+        }
+
+        GameLosePopupController.Open(
+            deducted,
+            onRetry: () => SOManager.instance?.PlayCurrentLevel(),
+            onHome: SOManager.LoadHome,
+            callerCanvas: GetBattleCanvas());
     }
 
     void OnDestroy()
