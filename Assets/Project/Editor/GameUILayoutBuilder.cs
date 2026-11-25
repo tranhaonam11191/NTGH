@@ -1,4 +1,3 @@
-using NTGH.Teammates;
 using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -15,51 +14,15 @@ namespace NTGH.Editor
         private const string PanelFillPath = "Assets/Project/Sprites/UI/Neon90s/ui_neon_panel_fill.png";
         private const string BorderOuterPath = "Assets/Project/Sprites/UI/Neon90s/ui_neon_border_outer.png";
         private const string BorderInnerPath = "Assets/Project/Sprites/UI/Neon90s/ui_neon_border_inner.png";
-        private const string LabelFillPath = "Assets/Project/Sprites/UI/Neon90s/ui_neon_label_fill.png";
-        private const string LabelBorderPath = "Assets/Project/Sprites/UI/Neon90s/ui_neon_label_border.png";
-        private const string IconWeaponPath = "Assets/Project/Sprites/UI/Neon90s/icon_neon_weapon.png";
-        private const string IconOutfitPath = "Assets/Project/Sprites/UI/Neon90s/icon_neon_outfit.png";
 
         // Canvas reference resolution is 720 x 1600 (scale 0.01 => 7.2 x 16.0 world units).
         private const float AdBannerHeightPx = 120f;
         private const float FooterHeightPx = 140f;
-        private const float HudPanelWidthPx = 688f;
-        private const float HudPanelHeightPx = 294f;
-        private const float TopPanelMarginPx = 32f;
-        private const float PlayerPanelBottomPx = AdBannerHeightPx + FooterHeightPx + 6f; // 266px from bottom => Y = -534 to -240
 
         // 7x7 grid with ItemSize = (0.9, 0.9) => 6.3 x 6.3 world units => 630 x 630 px inside 664 x 664 BoardFrame.
         private const float BoardFrameSizePx = 664f;
         private const float BoardCenterYPx = 118f;
         private const float BoardWorldCenterY = 1.18f;
-
-        private struct HudTheme
-        {
-            public Color PanelBg;
-            public Color BorderOuter;
-            public Color BorderInner;
-            public Color LevelBg;
-            public Color LevelBorder;
-            public string HealthFillSprite;
-            public string DefaultName;
-            public string DefaultLevel;
-            public string DefaultHealthText;
-            public string DefaultAvatarSprite;
-            public string[] TeammateSprites;
-        }
-
-        private struct HudRefs
-        {
-            public Image HealthFill;
-            public Image AttackTimerFill;
-            public Image WeaponSlotIcon;
-            public Image OutfitSlotIcon;
-            public TeammateCardView[] TeammateSlots;
-            public TextMeshProUGUI TxtName;
-            public TextMeshProUGUI TxtLevel;
-            public TextMeshProUGUI TxtHealth;
-            public RectTransform AvatarContainer;
-        }
 
         [MenuItem("NTGH/UI/Apply Game Layout Battle HUD (7x7)")]
         public static void ApplyBattleHudLayout()
@@ -102,58 +65,7 @@ namespace NTGH.Editor
             // Hide legacy floating bar containers (keep inactive so no stray visuals remain)
             HideLegacyBarContainers(body);
 
-            var enemyTheme = new HudTheme
-            {
-                PanelBg = new Color(0.10f, 0.03f, 0.05f, 0.90f),
-                BorderOuter = new Color(0.84f, 0.16f, 0.22f, 1f),
-                BorderInner = new Color(1.00f, 0.36f, 0.42f, 0.35f),
-                LevelBg = new Color(0.32f, 0.06f, 0.09f, 0.95f),
-                LevelBorder = new Color(0.82f, 0.20f, 0.25f, 0.90f),
-                HealthFillSprite = "Assets/Project/Textures/bar_fill_red.png",
-                DefaultName = "Hồng Côn",
-                DefaultLevel = "Lv.100",
-                DefaultHealthText = "100.000 / 100.000",
-                DefaultAvatarSprite = "Assets/Project/Textures/temp_enemy.png",
-                TeammateSprites = new[]
-                {
-                    "Assets/Project/Textures/Characters/QuaDen.png",
-                    "Assets/Project/Textures/Characters/KimMaoHo.png",
-                    "Assets/Project/Textures/Characters/LapHoa.png",
-                    "Assets/Project/Textures/Characters/LanhDienHo.png"
-                }
-            };
-
-            var playerTheme = new HudTheme
-            {
-                PanelBg = new Color(0.03f, 0.09f, 0.11f, 0.90f),
-                BorderOuter = new Color(0.12f, 0.78f, 0.82f, 1f),
-                BorderInner = new Color(0.45f, 0.94f, 0.98f, 0.35f),
-                LevelBg = new Color(0.05f, 0.25f, 0.28f, 0.95f),
-                LevelBorder = new Color(0.18f, 0.76f, 0.80f, 0.90f),
-                HealthFillSprite = "Assets/Project/Textures/bar_fill_green.png",
-                DefaultName = "Lương Phi",
-                DefaultLevel = "Lv.1",
-                DefaultHealthText = "12.800 / 12.800",
-                DefaultAvatarSprite = "Assets/Project/Textures/temp_player.png",
-                TeammateSprites = new[]
-                {
-                    "Assets/Project/Textures/Characters/TranHaoNam.png",
-                    "Assets/Project/Textures/Characters/ThaiTu.png",
-                    "Assets/Project/Textures/Characters/DieuDuong.png",
-                    "Assets/Project/Textures/Characters/a_dung_l01_giao_bao.png"
-                }
-            };
-
-            var enemyRefs = BuildHudPanel(body, "EnemyPanel", isTop: true, enemyTheme);
-            var playerRefs = BuildHudPanel(body, "PlayerPanel", isTop: false, playerTheme);
-
-            // Re-parent existing Com (Enemy avatar) and Player (Player avatar) into their AvatarContainers
-            var enemyAvatarImg = AttachExistingAvatar(body, "Com", enemyRefs.AvatarContainer, enemyTheme.DefaultAvatarSprite);
-            var playerAvatarImg = AttachExistingAvatar(body, "Player", playerRefs.AvatarContainer, playerTheme.DefaultAvatarSprite);
-
-            // Wire GameController serialized references cleanly
-            WireGameController(gc, enemyRefs, enemyAvatarImg, playerRefs, playerAvatarImg);
-
+            // Both character panels inherit their layout from CharacterPanel.prefab.
             ConfigureFooterBoosters(footer);
             ConfigureAdBannerZone(canvasRect);
             ConfigureShapesManager();
@@ -183,7 +95,12 @@ namespace NTGH.Editor
             if (bgr != null)
             {
                 bgr.SetAsFirstSibling();
-                AssignSprite(bgr, "Assets/Project/Scenes/Sprites/Bgr/Bgr_HongKong_Battle_Alley.jpg");
+                var fitter = bgr.GetComponent<AspectRatioFitter>();
+                if (fitter != null) Object.DestroyImmediate(fitter);
+                StretchFull(bgr);
+                var background = GetOrAddComponent<Image>(bgr);
+                background.sprite = null;
+                background.color = new Color32(18, 23, 35, 255);
             }
         }
 
@@ -297,411 +214,6 @@ namespace NTGH.Editor
             gridRect.SetAsFirstSibling();
             borderOuter.SetAsLastSibling();
             borderInner.SetAsLastSibling();
-        }
-
-        private static HudRefs BuildHudPanel(RectTransform body, string panelName, bool isTop, HudTheme theme)
-        {
-            var panel = GetOrCreateChild(body, panelName);
-            if (isTop)
-            {
-                panel.anchorMin = new Vector2(0.5f, 1f);
-                panel.anchorMax = new Vector2(0.5f, 1f);
-                panel.pivot = new Vector2(0.5f, 1f);
-                panel.anchoredPosition = new Vector2(0f, -TopPanelMarginPx);
-            }
-            else
-            {
-                panel.anchorMin = new Vector2(0.5f, 0f);
-                panel.anchorMax = new Vector2(0.5f, 0f);
-                panel.pivot = new Vector2(0.5f, 0f);
-                panel.anchoredPosition = new Vector2(0f, PlayerPanelBottomPx);
-            }
-            panel.sizeDelta = new Vector2(HudPanelWidthPx, HudPanelHeightPx);
-
-            // Panel background & metallic neon borders
-            var bgImg = GetOrAddComponent<Image>(panel);
-            AssignSlicedSprite(bgImg, PanelFillPath, theme.PanelBg);
-
-            var borderOuter = GetOrCreateChild(panel, "BorderOuter");
-            StretchFull(borderOuter);
-            var outerImg = GetOrAddComponent<Image>(borderOuter);
-            AssignSlicedSprite(outerImg, BorderOuterPath, theme.BorderOuter);
-            outerImg.raycastTarget = false;
-
-            var borderInner = GetOrCreateChild(panel, "BorderInner");
-            StretchFull(borderInner, 5f);
-            var innerImg = GetOrAddComponent<Image>(borderInner);
-            AssignSlicedSprite(innerImg, BorderInnerPath, theme.BorderInner);
-            innerImg.raycastTarget = false;
-
-            Color goldBorder = new Color(0.85f, 0.67f, 0.28f, 1f);
-            Color slotBg = new Color(0.07f, 0.08f, 0.11f, 0.95f);
-
-            // --- LEFT COLUMN: Leader Avatar + (optional Enemy Attack Timer) + 2 Equipment Slots ---
-            var avatarFrame = GetOrCreateChild(panel, "AvatarFrame");
-            float avatarHeight = isTop ? 150f : 162f;
-            SetTopLeft(avatarFrame, 18f, -16f, 162f, avatarHeight);
-            AssignSlicedSprite(GetOrAddComponent<Image>(avatarFrame), PanelFillPath, slotBg);
-
-            var avatarMask = GetOrCreateChild(avatarFrame, "AvatarMask");
-            StretchFull(avatarMask, 6f);
-            GetOrAddComponent<RectMask2D>(avatarMask);
-
-            var avatarBorder = GetOrCreateChild(avatarFrame, "GoldBorder");
-            StretchFull(avatarBorder);
-            var avatarBorderImg = GetOrAddComponent<Image>(avatarBorder);
-            AssignSlicedSprite(avatarBorderImg, BorderOuterPath, goldBorder, 1.8f);
-            avatarBorderImg.raycastTarget = false;
-            avatarBorder.SetAsLastSibling();
-
-            // Dedicated Enemy Attack Countdown Timer bar (separate from NỘ/MP bar)
-            Image attackTimerFillImg = null;
-            if (isTop)
-            {
-                var timerBar = GetOrCreateChild(panel, "AttackTimerBar");
-                SetTopLeft(timerBar, 18f, -172f, 162f, 14f);
-                var timerBgImg = GetOrAddComponent<Image>(timerBar);
-                AssignSprite(timerBar, "Assets/Project/Textures/bar_frame.png");
-                timerBgImg.color = new Color(0.16f, 0.14f, 0.16f, 0.95f);
-
-                var timerFillRect = GetOrCreateChild(timerBar, "Fill");
-                StretchFull(timerFillRect, 2f);
-                attackTimerFillImg = GetOrAddComponent<Image>(timerFillRect);
-                AssignSprite(timerFillRect, "Assets/Project/Textures/bar_fill_orange.png");
-                attackTimerFillImg.color = Color.white;
-                attackTimerFillImg.type = Image.Type.Filled;
-                attackTimerFillImg.fillMethod = Image.FillMethod.Horizontal;
-                attackTimerFillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
-                attackTimerFillImg.fillAmount = 1f;
-            }
-            else
-            {
-                var oldTimer = panel.Find("AttackTimerBar");
-                if (oldTimer != null) Object.DestroyImmediate(oldTimer.gameObject);
-            }
-
-            // 2 Equipment Slots below Avatar
-            var equipRow = GetOrCreateChild(panel, "EquipSlots");
-            float equipY = isTop ? -192f : -190f;
-            float equipSize = isTop ? 76f : 77f;
-            SetTopLeft(equipRow, 18f, equipY, 162f, equipSize + 4f);
-            var weaponSlotIcon = BuildEquipSlot(equipRow, "Slot_Weapon", 0f, equipSize, equipSize, IconWeaponPath, goldBorder, slotBg);
-            var outfitSlotIcon = BuildEquipSlot(equipRow, "Slot_Outfit", 162f - equipSize, equipSize, equipSize, IconOutfitPath, goldBorder, slotBg);
-
-            // --- RIGHT COLUMN: Name/Lv/HP + MP + 4 Teammate Cards ---
-            var rightCol = GetOrCreateChild(panel, "RightColumn");
-            SetTopLeft(rightCol, 194f, -16f, 476f, 262f);
-
-            // Row 1: Name + Level Pill + HP Bar
-            var statsTop = GetOrCreateChild(rightCol, "StatsTop");
-            SetTopLeft(statsTop, 0f, 0f, 476f, 34f);
-
-            var txtNameRect = GetOrCreateChild(statsTop, "TxtName");
-            SetTopLeft(txtNameRect, 0f, 0f, 134f, 34f);
-            var txtName = ConfigureTMP(txtNameRect, theme.DefaultName, 22f, FontStyles.Bold, TextAlignmentOptions.MidlineLeft, Color.white);
-            txtName.enableAutoSizing = true;
-            txtName.fontSizeMin = 15f;
-            txtName.fontSizeMax = 22f;
-
-            var levelBadge = GetOrCreateChild(statsTop, "LevelBadge");
-            SetTopLeft(levelBadge, 136f, -4f, 76f, 26f);
-            AssignSlicedSprite(GetOrAddComponent<Image>(levelBadge), LabelFillPath, theme.LevelBg);
-            var levelBorder = GetOrCreateChild(levelBadge, "Border");
-            StretchFull(levelBorder);
-            var lvlBorderImg = GetOrAddComponent<Image>(levelBorder);
-            AssignSlicedSprite(lvlBorderImg, LabelBorderPath, theme.LevelBorder);
-            lvlBorderImg.raycastTarget = false;
-            var txtLevelRect = GetOrCreateChild(levelBadge, "TxtLevel");
-            StretchFull(txtLevelRect);
-            var txtLevel = ConfigureTMP(txtLevelRect, theme.DefaultLevel, 15f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.Center, Color.white);
-
-            // Health Bar
-            var hpBar = GetOrCreateChild(statsTop, "HealthBar");
-            SetTopLeft(hpBar, 220f, -4f, 256f, 26f);
-            var hpFrameImg = GetOrAddComponent<Image>(hpBar);
-            AssignSprite(hpBar, "Assets/Project/Textures/bar_frame.png");
-            hpFrameImg.color = new Color(0.18f, 0.20f, 0.24f, 0.95f);
-
-            var hpFillRect = GetOrCreateChild(hpBar, "Fill");
-            StretchFull(hpFillRect, 2f);
-            var hpFillImg = GetOrAddComponent<Image>(hpFillRect);
-            AssignSprite(hpFillRect, theme.HealthFillSprite);
-            hpFillImg.color = Color.white;
-            hpFillImg.type = Image.Type.Filled;
-            hpFillImg.fillMethod = Image.FillMethod.Horizontal;
-            hpFillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
-            hpFillImg.fillAmount = 1f;
-
-            var txtHpRect = GetOrCreateChild(hpBar, "TxtHealth");
-            StretchFull(txtHpRect);
-            txtHpRect.offsetMin = new Vector2(8f, 0f);
-            txtHpRect.offsetMax = new Vector2(-10f, 0f);
-            var txtHealth = ConfigureTMP(txtHpRect, theme.DefaultHealthText, 15f, FontStyles.Bold | FontStyles.Italic, TextAlignmentOptions.MidlineRight, Color.white);
-            AddTextShadow(txtHpRect);
-
-            var teamRow = GetOrCreateChild(rightCol, "TeammatesRow");
-            SetTopLeft(teamRow, 0f, -72f, 476f, 186f);
-            var hlg = GetOrAddComponent<HorizontalLayoutGroup>(teamRow);
-            hlg.spacing = 8f;
-            hlg.childAlignment = TextAnchor.MiddleCenter;
-            hlg.childControlWidth = false;
-            hlg.childControlHeight = false;
-            hlg.childForceExpandWidth = false;
-            hlg.childForceExpandHeight = false;
-
-            var teammateViews = new TeammateCardView[4];
-            for (int i = 0; i < 4; i++)
-            {
-                string spritePath = (theme.TeammateSprites != null && i < theme.TeammateSprites.Length)
-                    ? theme.TeammateSprites[i]
-                    : null;
-                teammateViews[i] = BuildTeammateCard(teamRow, $"Teammate_{i + 1}", $"Đồng đội {i + 1}", spritePath, goldBorder, slotBg);
-            }
-
-            // Ensure outer borders render on top
-            borderOuter.SetAsLastSibling();
-            borderInner.SetAsLastSibling();
-
-            return new HudRefs
-            {
-                HealthFill = hpFillImg,
-                AttackTimerFill = attackTimerFillImg,
-                WeaponSlotIcon = weaponSlotIcon,
-                OutfitSlotIcon = outfitSlotIcon,
-                TeammateSlots = teammateViews,
-                TxtName = txtName,
-                TxtLevel = txtLevel,
-                TxtHealth = txtHealth,
-                AvatarContainer = avatarMask
-            };
-        }
-
-        private static Image BuildEquipSlot(
-            RectTransform parent,
-            string slotName,
-            float x,
-            float width,
-            float height,
-            string iconPath,
-            Color borderColor,
-            Color bgColor)
-        {
-            var slot = GetOrCreateChild(parent, slotName);
-            SetTopLeft(slot, x, 0f, width, height);
-            AssignSlicedSprite(GetOrAddComponent<Image>(slot), PanelFillPath, bgColor);
-
-            var icon = GetOrCreateChild(slot, "Icon");
-            StretchFull(icon, 10f);
-            var iconImg = GetOrAddComponent<Image>(icon);
-            AssignSprite(icon, iconPath);
-            iconImg.preserveAspect = true;
-            iconImg.color = new Color(0.92f, 0.88f, 0.80f, 0.95f);
-
-            var border = GetOrCreateChild(slot, "GoldBorder");
-            StretchFull(border);
-            var borderImg = GetOrAddComponent<Image>(border);
-            AssignSlicedSprite(borderImg, BorderOuterPath, borderColor, 2.2f);
-            borderImg.raycastTarget = false;
-            border.SetAsLastSibling();
-            return iconImg;
-        }
-
-        private static TeammateCardView BuildTeammateCard(
-            RectTransform parent,
-            string cardName,
-            string label,
-            string portraitPath,
-            Color borderColor,
-            Color bgColor)
-        {
-            var card = GetOrCreateChild(parent, cardName);
-            card.sizeDelta = new Vector2(113f, 184f);
-            var cardBgImg = GetOrAddComponent<Image>(card);
-            AssignSlicedSprite(cardBgImg, PanelFillPath, bgColor, 2.2f);
-
-            // Portrait mask (fits inside upper window of card frame)
-            var portraitMask = GetOrCreateChild(card, "PortraitMask");
-            portraitMask.anchorMin = new Vector2(0f, 1f);
-            portraitMask.anchorMax = new Vector2(1f, 1f);
-            portraitMask.pivot = new Vector2(0.5f, 1f);
-            portraitMask.anchoredPosition = new Vector2(0f, -14f);
-            portraitMask.sizeDelta = new Vector2(-24f, 100f);
-            GetOrAddComponent<RectMask2D>(portraitMask);
-
-            var portrait = GetOrCreateChild(portraitMask, "Portrait");
-            StretchFull(portrait);
-            var portraitImg = GetOrAddComponent<Image>(portrait);
-            if (!string.IsNullOrEmpty(portraitPath))
-            {
-                AssignSprite(portrait, portraitPath);
-            }
-            portraitImg.color = Color.white;
-            portraitImg.preserveAspect = false;
-            var fitter = GetOrAddComponent<AspectRatioFitter>(portrait);
-            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-            if (portraitImg.sprite != null)
-            {
-                fitter.aspectRatio = portraitImg.sprite.rect.width / portraitImg.sprite.rect.height;
-            }
-
-            // Label bar
-            var nameRect = GetOrCreateChild(card, "TxtName");
-            nameRect.anchorMin = new Vector2(0f, 0f);
-            nameRect.anchorMax = new Vector2(1f, 0f);
-            nameRect.pivot = new Vector2(0.5f, 0f);
-            nameRect.anchoredPosition = new Vector2(0f, 36f);
-            nameRect.sizeDelta = new Vector2(-18f, 22f);
-            var tmp = ConfigureTMP(nameRect, label, 12.5f, FontStyles.Bold, TextAlignmentOptions.Center, Color.white);
-            tmp.enableAutoSizing = true;
-            tmp.fontSizeMin = 9f;
-            tmp.fontSizeMax = 12.5f;
-
-            // Stat text (+X ST / -Y ST)
-            var statRect = GetOrCreateChild(card, "TxtStat");
-            statRect.anchorMin = new Vector2(0f, 0f);
-            statRect.anchorMax = new Vector2(1f, 0f);
-            statRect.pivot = new Vector2(0.5f, 0f);
-            statRect.anchoredPosition = new Vector2(0f, 20f);
-            statRect.sizeDelta = new Vector2(-18f, 16f);
-            var statTmp = ConfigureTMP(statRect, "", 11f, FontStyles.Bold, TextAlignmentOptions.Center, new Color(1f, 0.88f, 0.45f, 1f));
-
-            // Mini charge bar at bottom
-            var barBg = GetOrCreateChild(card, "MiniBarBg");
-            barBg.anchorMin = new Vector2(0f, 0f);
-            barBg.anchorMax = new Vector2(1f, 0f);
-            barBg.pivot = new Vector2(0.5f, 0f);
-            barBg.anchoredPosition = new Vector2(0f, 10f);
-            barBg.sizeDelta = new Vector2(-24f, 8f);
-            var barBgImg = GetOrAddComponent<Image>(barBg);
-            AssignSprite(barBg, "Assets/Project/Textures/bar_frame.png");
-            barBgImg.color = new Color(0.12f, 0.16f, 0.22f, 0.95f);
-
-            var barFill = GetOrCreateChild(barBg, "Fill");
-            StretchFull(barFill, 1f);
-            var barFillImg = GetOrAddComponent<Image>(barFill);
-            AssignSprite(barFill, "Assets/Project/Textures/bar_fill_blue.png");
-            barFillImg.color = Color.white;
-            barFillImg.type = Image.Type.Filled;
-            barFillImg.fillMethod = Image.FillMethod.Horizontal;
-            barFillImg.fillAmount = 1f;
-
-            // Subtle outer border (toggled/tinted by TeammateCardView)
-            var border = GetOrCreateChild(card, "GoldBorder");
-            StretchFull(border);
-            var borderImg = GetOrAddComponent<Image>(border);
-            AssignSlicedSprite(borderImg, BorderOuterPath, borderColor, 2.2f);
-            borderImg.raycastTarget = false;
-            border.SetAsLastSibling();
-
-            var view = GetOrAddComponent<TeammateCardView>(card);
-            view.SetReferences(cardBgImg, borderImg, portraitImg, fitter, tmp, statTmp, null, null, barFillImg);
-            return view;
-        }
-
-        private static Image AttachExistingAvatar(
-            RectTransform body,
-            string avatarName,
-            RectTransform avatarMaskContainer,
-            string defaultSpritePath)
-        {
-            // Find existing avatar either directly under Body or already inside AvatarMask
-            Transform existing = avatarMaskContainer.Find(avatarName);
-            if (existing == null && body != null)
-            {
-                for (int i = 0; i < body.childCount; i++)
-                {
-                    var c = body.GetChild(i);
-                    if (c.name == avatarName && c.GetComponent<Image>() != null)
-                    {
-                        existing = c;
-                        break;
-                    }
-                }
-            }
-
-            RectTransform rt;
-            if (existing != null)
-            {
-                rt = existing as RectTransform;
-                rt.SetParent(avatarMaskContainer, false);
-            }
-            else
-            {
-                rt = CreateUIObject(avatarName, avatarMaskContainer);
-                rt.gameObject.AddComponent<Image>();
-            }
-
-            // Hide legacy floating rank text child on Player if present
-            var legacyRank = rt.Find("Text (TMP)");
-            if (legacyRank != null) legacyRank.gameObject.SetActive(false);
-
-            StretchFull(rt);
-            var img = rt.GetComponent<Image>();
-            AssignSprite(rt, defaultSpritePath);
-            img.color = Color.white;
-            img.preserveAspect = false;
-
-            var fitter = GetOrAddComponent<AspectRatioFitter>(rt);
-            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-            if (img.sprite != null)
-            {
-                fitter.aspectRatio = img.sprite.rect.width / img.sprite.rect.height;
-            }
-
-            return img;
-        }
-
-        private static void WireGameController(
-            GameController gc,
-            HudRefs enemyRefs,
-            Image enemyAvatar,
-            HudRefs playerRefs,
-            Image playerAvatar)
-        {
-            var so = new SerializedObject(gc);
-
-            WireCharacter(so.FindProperty("Enemy"), enemyRefs, enemyAvatar, wireAttackTimer: true);
-            WireCharacter(so.FindProperty("Player"), playerRefs, playerAvatar, wireAttackTimer: false);
-
-            so.ApplyModifiedProperties();
-            EditorUtility.SetDirty(gc);
-        }
-
-        private static void WireCharacter(
-            SerializedProperty charProp,
-            HudRefs refs,
-            Image avatarImg,
-            bool wireAttackTimer)
-        {
-            if (charProp == null) return;
-
-            SetObjRef(charProp, "m_imgAvatar", avatarImg);
-            SetObjRef(charProp, "m_Health", refs.HealthFill);
-            SetObjRef(charProp, "m_timeToAttack", wireAttackTimer ? refs.AttackTimerFill : null);
-            SetObjRef(charProp, "m_txtName", refs.TxtName);
-            SetObjRef(charProp, "m_txtLevel", refs.TxtLevel);
-            SetObjRef(charProp, "m_txtHealth", refs.TxtHealth);
-            SetObjRef(charProp, "m_imgWeaponSlot", refs.WeaponSlotIcon);
-            SetObjRef(charProp, "m_imgOutfitSlot", refs.OutfitSlotIcon);
-
-            var slotsProp = charProp.FindPropertyRelative("m_teammateSlots");
-            if (slotsProp != null && refs.TeammateSlots != null)
-            {
-                slotsProp.arraySize = refs.TeammateSlots.Length;
-                for (int i = 0; i < refs.TeammateSlots.Length; i++)
-                {
-                    slotsProp.GetArrayElementAtIndex(i).objectReferenceValue = refs.TeammateSlots[i];
-                }
-            }
-        }
-
-        private static void SetObjRef(SerializedProperty parent, string childName, Object value)
-        {
-            var p = parent.FindPropertyRelative(childName);
-            if (p != null)
-            {
-                p.objectReferenceValue = value;
-            }
         }
 
         private static void ConfigureFooterBoosters(RectTransform footer)
@@ -847,15 +359,6 @@ namespace NTGH.Editor
             return comp;
         }
 
-        private static void SetTopLeft(RectTransform rt, float x, float y, float w, float h)
-        {
-            rt.anchorMin = new Vector2(0f, 1f);
-            rt.anchorMax = new Vector2(0f, 1f);
-            rt.pivot = new Vector2(0f, 1f);
-            rt.anchoredPosition = new Vector2(x, y);
-            rt.sizeDelta = new Vector2(w, h);
-        }
-
         private static void StretchFull(RectTransform rt, float inset = 0f)
         {
             rt.anchorMin = Vector2.zero;
@@ -884,13 +387,6 @@ namespace NTGH.Editor
             tmp.textWrappingMode = TextWrappingModes.NoWrap;
             tmp.raycastTarget = false;
             return tmp;
-        }
-
-        private static void AddTextShadow(RectTransform rt)
-        {
-            var shadow = GetOrAddComponent<Shadow>(rt);
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
-            shadow.effectDistance = new Vector2(1.5f, -1.5f);
         }
 
         private static void AssignSprite(Transform target, string assetPath)

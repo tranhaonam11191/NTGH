@@ -43,7 +43,7 @@ public class CharacterOnGame
     bool m_avatarDefaultsCached;
     Sequence m_hitFeedbackSeq;
 
-    public void ApplyLoadout(BattleLoadout loadout, TeammateCardDatabaseSO database)
+    public void ApplyLoadout(BattleLoadout loadout)
     {
         if (loadout == null) return;
 
@@ -67,8 +67,7 @@ public class CharacterOnGame
                 if (slotView == null) continue;
 
                 TeammateCardSO card = i < loadout.Teammates.Length ? loadout.Teammates[i] : null;
-                TeammateCardThemeSO theme = (card != null && database != null) ? database.GetTheme(card.CardType) : null;
-                slotView.Bind(card, theme, $"Ô {i + 1}");
+                slotView.Bind(card);
             }
         }
     }
@@ -103,7 +102,7 @@ public class CharacterOnGame
         m_avatarDefaultsCached = true;
     }
 
-    public void PlayHitFeedback()
+    public void PlayHitFeedback(bool shielded = false)
     {
         if (m_imgAvatar == null) return;
         CacheAvatarDefaults();
@@ -113,11 +112,18 @@ public class CharacterOnGame
         m_imgAvatar.rectTransform.DOKill();
 
         m_imgAvatar.rectTransform.anchoredPosition = m_avatarBaseAnchoredPos;
-        m_imgAvatar.color = new Color(1f, 0.28f, 0.28f, m_avatarBaseColor.a);
+        Color flashColor = shielded
+            ? Color.Lerp(m_avatarBaseColor, new Color(0.75f, 0.90f, 1f, m_avatarBaseColor.a), 0.35f)
+            : new Color(1f, 0.28f, 0.28f, m_avatarBaseColor.a);
+        float duration = shielded ? 0.22f : 0.28f;
+        float shakeStrength = shielded ? 6f : 14f;
+        int shakeVibrato = shielded ? 16 : 24;
+
+        m_imgAvatar.color = flashColor;
 
         m_hitFeedbackSeq = DOTween.Sequence().SetLink(m_imgAvatar.gameObject)
-            .Join(m_imgAvatar.DOColor(m_avatarBaseColor, 0.28f).SetEase(Ease.OutQuad))
-            .Join(m_imgAvatar.rectTransform.DOShakeAnchorPos(0.28f, 14f, 24, 90f, false, true))
+            .Join(m_imgAvatar.DOColor(m_avatarBaseColor, duration).SetEase(Ease.OutQuad))
+            .Join(m_imgAvatar.rectTransform.DOShakeAnchorPos(duration, shakeStrength, shakeVibrato, 90f, false, true))
             .OnComplete(() =>
             {
                 if (m_imgAvatar != null)
@@ -128,6 +134,33 @@ public class CharacterOnGame
             });
     }
 
+    public bool HasEquippedCardType(TeammateCardType cardType)
+    {
+        if (m_teammateSlots == null) return false;
+        for (int i = 0; i < m_teammateSlots.Length; i++)
+        {
+            var slot = m_teammateSlots[i];
+            if (slot != null && slot.CurrentCard != null && slot.CurrentCard.CardType == cardType)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void PlaySupportCardsGlow()
+    {
+        if (m_teammateSlots == null) return;
+        for (int i = 0; i < m_teammateSlots.Length; i++)
+        {
+            var slot = m_teammateSlots[i];
+            if (slot != null && slot.CurrentCard != null && slot.CurrentCard.CardType == TeammateCardType.Support)
+            {
+                slot.PlaySupportGlow();
+            }
+        }
+    }
+
     public void KillTweens()
     {
         m_Health?.DOKill();
@@ -136,6 +169,13 @@ public class CharacterOnGame
         {
             m_imgAvatar.DOKill();
             m_imgAvatar.rectTransform.DOKill();
+        }
+        if (m_teammateSlots != null)
+        {
+            for (int i = 0; i < m_teammateSlots.Length; i++)
+            {
+                m_teammateSlots[i]?.KillHighlightTween(restoreVisuals: false);
+            }
         }
     }
 
@@ -252,6 +292,8 @@ public class GameController : MonoBehaviour
     //Effect
     [Header("Effect")]
     [SerializeField] ParticleSystem m_effAttack;
+    [SerializeField] ParticleSystem m_effShield;
+    [SerializeField] float m_shieldEffectScale = 0.35f;
 
     [Header("Weapon")]
     [SerializeField] Image m_WeaponImage;
@@ -269,6 +311,8 @@ public class GameController : MonoBehaviour
     float m_SecondsSinceFirstClick;
     resultType m_Result;
     bool m_ResultShown;
+    float m_LastPlayerShieldTime = -10f;
+    float m_LastEnemyShieldTime = -10f;
 
     public bool BlocksBoard => Data == null || endGame || m_ShowingStory || m_PendingLines.Count > 0;
 
@@ -304,7 +348,11 @@ public class GameController : MonoBehaviour
         SetupWeapon();
         if (m_effAttack != null)
         {
-            ObjectPoolManager.Instance.Prewarm(m_effAttack, 4);
+            ObjectPoolManager.Instance.Prewarm(m_effAttack, 8);
+        }
+        if (m_effShield != null)
+        {
+            ObjectPoolManager.Instance.Prewarm(m_effShield, 4);
         }
         if (!openingPlayed) QueueConversations(ConversationTrigger.Start);
         StartCoroutine(PrepareBoard());
@@ -354,9 +402,16 @@ public class GameController : MonoBehaviour
     {
         Player?.KillTweens();
         Enemy?.KillTweens();
-        if (ObjectPoolManager.HasInstance && m_effAttack != null)
+        if (ObjectPoolManager.HasInstance)
         {
-            ObjectPoolManager.Instance.ClearPool(m_effAttack.gameObject);
+            if (m_effAttack != null)
+            {
+                ObjectPoolManager.Instance.ClearPool(m_effAttack.gameObject);
+            }
+            if (m_effShield != null)
+            {
+                ObjectPoolManager.Instance.ClearPool(m_effShield.gameObject);
+            }
         }
     }
 
@@ -394,18 +449,20 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            int rawDamage = Data.enemy.Character.attack + (m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalAttackBonus() : 0);
-            int reduction = m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalDamageReduction() : 0;
-            int finalDamage = Mathf.Max(1, rawDamage - reduction);
+            int baseDamage = Data.enemy.Character.attack + (m_EnemyLoadout != null ? Mathf.Max(0, m_EnemyLoadout.WeaponBonusAttack) : 0);
+            int remainingReduction = m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalDamageReduction() : 0;
+            int mainDamage = ConsumeDamageReduction(baseDamage, ref remainingReduction);
             m_EnemyAttackProgress = 1f;
 
             float effectZ = m_effAttack != null ? m_effAttack.transform.position.z : 0f;
             Vector3 enemyStartWorld = GetAvatarWorldPosition(Enemy, effectZ);
-            LaunchAttackEffect(enemyStartWorld, Player, finalDamage, () =>
+            LaunchAttackEffect(enemyStartWorld, Player, mainDamage, () =>
             {
                 Attack(Player, ref m_PlayerHp, m_PlayerMaxHp,
-                    finalDamage, ConversationTrigger.PlayerHealth);
+                    mainDamage, ConversationTrigger.PlayerHealth);
             });
+
+            LaunchAttackCardSwords(Enemy, Player, ref remainingReduction, targetIsPlayer: true);
         }
 
         Enemy?.UpdateAttackTimer(m_EnemyAttackProgress);
@@ -444,9 +501,8 @@ public class GameController : MonoBehaviour
         Player.Setup(Data.defaultPlayer.Character);
         Enemy.Setup(Data.enemy.Character);
 
-        var db = SOManager.instance != null ? SOManager.instance.TeammateDatabase : null;
-        Player.ApplyLoadout(m_PlayerLoadout, db);
-        Enemy.ApplyLoadout(m_EnemyLoadout, db);
+        Player.ApplyLoadout(m_PlayerLoadout);
+        Enemy.ApplyLoadout(m_EnemyLoadout);
 
         Player.UpdateHealthText(m_PlayerHp, m_PlayerMaxHp);
         Enemy.UpdateHealthText(m_EnemyHp, m_EnemyMaxHp);
@@ -668,7 +724,13 @@ public class GameController : MonoBehaviour
     {
         if (endGame) return;
         SoundManager.instance.PlaySfx(_attackAudio);
-        target?.PlayHitFeedback();
+        bool hasSupport = HasSupportCard(target);
+        target?.PlayHitFeedback(shielded: hasSupport);
+        if (hasSupport)
+        {
+            target?.PlaySupportCardsGlow();
+            PlayShieldEffect(target);
+        }
         float previous = hp;
         float minimumHp = target == Enemy ? maxHp * Data.finalStandEnemyHealth : 0f;
         hp = Mathf.Clamp(hp - damage, minimumHp, maxHp);
@@ -703,31 +765,159 @@ public class GameController : MonoBehaviour
     {
         if (Data == null || endGame || clearedItems < Constants.MinimumMatches) return;
 
-        LaunchAttackEffect(boardPosition, Enemy, clearedItems, () =>
+        int remainingReduction = m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalDamageReduction() : 0;
+        int mainDamage = ConsumeDamageReduction(clearedItems, ref remainingReduction);
+
+        LaunchAttackEffect(boardPosition, Enemy, mainDamage, () =>
         {
-            Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, clearedItems, ConversationTrigger.EnemyHealth);
+            Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, mainDamage, ConversationTrigger.EnemyHealth);
         });
+
+        LaunchAttackCardSwords(Player, Enemy, ref remainingReduction, targetIsPlayer: false);
+    }
+
+    private static int ConsumeDamageReduction(int rawDamage, ref int remainingReduction)
+    {
+        int clampedRaw = Mathf.Max(1, rawDamage);
+        if (remainingReduction <= 0) return clampedRaw;
+
+        int maxAbsorbable = Mathf.Max(0, clampedRaw - 1);
+        int absorbed = Mathf.Min(maxAbsorbable, remainingReduction);
+        remainingReduction -= absorbed;
+        return clampedRaw - absorbed;
+    }
+
+    private bool HasSupportCard(CharacterOnGame target)
+    {
+        if (target == null) return false;
+        if (target.HasEquippedCardType(TeammateCardType.Support)) return true;
+
+        BattleLoadout loadout = target == Player ? m_PlayerLoadout : m_EnemyLoadout;
+        return loadout != null && loadout.GetTotalDamageReduction() > 0;
+    }
+
+    private void LaunchAttackCardSwords(CharacterOnGame attacker, CharacterOnGame target, ref int remainingReduction, bool targetIsPlayer)
+    {
+        if (attacker == null || attacker.m_teammateSlots == null || target == null) return;
+
+        float effectZ = m_effAttack != null ? m_effAttack.transform.position.z : 0f;
+        int launchedCount = 0;
+
+        for (int i = 0; i < attacker.m_teammateSlots.Length; i++)
+        {
+            var slot = attacker.m_teammateSlots[i];
+            if (slot == null || slot.CurrentCard == null || slot.CurrentCard.CardType != TeammateCardType.Attack)
+            {
+                continue;
+            }
+
+            int cardDamage = ConsumeDamageReduction(Mathf.Max(1, slot.CurrentCard.EffectValue), ref remainingReduction);
+            RectTransform cardRect = slot.transform as RectTransform;
+            Vector3 cardWorld = cardRect != null
+                ? GetRectWorldPosition(cardRect, effectZ)
+                : GetAvatarWorldPosition(attacker, effectZ);
+
+            float delay = 0.08f * (launchedCount + 1);
+            launchedCount++;
+
+            slot.PlayAttackPulse();
+            LaunchAttackEffect(cardWorld, target, cardDamage, () =>
+            {
+                if (targetIsPlayer)
+                {
+                    Attack(Player, ref m_PlayerHp, m_PlayerMaxHp, cardDamage, ConversationTrigger.PlayerHealth);
+                }
+                else
+                {
+                    Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, cardDamage, ConversationTrigger.EnemyHealth);
+                }
+            }, delay);
+        }
+    }
+
+    private void PlayShieldEffect(CharacterOnGame target)
+    {
+        if (m_effShield == null || target == null || target.m_imgAvatar == null) return;
+
+        float now = Time.time;
+        if (target == Player)
+        {
+            if (now - m_LastPlayerShieldTime < 0.12f) return;
+            m_LastPlayerShieldTime = now;
+        }
+        else
+        {
+            if (now - m_LastEnemyShieldTime < 0.12f) return;
+            m_LastEnemyShieldTime = now;
+        }
+
+        float shieldZ = m_effAttack != null ? m_effAttack.transform.position.z : m_effShield.transform.position.z;
+        Vector3 avatarWorld = GetAvatarWorldPosition(target, shieldZ);
+        ParticleSystem effect = ObjectPoolManager.Instance.Rent(m_effShield, avatarWorld, m_effShield.transform.rotation);
+        if (effect == null) return;
+
+        effect.name = "SupportShieldEffect";
+        effect.transform.DOKill();
+        effect.transform.localScale = Vector3.one * Mathf.Max(0.05f, m_shieldEffectScale);
+        effect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        int sortingLayerID = 0;
+        int sortingOrder = 5;
+        if (m_effAttack != null && m_effAttack.TryGetComponent<ParticleSystemRenderer>(out var attackRenderer))
+        {
+            sortingLayerID = attackRenderer.sortingLayerID;
+            sortingOrder = Mathf.Max(5, attackRenderer.sortingOrder + 1);
+        }
+
+        foreach (ParticleSystemRenderer psRenderer in effect.GetComponentsInChildren<ParticleSystemRenderer>(true))
+        {
+            psRenderer.sortingLayerID = sortingLayerID;
+            psRenderer.sortingOrder = sortingOrder;
+        }
+
+        if (!effect.TryGetComponent<PooledParticleAutoReturn>(out _))
+        {
+            effect.gameObject.AddComponent<PooledParticleAutoReturn>();
+        }
+        var rootMain = effect.main;
+        rootMain.stopAction = ParticleSystemStopAction.Callback;
+        effect.Play(true);
     }
 
     private Vector3 GetAvatarWorldPosition(CharacterOnGame character, float effectZ)
     {
         Image avatar = character != null ? character.m_imgAvatar : null;
-        if (avatar == null) return new Vector3(0f, 0f, effectZ);
+        return avatar != null ? GetRectWorldPosition(avatar.rectTransform, effectZ) : new Vector3(0f, 0f, effectZ);
+    }
 
-        Canvas canvas = avatar.canvas != null ? avatar.canvas.rootCanvas : null;
-        Vector3 avatarCenterWorld = avatar.rectTransform.TransformPoint(avatar.rectTransform.rect.center);
+    private Vector3 GetRectWorldPosition(RectTransform rect, float effectZ)
+    {
+        if (rect == null) return new Vector3(0f, 0f, effectZ);
+
+        Canvas canvas = rect.GetComponentInParent<Canvas>();
+        if (canvas != null) canvas = canvas.rootCanvas;
+        Vector3 centerWorld = rect.TransformPoint(rect.rect.center);
         Camera mainCamera = Camera.main;
         Camera uiCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
-        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(uiCamera, avatarCenterWorld);
+        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(uiCamera, centerWorld);
         Vector3 worldPos = mainCamera != null
             ? mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(effectZ - mainCamera.transform.position.z)))
-            : avatarCenterWorld;
+            : centerWorld;
         worldPos.z = effectZ;
         return worldPos;
     }
 
-    private void LaunchAttackEffect(Vector3 startPosition, CharacterOnGame target, int damageAmount, Action onHit)
+    private void LaunchAttackEffect(Vector3 startPosition, CharacterOnGame target, int damageAmount, Action onHit, float startDelay = 0f)
     {
+        if (startDelay > 0f)
+        {
+            DOVirtual.DelayedCall(startDelay, () =>
+            {
+                if (endGame) return;
+                LaunchAttackEffect(startPosition, target, damageAmount, onHit, 0f);
+            }).SetLink(gameObject);
+            return;
+        }
         Image avatar = target != null ? target.m_imgAvatar : null;
         Canvas canvas = avatar != null && avatar.canvas != null ? avatar.canvas.rootCanvas : null;
         RectTransform layer = canvas != null ? (RectTransform)canvas.transform : null;
