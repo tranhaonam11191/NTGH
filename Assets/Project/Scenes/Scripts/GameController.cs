@@ -38,6 +38,11 @@ public class CharacterOnGame
 
     public TeammateCardView[] m_teammateSlots;
 
+    Vector2 m_avatarBaseAnchoredPos;
+    Color m_avatarBaseColor = Color.white;
+    bool m_avatarDefaultsCached;
+    Sequence m_hitFeedbackSeq;
+
     public void ApplyLoadout(BattleLoadout loadout, TeammateCardDatabaseSO database)
     {
         if (loadout == null) return;
@@ -86,7 +91,52 @@ public class CharacterOnGame
         {
             m_txtName.text = character.Name;
         }
+        CacheAvatarDefaults();
         UpdateHealthText(character.health, character.health);
+    }
+
+    private void CacheAvatarDefaults()
+    {
+        if (m_avatarDefaultsCached || m_imgAvatar == null) return;
+        m_avatarBaseAnchoredPos = m_imgAvatar.rectTransform.anchoredPosition;
+        m_avatarBaseColor = m_imgAvatar.color;
+        m_avatarDefaultsCached = true;
+    }
+
+    public void PlayHitFeedback()
+    {
+        if (m_imgAvatar == null) return;
+        CacheAvatarDefaults();
+
+        m_hitFeedbackSeq?.Kill();
+        m_imgAvatar.DOKill();
+        m_imgAvatar.rectTransform.DOKill();
+
+        m_imgAvatar.rectTransform.anchoredPosition = m_avatarBaseAnchoredPos;
+        m_imgAvatar.color = new Color(1f, 0.28f, 0.28f, m_avatarBaseColor.a);
+
+        m_hitFeedbackSeq = DOTween.Sequence().SetLink(m_imgAvatar.gameObject)
+            .Join(m_imgAvatar.DOColor(m_avatarBaseColor, 0.28f).SetEase(Ease.OutQuad))
+            .Join(m_imgAvatar.rectTransform.DOShakeAnchorPos(0.28f, 14f, 24, 90f, false, true))
+            .OnComplete(() =>
+            {
+                if (m_imgAvatar != null)
+                {
+                    m_imgAvatar.color = m_avatarBaseColor;
+                    m_imgAvatar.rectTransform.anchoredPosition = m_avatarBaseAnchoredPos;
+                }
+            });
+    }
+
+    public void KillTweens()
+    {
+        m_Health?.DOKill();
+        m_hitFeedbackSeq?.Kill();
+        if (m_imgAvatar != null)
+        {
+            m_imgAvatar.DOKill();
+            m_imgAvatar.rectTransform.DOKill();
+        }
     }
 
     public void UpdateAttackTimer(float progress)
@@ -252,6 +302,10 @@ public class GameController : MonoBehaviour
         m_StageTitle.text = $"STAGE {SOManager.instance.CurrentLevelNumber}\n{Data.displayName}";
         SetupCharacter();
         SetupWeapon();
+        if (m_effAttack != null)
+        {
+            ObjectPoolManager.Instance.Prewarm(m_effAttack, 4);
+        }
         if (!openingPlayed) QueueConversations(ConversationTrigger.Start);
         StartCoroutine(PrepareBoard());
     }
@@ -298,8 +352,12 @@ public class GameController : MonoBehaviour
 
     void OnDestroy()
     {
-        Player.m_Health?.DOKill();
-        Enemy.m_Health?.DOKill();
+        Player?.KillTweens();
+        Enemy?.KillTweens();
+        if (ObjectPoolManager.HasInstance && m_effAttack != null)
+        {
+            ObjectPoolManager.Instance.ClearPool(m_effAttack.gameObject);
+        }
     }
 
     void SetupWeapon()
@@ -339,11 +397,15 @@ public class GameController : MonoBehaviour
             int rawDamage = Data.enemy.Character.attack + (m_EnemyLoadout != null ? m_EnemyLoadout.GetTotalAttackBonus() : 0);
             int reduction = m_PlayerLoadout != null ? m_PlayerLoadout.GetTotalDamageReduction() : 0;
             int finalDamage = Mathf.Max(1, rawDamage - reduction);
-            PlayAttackEffect();
-            enemyWeapon.Move(Player.m_imgAvatar.transform.position);
-            Attack(Player, ref m_PlayerHp, m_PlayerMaxHp,
-                finalDamage, ConversationTrigger.PlayerHealth);
             m_EnemyAttackProgress = 1f;
+
+            float effectZ = m_effAttack != null ? m_effAttack.transform.position.z : 0f;
+            Vector3 enemyStartWorld = GetAvatarWorldPosition(Enemy, effectZ);
+            LaunchAttackEffect(enemyStartWorld, Player, finalDamage, () =>
+            {
+                Attack(Player, ref m_PlayerHp, m_PlayerMaxHp,
+                    finalDamage, ConversationTrigger.PlayerHealth);
+            });
         }
 
         Enemy?.UpdateAttackTimer(m_EnemyAttackProgress);
@@ -606,6 +668,7 @@ public class GameController : MonoBehaviour
     {
         if (endGame) return;
         SoundManager.instance.PlaySfx(_attackAudio);
+        target?.PlayHitFeedback();
         float previous = hp;
         float minimumHp = target == Enemy ? maxHp * Data.finalStandEnemyHealth : 0f;
         hp = Mathf.Clamp(hp - damage, minimumHp, maxHp);
@@ -640,7 +703,32 @@ public class GameController : MonoBehaviour
     {
         if (Data == null || endGame || clearedItems < Constants.MinimumMatches) return;
 
-        Image avatar = Enemy != null ? Enemy.m_imgAvatar : null;
+        LaunchAttackEffect(boardPosition, Enemy, clearedItems, () =>
+        {
+            Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, clearedItems, ConversationTrigger.EnemyHealth);
+        });
+    }
+
+    private Vector3 GetAvatarWorldPosition(CharacterOnGame character, float effectZ)
+    {
+        Image avatar = character != null ? character.m_imgAvatar : null;
+        if (avatar == null) return new Vector3(0f, 0f, effectZ);
+
+        Canvas canvas = avatar.canvas != null ? avatar.canvas.rootCanvas : null;
+        Vector3 avatarCenterWorld = avatar.rectTransform.TransformPoint(avatar.rectTransform.rect.center);
+        Camera mainCamera = Camera.main;
+        Camera uiCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(uiCamera, avatarCenterWorld);
+        Vector3 worldPos = mainCamera != null
+            ? mainCamera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, Mathf.Abs(effectZ - mainCamera.transform.position.z)))
+            : avatarCenterWorld;
+        worldPos.z = effectZ;
+        return worldPos;
+    }
+
+    private void LaunchAttackEffect(Vector3 startPosition, CharacterOnGame target, int damageAmount, Action onHit)
+    {
+        Image avatar = target != null ? target.m_imgAvatar : null;
         Canvas canvas = avatar != null && avatar.canvas != null ? avatar.canvas.rootCanvas : null;
         RectTransform layer = canvas != null ? (RectTransform)canvas.transform : null;
         Vector3 avatarCenterWorld = avatar != null
@@ -650,28 +738,30 @@ public class GameController : MonoBehaviour
 
         if (m_effAttack == null || avatar == null)
         {
-            Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, clearedItems, ConversationTrigger.EnemyHealth);
-            if (layer != null) ShowMatchDamage(layer, targetLocal, clearedItems);
+            onHit?.Invoke();
+            if (layer != null) ShowMatchDamage(layer, targetLocal, damageAmount);
             return;
         }
 
         float effectZ = m_effAttack.transform.position.z;
-        Vector3 startWorld = new Vector3(boardPosition.x, boardPosition.y, effectZ);
-        Camera mainCamera = Camera.main;
-        Camera uiCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
-        Vector2 targetScreen = RectTransformUtility.WorldToScreenPoint(uiCamera, avatarCenterWorld);
-        Vector3 targetWorld = mainCamera != null
-            ? mainCamera.ScreenToWorldPoint(new Vector3(targetScreen.x, targetScreen.y, Mathf.Abs(effectZ - mainCamera.transform.position.z)))
-            : avatarCenterWorld;
-        targetWorld.z = effectZ;
+        Vector3 startWorld = new Vector3(startPosition.x, startPosition.y, effectZ);
+        Vector3 targetWorld = GetAvatarWorldPosition(target, effectZ);
 
         Vector2 dir = new Vector2(targetWorld.x - startWorld.x, targetWorld.y - startWorld.y);
         // BuffAttack_01 sword texture points straight up (+Y); Billboard startRotation is clockwise in radians.
         float swordRotationRad = dir.sqrMagnitude > 0.0001f ? Mathf.Atan2(dir.x, dir.y) : 0f;
 
-        ParticleSystem effect = Instantiate(m_effAttack, startWorld, m_effAttack.transform.rotation);
+        ParticleSystem effect = ObjectPoolManager.Instance.Rent(m_effAttack, startWorld, m_effAttack.transform.rotation);
+        if (effect == null)
+        {
+            onHit?.Invoke();
+            if (layer != null) ShowMatchDamage(layer, targetLocal, damageAmount);
+            return;
+        }
+
         effect.name = "MatchAttackEffect";
-        effect.gameObject.SetActive(true);
+        effect.transform.DOKill();
+        effect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         foreach (ParticleSystem ps in effect.GetComponentsInChildren<ParticleSystem>(true))
         {
             var main = ps.main;
@@ -683,32 +773,29 @@ public class GameController : MonoBehaviour
                 main.startRotation = swordRotationRad;
             }
         }
+        if (!effect.TryGetComponent<PooledParticleAutoReturn>(out _))
+        {
+            effect.gameObject.AddComponent<PooledParticleAutoReturn>();
+        }
         var rootMain = effect.main;
-        rootMain.stopAction = ParticleSystemStopAction.Destroy;
+        rootMain.stopAction = ParticleSystemStopAction.Callback;
         effect.Play(true);
 
         Vector3 approachDir = dir.sqrMagnitude > 0.0001f ? (Vector3)dir.normalized : Vector3.up;
         Vector3 windUpWorld = startWorld - approachDir * 0.9f;
         Vector3 recoilWorld = targetWorld - approachDir * 0.35f;
 
-        DOTween.Sequence().SetLink(effect.gameObject)
+        DOTween.Sequence().SetLink(effect.gameObject, LinkBehaviour.KillOnDisable)
             .AppendInterval(0.25f)
             .Append(effect.transform.DOMove(windUpWorld, 0.18f).SetEase(Ease.OutCubic))
             .Append(effect.transform.DOMove(targetWorld, 0.28f).SetEase(Ease.InCubic))
             .AppendCallback(() =>
             {
                 if (endGame) return;
-                Attack(Enemy, ref m_EnemyHp, m_EnemyMaxHp, clearedItems, ConversationTrigger.EnemyHealth);
-                if (layer != null) ShowMatchDamage(layer, targetLocal, clearedItems);
+                onHit?.Invoke();
+                if (layer != null) ShowMatchDamage(layer, targetLocal, damageAmount);
             })
             .Append(effect.transform.DOMove(recoilWorld, 0.12f).SetEase(Ease.OutBack));
-    }
-
-    private void PlayAttackEffect()
-    {
-        if (m_effAttack == null) return;
-        m_effAttack.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        m_effAttack.Play(true);
     }
 
     private void ShowMatchDamage(RectTransform layer, Vector2 target, int amount)
