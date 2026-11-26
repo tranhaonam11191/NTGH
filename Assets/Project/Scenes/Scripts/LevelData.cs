@@ -44,6 +44,22 @@ public class LevelData : ScriptableObject
     public bool HasStoryVideo => videoClip != null;
     public string GetStoryVideoKey() => videoClip != null ? $"{name}_{videoClip.name}" : string.Empty;
 
+    public string GetConversationKey(int conversationIndex)
+    {
+        if (conversations == null || conversationIndex < 0 || conversationIndex >= conversations.Count)
+        {
+            return string.Empty;
+        }
+
+        var group = conversations[conversationIndex];
+        if (group == null)
+        {
+            return string.Empty;
+        }
+
+        return $"{name}_conv_{conversationIndex}_{group.trigger}";
+    }
+
     public bool HasCombatants => defaultPlayer != null && defaultPlayer.Character != null &&
         defaultPlayer.Character.health > 0 && enemy != null && enemy.Character != null &&
         enemy.Character.health > 0;

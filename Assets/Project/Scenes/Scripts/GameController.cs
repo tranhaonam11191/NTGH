@@ -395,6 +395,7 @@ public class GameController : MonoBehaviour
     
     readonly HashSet<LevelConversation> m_Played = new HashSet<LevelConversation>();
     readonly List<ConversationData> m_PendingLines = new List<ConversationData>();
+    readonly List<string> m_PendingConversationKeys = new List<string>();
     bool m_ShowingStory;
     float m_PlayerHp, m_EnemyHp;
     int m_PlayerMaxHp, m_EnemyMaxHp;
@@ -473,10 +474,37 @@ public class GameController : MonoBehaviour
 
     void QueueConversations(ConversationTrigger moment, float previous = 0, float current = 0)
     {
-        foreach (var group in Data.conversations)
+        if (Data == null || Data.conversations == null) return;
+
+        User.EnsureLoaded();
+        for (int i = 0; i < Data.conversations.Count; i++)
         {
-            if (group == null || !group.Matches(moment, previous, current) || !m_Played.Add(group)) continue;
-            m_PendingLines.AddRange(group.lines);
+            var group = Data.conversations[i];
+            if (group == null || !group.Matches(moment, previous, current)) continue;
+
+            string convKey = Data.GetConversationKey(i);
+            if (User.data != null && User.data.IsConversationWatched(convKey)) continue;
+
+            if (!m_Played.Add(group)) continue;
+
+            int addedCount = 0;
+            if (group.lines != null)
+            {
+                for (int j = 0; j < group.lines.Count; j++)
+                {
+                    var line = group.lines[j];
+                    if (line != null)
+                    {
+                        m_PendingLines.Add(line);
+                        addedCount++;
+                    }
+                }
+            }
+
+            if (addedCount > 0 && !string.IsNullOrEmpty(convKey))
+            {
+                m_PendingConversationKeys.Add(convKey);
+            }
         }
     }
 
@@ -500,9 +528,19 @@ public class GameController : MonoBehaviour
         if (m_PendingLines.Count > 0)
         {
             var lines = m_PendingLines.ToArray();
+            var conversationKeys = m_PendingConversationKeys.ToArray();
             m_PendingLines.Clear();
+            m_PendingConversationKeys.Clear();
             m_ShowingStory = true;
-            StoryController.Show(lines, () => m_ShowingStory = false, showBattleShield: true);
+            StoryController.Show(lines, () =>
+            {
+                User.EnsureLoaded();
+                if (User.data != null && User.data.MarkConversationsWatched(conversationKeys))
+                {
+                    User.Save();
+                }
+                m_ShowingStory = false;
+            }, showBattleShield: true);
         }
         else if (endGame && !m_ResultShown)
         {

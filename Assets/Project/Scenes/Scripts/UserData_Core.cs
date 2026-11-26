@@ -121,6 +121,65 @@ public partial class UserData
     #region Migration
     public bool legacy_migrated = false;
     #endregion
+
+    #region Watched Conversations
+    public List<string> watched_conversations = new List<string>();
+
+    public bool IsConversationWatched(string conversationKey)
+    {
+        if (string.IsNullOrEmpty(conversationKey))
+        {
+            return false;
+        }
+
+        EnsureConversationsInitialized();
+        return watched_conversations.Contains(conversationKey);
+    }
+
+    public bool MarkConversationWatched(string conversationKey)
+    {
+        if (string.IsNullOrEmpty(conversationKey))
+        {
+            return false;
+        }
+
+        EnsureConversationsInitialized();
+        if (watched_conversations.Contains(conversationKey))
+        {
+            return false;
+        }
+
+        watched_conversations.Add(conversationKey);
+        return true;
+    }
+
+    public bool MarkConversationsWatched(IEnumerable<string> conversationKeys)
+    {
+        if (conversationKeys == null)
+        {
+            return false;
+        }
+
+        bool changed = false;
+        foreach (string key in conversationKeys)
+        {
+            if (MarkConversationWatched(key))
+            {
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    public void EnsureConversationsInitialized()
+    {
+        if (watched_conversations == null)
+        {
+            watched_conversations = new List<string>();
+        }
+    }
+    #endregion
 }
 
 public static partial class User
@@ -156,6 +215,7 @@ public static partial class User
             legacy_migrated = true
         };
         data.EnsureInventoryInitialized();
+        data.EnsureConversationsInitialized();
         data.EnsureHomeDefaults();
         data.EnsureHeartDefaults();
         data.EnsureBoosterStorage();
@@ -174,6 +234,7 @@ public static partial class User
         bool changed = false;
 
         data.EnsureInventoryInitialized();
+        data.EnsureConversationsInitialized();
         data.EnsureBoosterStorage();
         if (data.EnsureHomeDefaults())
         {

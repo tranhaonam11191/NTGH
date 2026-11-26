@@ -89,12 +89,43 @@ public class SOManager : MonoBehaviour
 
         m_Loading = true;
         Core.Init();
+        User.EnsureLoaded();
         var opening = new List<ConversationData>();
-        foreach (var group in level.conversations)
+        var openingKeys = new List<string>();
+        if (level.conversations != null)
         {
-            if (group?.trigger == ConversationTrigger.Start && group.lines != null)
-                opening.AddRange(group.lines.FindAll(line => line != null));
+            for (int i = 0; i < level.conversations.Count; i++)
+            {
+                var group = level.conversations[i];
+                if (group == null || group.trigger != ConversationTrigger.Start || group.lines == null)
+                {
+                    continue;
+                }
+
+                string convKey = level.GetConversationKey(i);
+                if (User.data != null && User.data.IsConversationWatched(convKey))
+                {
+                    continue;
+                }
+
+                int addedCount = 0;
+                for (int j = 0; j < group.lines.Count; j++)
+                {
+                    var line = group.lines[j];
+                    if (line != null)
+                    {
+                        opening.Add(line);
+                        addedCount++;
+                    }
+                }
+
+                if (addedCount > 0 && !string.IsNullOrEmpty(convKey))
+                {
+                    openingKeys.Add(convKey);
+                }
+            }
         }
+
         if (opening.Count == 0)
         {
             LoadBattle(level);
@@ -103,7 +134,24 @@ public class SOManager : MonoBehaviour
 
         Core.Load<Canvas>("StoryIntro", onSceneLoaded: canvas =>
             StoryController.Show(opening, newlyUnlockedIds =>
-                OnStoryIntroCompleted(level, newlyUnlockedIds, canvas)));
+            {
+                MarkConversationsWatched(openingKeys);
+                OnStoryIntroCompleted(level, newlyUnlockedIds, canvas);
+            }));
+    }
+
+    static void MarkConversationsWatched(IEnumerable<string> conversationKeys)
+    {
+        if (conversationKeys == null)
+        {
+            return;
+        }
+
+        User.EnsureLoaded();
+        if (User.data != null && User.data.MarkConversationsWatched(conversationKeys))
+        {
+            User.Save();
+        }
     }
 
     void OnStoryIntroCompleted(LevelData level, IReadOnlyList<string> newlyUnlockedIds, Canvas callerCanvas)
