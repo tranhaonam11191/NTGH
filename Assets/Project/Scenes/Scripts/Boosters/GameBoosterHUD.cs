@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using NTGH.UI;
 using TMPro;
@@ -25,8 +27,12 @@ namespace NTGH.Boosters
         [SerializeField] private CanvasGroup m_toastCanvasGroup;
         [SerializeField] private TextMeshProUGUI m_toastText;
 
+        private readonly List<GameObject> m_flyingIcons = new List<GameObject>();
+        private readonly List<Tween> m_activeIntroTweens = new List<Tween>();
         private Sequence m_toastSequence;
         private bool m_lastBoardBusy;
+        private bool m_hasIntroBoardBlock;
+        private bool m_introSequenceRunning;
 
         private void Awake()
         {
@@ -89,6 +95,8 @@ namespace NTGH.Boosters
         {
             m_toastSequence?.Kill();
             m_toastSequence = null;
+            CleanupIntroAnimations();
+            ReleaseIntroBoardBlock();
 
             if (m_cancelTargetingButton != null)
             {
@@ -113,15 +121,6 @@ namespace NTGH.Boosters
                 }
             }
 
-            User.EnsureLoaded();
-            if (User.data != null && m_database != null)
-            {
-                if (User.data.EnsureBoosterDefaults(m_database, GetCurrentLevelNumber()))
-                {
-                    User.Save();
-                }
-            }
-
             if (m_boosters != null)
             {
                 for (int i = 0; i < m_boosters.Length; i++)
@@ -132,6 +131,7 @@ namespace NTGH.Boosters
             }
 
             RefreshAllBoosters();
+            StartCoroutine(CheckAndShowBoosterIntroCoroutine());
         }
 
         private void Update()
@@ -143,6 +143,217 @@ namespace NTGH.Boosters
                 m_lastBoardBusy = busy;
                 RefreshAllBoosters();
             }
+        }
+
+        private IEnumerator CheckAndShowBoosterIntroCoroutine()
+        {
+            // Wait 1 frame so GameController.Setup runs, then wait until opening story dialogue finishes.
+            yield return null;
+            while (GameController.instance != null && GameController.instance.BlocksBoard)
+            {
+                yield return null;
+            }
+
+            if (m_database == null)
+            {
+                m_database = BoosterDatabaseSO.LoadDefault();
+            }
+
+            User.EnsureLoaded();
+            if (User.data == null || m_database == null)
+            {
+                yield break;
+            }
+
+            int levelNum = GetCurrentLevelNumber();
+            List<BoosterConfig> pending = User.data.GetPendingUnlockBoosters(m_database, levelNum);
+            if (pending == null || pending.Count == 0)
+            {
+                yield break;
+            }
+
+            m_introSequenceRunning = true;
+            AcquireIntroBoardBlock();
+
+            Canvas callerCanvas = GetComponentInParent<Canvas>();
+            BoosterIntroScreenController.Open(
+                pending,
+                HandleBoosterIntroClaimed,
+                callerCanvas: callerCanvas);
+        }
+
+        private void HandleBoosterIntroClaimed(
+            IReadOnlyList<BoosterConfig> configs,
+            IReadOnlyList<Vector3> startScreenPositions)
+        {
+            if (configs == null || configs.Count == 0)
+            {
+                FinishIntroSequence();
+                return;
+            }
+
+            Canvas rootCanvas = GetComponentInParent<Canvas>();
+            if (rootCanvas != null) rootCanvas = rootCanvas.rootCanvas;
+            RectTransform canvasRect = rootCanvas != null ? rootCanvas.transform as RectTransform : null;
+            Camera uiCam = rootCanvas != null && rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? rootCanvas.worldCamera
+                : null;
+
+            int remaining = configs.Count;
+
+            for (int i = 0; i < configs.Count; i++)
+            {
+                BoosterConfig cfg = configs[i];
+                BoosterBase targetSlot = FindBoosterSlot(cfg.type);
+
+                if (targetSlot == null || canvasRect == null)
+                {
+                    User.EnsureLoaded();
+                    User.data?.ClaimBoosterUnlock(cfg);
+                    User.Save();
+                    remaining--;
+                    if (remaining <= 0) FinishIntroSequence();
+                    continue;
+                }
+
+                Vector2 startScreen = i < startScreenPositions.Count
+                    ? new Vector2(startScreenPositions[i].x, startScreenPositions[i].y)
+                    : new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+
+                RectTransform targetIconRt = targetSlot.IconRectTransform;
+                Vector3 targetWorldCenter = targetIconRt.TransformPoint(targetIconRt.rect.center);
+                Vector2 targetScreen = RectTransformUtility.WorldToScreenPoint(uiCam, targetWorldCenter);
+
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, startScreen, uiCam, out Vector2 startLocal);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, targetScreen, uiCam, out Vector2 endLocal);
+
+                // Spawn flying booster icon with the EXACT size of the in-game booster UI icon
+                Vector2 inGameIconSize = targetIconRt.rect.size;
+                if (inGameIconSize.x <= 1f || inGameIconSize.y <= 1f)
+                {
+                    inGameIconSize = new Vector2(96f, 96f);
+                }
+
+                GameObject flyGo = new GameObject($"FlyingBooster_{cfg.type}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                flyGo.layer = canvasRect.gameObject.layer;
+                RectTransform flyRt = flyGo.GetComponent<RectTransform>();
+                flyRt.SetParent(canvasRect, false);
+                flyRt.SetAsLastSibling();
+                flyRt.anchorMin = new Vector2(0.5f, 0.5f);
+                flyRt.anchorMax = new Vector2(0.5f, 0.5f);
+                flyRt.pivot = new Vector2(0.5f, 0.5f);
+                flyRt.sizeDelta = inGameIconSize;
+                flyRt.anchoredPosition = startLocal;
+                flyRt.localScale = Vector3.one * 0.85f;
+
+                Image flyImg = flyGo.GetComponent<Image>();
+                flyImg.sprite = cfg.icon;
+                flyImg.preserveAspect = true;
+                flyImg.raycastTarget = false;
+
+                m_flyingIcons.Add(flyGo);
+
+                // Curved Bezier arc toward the target slot
+                Vector2 midLocal = (startLocal + endLocal) * 0.5f + new Vector2(0f, 110f);
+                float delay = 0.08f * i;
+                const float flyDuration = 0.52f;
+
+                Sequence flySeq = DOTween.Sequence().SetUpdate(true).SetLink(flyGo);
+                if (delay > 0f)
+                {
+                    flySeq.AppendInterval(delay);
+                }
+
+                flySeq.Append(flyRt.DOScale(Vector3.one, 0.12f).SetEase(Ease.OutBack));
+                flySeq.Join(DOVirtual.Float(0f, 1f, flyDuration, t =>
+                {
+                    if (flyRt == null) return;
+                    float omt = 1f - t;
+                    Vector2 pos = (omt * omt * startLocal) + (2f * omt * t * midLocal) + (t * t * endLocal);
+                    flyRt.anchoredPosition = pos;
+                }).SetEase(Ease.InOutCubic));
+
+                flySeq.OnComplete(() =>
+                {
+                    if (flyGo != null)
+                    {
+                        m_flyingIcons.Remove(flyGo);
+                        Destroy(flyGo);
+                    }
+
+                    User.EnsureLoaded();
+                    if (User.data != null)
+                    {
+                        User.data.ClaimBoosterUnlock(cfg);
+                        User.Save();
+                    }
+
+                    int newCount = User.data != null ? User.data.GetBoosterCount(cfg.type) : cfg.initialFreeCount;
+                    targetSlot.PlayUnlockAnimation(cfg, newCount, () =>
+                    {
+                        remaining--;
+                        if (remaining <= 0)
+                        {
+                            FinishIntroSequence();
+                        }
+                    });
+                });
+
+                m_activeIntroTweens.Add(flySeq);
+            }
+        }
+
+        private void FinishIntroSequence()
+        {
+            m_introSequenceRunning = false;
+            m_activeIntroTweens.Clear();
+            ReleaseIntroBoardBlock();
+            RefreshAllBoosters();
+        }
+
+        private BoosterBase FindBoosterSlot(BoosterType type)
+        {
+            if (m_boosters == null) return null;
+            for (int i = 0; i < m_boosters.Length; i++)
+            {
+                if (m_boosters[i] != null && m_boosters[i].BoosterType == type)
+                {
+                    return m_boosters[i];
+                }
+            }
+            return null;
+        }
+
+        private void AcquireIntroBoardBlock()
+        {
+            if (m_hasIntroBoardBlock || GameController.instance == null) return;
+            GameController.instance.PushBoosterPopupBlock();
+            m_hasIntroBoardBlock = true;
+        }
+
+        private void ReleaseIntroBoardBlock()
+        {
+            if (!m_hasIntroBoardBlock) return;
+            m_hasIntroBoardBlock = false;
+            GameController.instance?.PopBoosterPopupBlock();
+        }
+
+        private void CleanupIntroAnimations()
+        {
+            for (int i = 0; i < m_activeIntroTweens.Count; i++)
+            {
+                m_activeIntroTweens[i]?.Kill();
+            }
+            m_activeIntroTweens.Clear();
+
+            for (int i = 0; i < m_flyingIcons.Count; i++)
+            {
+                if (m_flyingIcons[i] != null)
+                {
+                    Destroy(m_flyingIcons[i]);
+                }
+            }
+            m_flyingIcons.Clear();
         }
 
         private int GetCurrentLevelNumber()
@@ -158,7 +369,10 @@ namespace NTGH.Boosters
 
         private void HandleBoosterCountChanged(BoosterType _, int __)
         {
-            RefreshAllBoosters();
+            if (!m_introSequenceRunning)
+            {
+                RefreshAllBoosters();
+            }
         }
 
         private void HandleBoosterModeChanged(BoosterType? activeMode)
@@ -192,7 +406,7 @@ namespace NTGH.Boosters
 
         private void HandleBoosterClicked(BoosterBase booster)
         {
-            if (booster == null || (GameController.instance != null && GameController.instance.BlocksBoard))
+            if (booster == null || m_introSequenceRunning || (GameController.instance != null && GameController.instance.BlocksBoard))
             {
                 return;
             }
@@ -212,8 +426,11 @@ namespace NTGH.Boosters
                 return;
             }
 
+            User.EnsureLoaded();
             int levelNum = GetCurrentLevelNumber();
-            if (!config.IsUnlockedAtLevel(levelNum))
+            bool isUnlocked = config.IsUnlockedAtLevel(levelNum) &&
+                (User.data == null || User.data.HasClaimedBoosterUnlock(type));
+            if (!isUnlocked)
             {
                 ShowToast($"Mở khóa ở Màn {config.unlockLevel}!");
                 return;
@@ -225,7 +442,6 @@ namespace NTGH.Boosters
                 return;
             }
 
-            User.EnsureLoaded();
             int count = User.data != null ? User.data.GetBoosterCount(type) : 0;
             if (count <= 0)
             {
@@ -280,7 +496,9 @@ namespace NTGH.Boosters
                 if (booster == null) continue;
 
                 BoosterConfig config = m_database != null ? m_database.GetConfig(booster.BoosterType) : null;
-                bool isUnlocked = config != null && config.IsUnlockedAtLevel(levelNum);
+                bool isUnlocked = config != null &&
+                    config.IsUnlockedAtLevel(levelNum) &&
+                    (User.data == null || User.data.HasClaimedBoosterUnlock(booster.BoosterType));
                 int count = User.data != null ? User.data.GetBoosterCount(booster.BoosterType) : 0;
                 bool isTargeting = activeBooster == booster;
 

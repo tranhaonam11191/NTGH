@@ -70,6 +70,71 @@ public partial class UserData
         return true;
     }
 
+    public bool HasClaimedBoosterUnlock(BoosterType type)
+    {
+        EnsureBoosterStorage();
+        return booster_granted_ids.Contains(GetBoosterKey(type));
+    }
+
+    /// <summary>
+    /// Returns all boosters that are unlocked at currentLevelNumber but have not yet been claimed via BoosterIntroScreen.
+    /// </summary>
+    public List<BoosterConfig> GetPendingUnlockBoosters(BoosterDatabaseSO database, int currentLevelNumber)
+    {
+        EnsureBoosterStorage();
+        var pending = new List<BoosterConfig>();
+        if (database == null || database.Boosters == null)
+        {
+            return pending;
+        }
+
+        int levelNum = Mathf.Max(1, currentLevelNumber);
+        for (int i = 0; i < database.Boosters.Count; i++)
+        {
+            BoosterConfig config = database.Boosters[i];
+            if (config == null || !config.IsUnlockedAtLevel(levelNum))
+            {
+                continue;
+            }
+
+            if (!HasClaimedBoosterUnlock(config.type))
+            {
+                pending.Add(config);
+            }
+        }
+
+        return pending;
+    }
+
+    /// <summary>
+    /// Marks a booster unlock as claimed and grants its initial free charges once.
+    /// </summary>
+    public bool ClaimBoosterUnlock(BoosterConfig config)
+    {
+        if (config == null) return false;
+        EnsureBoosterStorage();
+
+        string key = GetBoosterKey(config.type);
+        if (booster_granted_ids.Contains(key))
+        {
+            return false;
+        }
+
+        booster_granted_ids.Add(key);
+        int starter = Mathf.Max(0, config.initialFreeCount);
+        if (starter > 0)
+        {
+            AddBooster(config.type, starter);
+        }
+        else if (!booster_counts.ContainsKey(key))
+        {
+            booster_counts[key] = 0;
+            User.NotifyBoosterCountChanged(config.type, 0);
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Grants initial free charges once when the player reaches a booster's unlock level.
     /// Returns true if persisted state changed.
@@ -83,33 +148,11 @@ public partial class UserData
         }
 
         bool changed = false;
-        int levelNum = Mathf.Max(1, currentLevelNumber);
-
-        for (int i = 0; i < database.Boosters.Count; i++)
+        var pending = GetPendingUnlockBoosters(database, currentLevelNumber);
+        for (int i = 0; i < pending.Count; i++)
         {
-            BoosterConfig config = database.Boosters[i];
-            if (config == null || !config.IsUnlockedAtLevel(levelNum))
+            if (ClaimBoosterUnlock(pending[i]))
             {
-                continue;
-            }
-
-            string key = GetBoosterKey(config.type);
-            if (!booster_granted_ids.Contains(key))
-            {
-                booster_granted_ids.Add(key);
-                int starter = Mathf.Max(0, config.initialFreeCount);
-                if (starter > 0)
-                {
-                    int current = booster_counts.TryGetValue(key, out int existing) ? Mathf.Max(0, existing) : 0;
-                    int next = current + starter;
-                    booster_counts[key] = next;
-                    User.NotifyBoosterCountChanged(config.type, next);
-                }
-                else if (!booster_counts.ContainsKey(key))
-                {
-                    booster_counts[key] = 0;
-                }
-
                 changed = true;
             }
         }

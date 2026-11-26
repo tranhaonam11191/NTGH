@@ -38,12 +38,14 @@ namespace NTGH.Boosters
 
         private Action<BoosterBase> m_onClicked;
         private Tween m_pulseTween;
+        private Sequence m_unlockSequence;
         private Vector3 m_baseScale = Vector3.one;
         private bool m_baseScaleCached;
 
         public abstract BoosterType BoosterType { get; }
         public virtual bool RequiresTarget => true;
         public BoosterSlotVisualState CurrentState { get; private set; }
+        public RectTransform IconRectTransform => m_iconImage != null ? m_iconImage.rectTransform : transform as RectTransform;
 
         protected virtual void Awake()
         {
@@ -65,15 +67,124 @@ namespace NTGH.Boosters
         protected virtual void OnDisable()
         {
             KillPulseTween(restoreScale: true);
+            m_unlockSequence?.Kill();
+            m_unlockSequence = null;
         }
 
         protected virtual void OnDestroy()
         {
             KillPulseTween(restoreScale: false);
+            m_unlockSequence?.Kill();
+            m_unlockSequence = null;
             if (m_button != null)
             {
                 m_button.onClick.RemoveListener(HandleClick);
             }
+        }
+
+        /// <summary>
+        /// Plays the unlock reveal animation when a newly claimed booster flies into this slot.
+        /// </summary>
+        public void PlayUnlockAnimation(BoosterConfig config, int count, Action onComplete = null)
+        {
+            CacheBaseScale();
+            KillPulseTween(restoreScale: true);
+            m_unlockSequence?.Kill();
+            m_unlockSequence = null;
+
+            RefreshState(config, isUnlocked: true, count: count, isTargeting: false, isBoardBusy: false);
+
+            // Briefly keep lock overlay visible to animate it bursting away
+            CanvasGroup lockCg = null;
+            if (m_lockOverlay != null)
+            {
+                m_lockOverlay.SetActive(true);
+                m_lockOverlay.transform.localScale = Vector3.one;
+                lockCg = m_lockOverlay.GetComponent<CanvasGroup>();
+                if (lockCg == null) lockCg = m_lockOverlay.AddComponent<CanvasGroup>();
+                lockCg.alpha = 1f;
+            }
+
+            if (m_badgeRoot != null)
+            {
+                m_badgeRoot.transform.localScale = Vector3.zero;
+            }
+
+            Image hlImg = null;
+            if (m_activeHighlight != null)
+            {
+                m_activeHighlight.SetActive(true);
+                hlImg = m_activeHighlight.GetComponent<Image>();
+                if (hlImg != null)
+                {
+                    Color c = hlImg.color;
+                    c.a = 1f;
+                    hlImg.color = c;
+                }
+            }
+
+            if (SoundManager.instance != null)
+            {
+                SoundManager.instance.PlaySfx("ClearSFX");
+            }
+
+            Sequence seq = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
+
+            // Slot juicy punch
+            transform.localScale = m_baseScale * 0.88f;
+            seq.Append(transform.DOScale(m_baseScale * 1.22f, 0.16f).SetEase(Ease.OutQuad));
+            seq.Append(transform.DOScale(m_baseScale, 0.24f).SetEase(Ease.OutBack));
+
+            // Lock overlay burst out
+            if (m_lockOverlay != null && lockCg != null)
+            {
+                seq.Join(m_lockOverlay.transform.DOScale(1.35f, 0.22f).SetEase(Ease.OutQuad));
+                seq.Join(lockCg.DOFade(0f, 0.22f).SetEase(Ease.InQuad));
+            }
+
+            // Badge pop in
+            if (m_badgeRoot != null)
+            {
+                seq.Insert(0.14f, m_badgeRoot.transform.DOScale(Vector3.one, 0.28f).SetEase(Ease.OutBack));
+            }
+
+            // Highlight ring flash & fade
+            if (hlImg != null)
+            {
+                seq.Insert(0.18f, hlImg.DOFade(0f, 0.28f).SetEase(Ease.OutQuad));
+            }
+
+            seq.OnComplete(() =>
+            {
+                if (m_lockOverlay != null)
+                {
+                    m_lockOverlay.SetActive(false);
+                    m_lockOverlay.transform.localScale = Vector3.one;
+                    if (lockCg != null) lockCg.alpha = 1f;
+                }
+
+                if (m_activeHighlight != null)
+                {
+                    m_activeHighlight.SetActive(false);
+                    if (hlImg != null)
+                    {
+                        Color c = hlImg.color;
+                        c.a = 1f;
+                        hlImg.color = c;
+                    }
+                }
+
+                if (m_badgeRoot != null)
+                {
+                    m_badgeRoot.transform.localScale = Vector3.one;
+                }
+
+                transform.localScale = m_baseScale;
+                m_unlockSequence = null;
+                onComplete?.Invoke();
+            });
+
+            m_unlockSequence = seq;
         }
 
         private void CacheBaseScale()
