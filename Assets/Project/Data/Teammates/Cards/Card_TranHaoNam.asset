@@ -16,6 +16,10 @@ MonoBehaviour:
   m_displayName: "Tr\u1EA7n H\u1EA1o Nam"
   m_cardType: 0
   m_description: "\u0110\u1EA1i ca \u0110\u1ED3ng La Loan. T\u0103ng m\u1EA1nh s\xE1t th\u01B0\u01A1ng m\u1ED7i \u0111\xF2n t\u1EA5n c\xF4ng."
+  m_title: "Đại Ca Đồng La Loan"
+  m_faction: "Hồng Hưng"
+  m_detail: "Trần Hạo Nam — biểu tượng nghĩa khí của khu Đồng La Loan. Nổi tiếng với phong thái trầm tĩnh, trọng tình huynh đệ nhưng ra tay cực kỳ quyết đoán khi đối mặt kẻ thù."
+  m_skillDetail: "Khi xuất trận, mỗi lượt tấn công của bạn được cộng thêm +18 sát thương trực tiếp, giúp áp đảo đối thủ nhanh chóng."
   m_avatar: {fileID: 21300000, guid: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d, type: 3}
   m_effectValue: 18
   m_priceGold: 0

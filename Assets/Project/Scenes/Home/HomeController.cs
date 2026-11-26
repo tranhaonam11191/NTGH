@@ -35,6 +35,7 @@ public class HomeController : MonoBehaviour
     {
         if (Outfits != null)
             Outfits.RankChanged += OnOutfitUpgraded;
+        User.ResolveAbandonedBattleHeartAndSave();
         SetData();
 
         //AdsController.instance.RequestBanner();
@@ -246,7 +247,9 @@ public class HomeController : MonoBehaviour
 
     public void OnClickSettings()
     {
-        if (_soundSettings != null)
-            _soundSettings.Setup();
+        if (SOManager.instance != null)
+            SOManager.instance.PlayAudio("Click2");
+
+        SettingsPopupController.OpenForHome(GetComponentInChildren<Canvas>());
     }
 }

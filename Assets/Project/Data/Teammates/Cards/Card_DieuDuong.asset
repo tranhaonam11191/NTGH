@@ -16,6 +16,10 @@ MonoBehaviour:
   m_displayName: "Di\u1EC7u D\u01B0\u01A1ng"
   m_cardType: 1
   m_description: "M\u01B0u s\u0129 l\u1EA1nh l\xF9ng, gi\u1EA3m m\u1EA1nh s\xE1t th\u01B0\u01A1ng t\u1EEB \u0111\xF2n \u0111\xE1nh \u0111\u1ED1i th\u1EE7."
+  m_title: "Mưu Sĩ Lạnh Lùng"
+  m_faction: "Đông Anh"
+  m_detail: "Kẻ nắm giữ nhiều mưu lược thâm sâu của Đông Anh. Diệu Dương giỏi đọc vị thế trận, hóa giải thế công của địch và duy trì lợi thế bền bỉ cho cả đội hình."
+  m_skillDetail: "Khi xuất trận, Diệu Dương hóa giải thế công và giảm 12 sát thương từ mỗi đòn tấn công của kẻ địch."
   m_avatar: {fileID: 21300000, guid: 3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f, type: 3}
   m_effectValue: 12
   m_priceGold: 350

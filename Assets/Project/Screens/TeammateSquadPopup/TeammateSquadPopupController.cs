@@ -130,6 +130,10 @@ namespace NTGH.UI
                     if (m_squadSlotButtons[i] != null)
                     {
                         m_squadSlotButtons[i].onClick.AddListener(() => OnClickSquadSlot(slotIndex));
+                        if (m_squadSlotViews != null && i < m_squadSlotViews.Length && m_squadSlotViews[i] != null)
+                        {
+                            m_squadSlotViews[i].OpenDetailOnClick = false;
+                        }
                     }
                 }
             }
@@ -376,7 +380,7 @@ namespace NTGH.UI
             var badgeNew = itemGo.transform.Find("BadgeNew");
             if (badgeNew != null)
             {
-                badgeNew.gameObject.SetActive(m_sessionNewCardIds.Contains(card.Id));
+                badgeNew.gameObject.SetActive(false);
             }
 
             var effectTmp = itemGo.transform.Find("TxtEffect")?.GetComponent<TextMeshProUGUI>();

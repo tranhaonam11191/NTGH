@@ -1,6 +1,8 @@
 using DG.Tweening;
+using NTGH.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace NTGH.Teammates
@@ -10,7 +12,7 @@ namespace NTGH.Teammates
     /// Separates the reusable card frame/theme (Attack = red, Support = blue) from the character portrait,
     /// so a single card frame design can render any teammate character in both Battle HUD and Home Shop.
     /// </summary>
-    public class TeammateCardView : MonoBehaviour
+    public class TeammateCardView : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private Image m_cardBackground;
         [SerializeField] private Image m_cardBorder;
@@ -22,6 +24,8 @@ namespace NTGH.Teammates
         [SerializeField] private TextMeshProUGUI m_txtTypeBadge;
         [SerializeField] private Image m_miniBarFill;
         [SerializeField] private GameObject m_emptyIndicator;
+        [SerializeField] private GameObject m_badgeNew;
+        [SerializeField] private bool m_openDetailOnClick = true;
 
         private static readonly Color ColAttackBg = new Color(0.32f, 0.06f, 0.08f, 0.96f);
         private static readonly Color ColSupportBg = new Color(0.05f, 0.16f, 0.28f, 0.96f);
@@ -29,8 +33,16 @@ namespace NTGH.Teammates
         private static readonly Color ColAttackBorder = new Color(0.92f, 0.26f, 0.24f, 1f);
         private static readonly Color ColSupportBorder = new Color(0.20f, 0.72f, 0.96f, 1f);
         private static readonly Color ColEmptyBorder = new Color(0.38f, 0.42f, 0.48f, 0.55f);
+        private static readonly Color ColNewBadgeBg = new Color(0.96f, 0.22f, 0.28f, 1f);
+        private static readonly Color ColNewBadgeText = new Color(1f, 0.96f, 0.72f, 1f);
 
         public TeammateCardSO CurrentCard { get; private set; }
+        public TeammateCardThemeSO CurrentTheme { get; private set; }
+        public bool OpenDetailOnClick
+        {
+            get => m_openDetailOnClick;
+            set => m_openDetailOnClick = value;
+        }
 
         private Color m_baseBgColor = ColEmptyBg;
         private Color m_baseBorderColor = ColEmptyBorder;
@@ -39,12 +51,64 @@ namespace NTGH.Teammates
         private Vector3 m_baseScale = Vector3.one;
         private bool m_baseScaleCached;
         private Sequence m_highlightSeq;
+        private bool m_pendingSeenCheck;
+        private bool m_showingNewBadge;
+
+        private void Awake()
+        {
+            if (m_openDetailOnClick && m_cardBackground != null)
+            {
+                m_cardBackground.raycastTarget = true;
+            }
+
+            if (m_badgeNew == null)
+            {
+                var found = transform.Find("BadgeNew");
+                if (found != null) m_badgeNew = found.gameObject;
+            }
+
+            if (m_badgeNew != null)
+            {
+                m_badgeNew.SetActive(false);
+            }
+        }
+
+        private void OnEnable()
+        {
+            if (m_pendingSeenCheck && CurrentCard != null)
+            {
+                EvaluateFirstSeenBadge(CurrentCard);
+            }
+        }
+
+        private void OnDisable()
+        {
+            // Once hidden after being shown, subsequent appearances are no longer the first time.
+            if (m_showingNewBadge)
+            {
+                SetNewBadgeVisible(false);
+            }
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (!m_openDetailOnClick || CurrentCard == null) return;
+            if (eventData != null && eventData.dragging) return;
+
+            if (SOManager.instance != null)
+            {
+                SOManager.instance.PlayAudio("Click2");
+            }
+
+            CardDetailScreenController.Open(CurrentCard, CurrentTheme, GetComponentInParent<Canvas>());
+        }
 
         public void Bind(TeammateCardSO card, TeammateCardThemeSO theme = null, string emptyLabel = "TRỐNG")
         {
             KillHighlightTween(restoreVisuals: false);
             CacheBaseScale();
             CurrentCard = card;
+            CurrentTheme = theme;
 
             if (card == null)
             {
@@ -129,6 +193,119 @@ namespace NTGH.Teammates
             }
 
             CacheBaseColors();
+            EvaluateFirstSeenBadge(card);
+        }
+
+        private void EvaluateFirstSeenBadge(TeammateCardSO card)
+        {
+            if (!Application.isPlaying || card == null || string.IsNullOrEmpty(card.Id))
+            {
+                m_pendingSeenCheck = false;
+                SetNewBadgeVisible(false);
+                return;
+            }
+
+            if (!gameObject.activeInHierarchy)
+            {
+                m_pendingSeenCheck = true;
+                SetNewBadgeVisible(false);
+                return;
+            }
+
+            m_pendingSeenCheck = false;
+            User.EnsureLoaded();
+            if (User.data == null)
+            {
+                SetNewBadgeVisible(false);
+                return;
+            }
+
+            bool isFirstTimeSeen = !User.data.HasSeenTeammate(card.Id);
+            if (isFirstTimeSeen)
+            {
+                User.data.MarkTeammateSeen(card.Id);
+                User.Save();
+            }
+
+            SetNewBadgeVisible(isFirstTimeSeen);
+        }
+
+        private void SetNewBadgeVisible(bool visible)
+        {
+            m_showingNewBadge = visible;
+
+            if (!visible)
+            {
+                if (m_badgeNew != null)
+                {
+                    m_badgeNew.SetActive(false);
+                }
+                return;
+            }
+
+            EnsureNewBadge();
+            if (m_badgeNew != null)
+            {
+                m_badgeNew.SetActive(true);
+                m_badgeNew.transform.SetAsLastSibling();
+            }
+        }
+
+        private void EnsureNewBadge()
+        {
+            if (m_badgeNew != null) return;
+
+            var existing = transform.Find("BadgeNew");
+            if (existing != null)
+            {
+                m_badgeNew = existing.gameObject;
+                return;
+            }
+
+            var badgeGo = new GameObject("BadgeNew", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            badgeGo.layer = gameObject.layer;
+            var badgeRt = badgeGo.GetComponent<RectTransform>();
+            badgeRt.SetParent(transform, false);
+            badgeRt.anchorMin = new Vector2(0f, 1f);
+            badgeRt.anchorMax = new Vector2(0f, 1f);
+            badgeRt.pivot = new Vector2(0f, 1f);
+            badgeRt.anchoredPosition = new Vector2(6f, -6f);
+            badgeRt.sizeDelta = new Vector2(48f, 20f);
+
+            var bg = badgeGo.GetComponent<Image>();
+            if (m_typeBadgeBg != null && m_typeBadgeBg.sprite != null)
+            {
+                bg.sprite = m_typeBadgeBg.sprite;
+                bg.type = m_typeBadgeBg.type;
+                bg.pixelsPerUnitMultiplier = m_typeBadgeBg.pixelsPerUnitMultiplier;
+            }
+            bg.color = ColNewBadgeBg;
+            bg.raycastTarget = false;
+
+            var labelGo = new GameObject("Label", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            labelGo.layer = gameObject.layer;
+            var labelRt = labelGo.GetComponent<RectTransform>();
+            labelRt.SetParent(badgeRt, false);
+            labelRt.anchorMin = Vector2.zero;
+            labelRt.anchorMax = Vector2.one;
+            labelRt.offsetMin = Vector2.zero;
+            labelRt.offsetMax = Vector2.zero;
+
+            var tmp = labelGo.GetComponent<TextMeshProUGUI>();
+            var refTmp = m_txtTypeBadge != null ? m_txtTypeBadge : m_txtName;
+            if (refTmp != null && refTmp.font != null)
+            {
+                tmp.font = refTmp.font;
+            }
+            tmp.text = "NEW";
+            tmp.fontSize = 11f;
+            tmp.fontStyle = FontStyles.Bold;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = ColNewBadgeText;
+            tmp.raycastTarget = false;
+            tmp.textWrappingMode = TextWrappingModes.NoWrap;
+
+            m_badgeNew = badgeGo;
         }
 
         private void CacheBaseScale()
@@ -225,6 +402,8 @@ namespace NTGH.Teammates
 
         private void ApplyEmptyState(string emptyLabel)
         {
+            m_pendingSeenCheck = false;
+            SetNewBadgeVisible(false);
             if (m_emptyIndicator != null) m_emptyIndicator.SetActive(true);
 
             if (m_cardBackground != null)
@@ -268,7 +447,8 @@ namespace NTGH.Teammates
             TextMeshProUGUI txtStat,
             Image typeBadgeBg,
             TextMeshProUGUI txtTypeBadge,
-            Image miniBarFill)
+            Image miniBarFill,
+            GameObject badgeNew = null)
         {
             m_cardBackground = cardBackground;
             m_cardBorder = cardBorder;
@@ -279,6 +459,7 @@ namespace NTGH.Teammates
             m_typeBadgeBg = typeBadgeBg;
             m_txtTypeBadge = txtTypeBadge;
             m_miniBarFill = miniBarFill;
+            if (badgeNew != null) m_badgeNew = badgeNew;
         }
     }
 }

@@ -30,7 +30,7 @@ MonoBehaviour:
     m_subtitle: "H\u1ED3ng C\xF4n \u2022 +150 HP"
     m_groupLabel: 
     m_previewSprite: {fileID: 21300000, guid: 9498c2bdcdb905f4b9a2f997124fb502, type: 3}
-    m_unlockMethod: 1
+    m_unlockMethod: 2
     m_priceGold: 500
     m_adsRequired: 1
     m_payload: outfit_lv2_hongcon
@@ -49,7 +49,7 @@ MonoBehaviour:
     m_groupLabel: 
     m_previewSprite: {fileID: 21300000, guid: fd77105a45f333e48a4b08d994fdecd2, type: 3}
     m_unlockMethod: 1
-    m_priceGold: 3500
+    m_priceGold: 50000
     m_adsRequired: 1
     m_payload: outfit_lv4_nhilo
   - m_id: outfit_lv5_longdau
@@ -57,7 +57,7 @@ MonoBehaviour:
     m_subtitle: "Long \u0110\u1EA7u \u2022 +1200 HP"
     m_groupLabel: 
     m_previewSprite: {fileID: 21300000, guid: 26ec701336092ec4b826ef82aad08694, type: 3}
-    m_unlockMethod: 2
-    m_priceGold: 8000
-    m_adsRequired: 2
+    m_unlockMethod: 1
+    m_priceGold: 100000
+    m_adsRequired: 1
     m_payload: outfit_lv5_longdau

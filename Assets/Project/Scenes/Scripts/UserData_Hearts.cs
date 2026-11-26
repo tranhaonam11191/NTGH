@@ -10,6 +10,8 @@ public partial class UserData
 
     int _hearts = MAX_HEARTS;
     long _heart_regen_start_utc_ticks = 0;
+    bool _pending_battle_heart = false;
+    long _pending_battle_utc_ticks = 0;
 
     [JsonProperty("hearts")]
     public int hearts
@@ -33,6 +35,20 @@ public partial class UserData
     {
         get => _heart_regen_start_utc_ticks;
         protected set => _heart_regen_start_utc_ticks = value < 0 ? 0 : value;
+    }
+
+    [JsonProperty("pending_battle_heart")]
+    public bool pending_battle_heart
+    {
+        get => _pending_battle_heart;
+        protected set => _pending_battle_heart = value;
+    }
+
+    [JsonProperty("pending_battle_utc_ticks")]
+    public long pending_battle_utc_ticks
+    {
+        get => _pending_battle_utc_ticks;
+        protected set => _pending_battle_utc_ticks = value < 0 ? 0 : value;
     }
 
     public bool IsHeartsFull()
@@ -232,6 +248,89 @@ public partial class UserData
     {
         return RefreshHearts();
     }
+
+    /// <summary>
+    /// Marks that a battle has started and reserves 1 heart penalty if the app is closed mid-battle.
+    /// Does not modify <see cref="hearts"/> so HeartDisplayView and in-session retry checks stay unaffected.
+    /// </summary>
+    public bool BeginBattleHeartReservation(DateTime? utcNowOverride = null)
+    {
+        DateTime now = utcNowOverride ?? DateTime.UtcNow;
+        RefreshHearts(now);
+
+        if (_hearts <= 0)
+        {
+            return false;
+        }
+
+        _pending_battle_heart = true;
+        _pending_battle_utc_ticks = now.Ticks;
+        return true;
+    }
+
+    /// <summary>
+    /// Clears the pending mid-battle heart reservation (e.g. when the player wins the battle).
+    /// </summary>
+    public bool ClearPendingBattleHeart()
+    {
+        if (!_pending_battle_heart && _pending_battle_utc_ticks == 0)
+        {
+            return false;
+        }
+
+        _pending_battle_heart = false;
+        _pending_battle_utc_ticks = 0;
+        return true;
+    }
+
+    /// <summary>
+    /// Clears any pending battle reservation and immediately consumes hearts (e.g. on defeat or Settings exit).
+    /// </summary>
+    public bool CommitPendingBattleHeartAndConsume(int amount = 1, DateTime? utcNowOverride = null)
+    {
+        bool cleared = ClearPendingBattleHeart();
+        bool consumed = ConsumeHeart(amount, utcNowOverride);
+        return cleared || consumed;
+    }
+
+    /// <summary>
+    /// Applies the 1-heart penalty for an abandoned battle from a previous session (force-close / crash).
+    /// Clamps the battle-start UTC timestamp safely so the 60-minute regen timer is accurate and never rewinds.
+    /// </summary>
+    public bool ResolveAbandonedBattleHeart(DateTime? utcNowOverride = null)
+    {
+        if (!_pending_battle_heart)
+        {
+            if (_pending_battle_utc_ticks != 0)
+            {
+                _pending_battle_utc_ticks = 0;
+                return true;
+            }
+
+            return false;
+        }
+
+        DateTime now = utcNowOverride ?? DateTime.UtcNow;
+        long targetTicks = _pending_battle_utc_ticks > 0 ? _pending_battle_utc_ticks : now.Ticks;
+
+        if (targetTicks > now.Ticks)
+        {
+            targetTicks = now.Ticks;
+        }
+
+        if (_hearts < MAX_HEARTS && _heart_regen_start_utc_ticks > 0 && targetTicks < _heart_regen_start_utc_ticks)
+        {
+            targetTicks = _heart_regen_start_utc_ticks;
+        }
+
+        DateTime penaltyUtc = new DateTime(targetTicks, DateTimeKind.Utc);
+        _pending_battle_heart = false;
+        _pending_battle_utc_ticks = 0;
+
+        ConsumeHeart(1, penaltyUtc);
+        RefreshHearts(now);
+        return true;
+    }
     #endregion
 }
 
@@ -248,6 +347,54 @@ public static partial class User
     {
         EnsureLoaded();
         if (data != null && data.RefreshHearts())
+        {
+            Save();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool BeginBattleHeartReservationAndSave()
+    {
+        EnsureLoaded();
+        if (data != null && data.BeginBattleHeartReservation())
+        {
+            Save();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool ClearPendingBattleHeartAndSave()
+    {
+        EnsureLoaded();
+        if (data != null && data.ClearPendingBattleHeart())
+        {
+            Save();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool CommitPendingBattleHeartAndSave(int amount = 1)
+    {
+        EnsureLoaded();
+        if (data != null && data.CommitPendingBattleHeartAndConsume(amount))
+        {
+            Save();
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool ResolveAbandonedBattleHeartAndSave()
+    {
+        EnsureLoaded();
+        if (data != null && data.ResolveAbandonedBattleHeart())
         {
             Save();
             return true;

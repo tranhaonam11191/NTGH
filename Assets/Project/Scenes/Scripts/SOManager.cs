@@ -15,8 +15,11 @@ public class SOManager : MonoBehaviour
     int m_LevelIndex;
     bool m_Loading;
 
-    public LevelData CurrentLevelData => m_Levels.Count == 0 ? null : m_Levels[m_LevelIndex];
+    public ArcsData ArcsData => m_ArcsData;
+    public LevelData CurrentLevelData => m_Levels == null || m_Levels.Count == 0 ? null : m_Levels[m_LevelIndex];
+    public int CurrentLevelIndex => m_LevelIndex;
     public int CurrentLevelNumber => m_LevelIndex + 1;
+    public int TotalLevels => m_Levels != null ? m_Levels.Count : 0;
 
     [SerializeField] CreateItemReward[] itemRewards;
 
@@ -177,6 +180,44 @@ public class SOManager : MonoBehaviour
             m_Loading = false;
             game.Setup(level, openingPlayed: true, playerLoadout: playerLoadout);
         });
+    }
+
+    /// <summary>
+    /// Debug helper: jumps directly to the specified 0-based flat level index in ArcsData,
+    /// bypassing heart checks and opening story cutscenes.
+    /// </summary>
+    public bool ForceLoadLevel(int flatIndex)
+    {
+        if (m_ArcsData != null)
+        {
+            m_Levels = m_ArcsData.GetOrderedLevels();
+        }
+
+        if (m_Levels == null || m_Levels.Count == 0 || flatIndex < 0 || flatIndex >= m_Levels.Count)
+        {
+            Debug.LogWarning($"[SOManager] ForceLoadLevel failed: invalid flatIndex {flatIndex}.", this);
+            return false;
+        }
+
+        var level = m_Levels[flatIndex];
+        if (level == null || !level.HasCombatants)
+        {
+            Debug.LogError($"[SOManager] ForceLoadLevel failed: level at index {flatIndex} has no valid combatants.", this);
+            return false;
+        }
+
+        m_LevelIndex = flatIndex;
+        User.EnsureLoaded();
+        if (User.data != null)
+        {
+            User.data.level = m_LevelIndex;
+            User.Save();
+        }
+
+        m_Loading = true;
+        Core.Init();
+        LoadBattle(level);
+        return true;
     }
 
     public BattleLoadout BuildPlayerBattleLoadout()

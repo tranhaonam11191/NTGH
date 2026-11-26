@@ -16,6 +16,10 @@ MonoBehaviour:
   m_displayName: "Qu\u1EA1 \u0110en"
   m_cardType: 0
   m_description: "M\xE3nh t\u01B0\u1EDBng \u0110\xF4ng Anh. S\xE1t th\u01B0\u01A1ng t\u1EA5n c\xF4ng c\u1EF1c \u0111\u1EA1i."
+  m_title: "Mãnh Tướng Đông Anh"
+  m_faction: "Đông Anh"
+  m_detail: "Nhân vật hung hãn khét tiếng giang hồ với lối đánh không khoan nhượng. Một khi Quạ Đen nhập cuộc, áp lực sát thương đè nặng lên đối thủ ở mọi lượt giao tranh."
+  m_skillDetail: "Khi xuất trận, Quạ Đen tung đòn kết liễu tàn bạo, cộng thêm +35 sát thương cho mỗi lượt tấn công."
   m_avatar: {fileID: 21300000, guid: 2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e, type: 3}
   m_effectValue: 35
   m_priceGold: 800

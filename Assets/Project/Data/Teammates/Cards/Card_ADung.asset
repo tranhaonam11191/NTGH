@@ -16,6 +16,10 @@ MonoBehaviour:
   m_displayName: "A D\u0169ng"
   m_cardType: 1
   m_description: "Huynh \u0111\u1EC7 trung th\xE0nh, che ch\u1EAFn gi\u1EA3m s\xE1t th\u01B0\u01A1ng \u0111\u1ECBch g\xE2y ra."
+  m_title: "Huynh Đệ Giao Báo"
+  m_faction: "Đồng La Loan"
+  m_detail: "Người anh em luôn sát cánh từ những ngày đầu bôn ba. Tuy không phô trương thanh thế nhưng luôn sẵn sàng lao ra đỡ đòn và bảo vệ đồng đội trong thời khắc nguy cấp."
+  m_skillDetail: "Khi xuất trận, A Dũng chủ động che chắn và giảm 8 sát thương từ mỗi đòn đánh của đối thủ."
   m_avatar: {fileID: 21300000, guid: 9364fa68948686243a4106d55c914ef1, type: 3}
   m_effectValue: 8
   m_priceGold: 0

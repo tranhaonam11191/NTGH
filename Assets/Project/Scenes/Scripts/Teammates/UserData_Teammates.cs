@@ -9,6 +9,7 @@ public partial class UserData
     public List<string> unlocked_teammate_ids = new List<string>();
     public List<string> equipped_teammate_ids = new List<string>();
     public List<string> unseen_teammate_ids = new List<string>();
+    public List<string> seen_teammate_ids = new List<string>();
 
     public bool IsTeammateUnlocked(string cardId)
     {
@@ -60,6 +61,32 @@ public partial class UserData
         EnsureTeammateDefaults();
         if (unseen_teammate_ids.Count == 0) return false;
         unseen_teammate_ids.Clear();
+        return true;
+    }
+
+    public bool HasSeenTeammate(string cardId)
+    {
+        if (string.IsNullOrEmpty(cardId)) return false;
+        EnsureTeammateDefaults();
+        return seen_teammate_ids.Contains(cardId);
+    }
+
+    public bool MarkTeammateSeen(string cardId)
+    {
+        if (string.IsNullOrEmpty(cardId)) return false;
+        EnsureTeammateDefaults();
+        unseen_teammate_ids.Remove(cardId);
+        if (seen_teammate_ids.Contains(cardId)) return false;
+
+        seen_teammate_ids.Add(cardId);
+        return true;
+    }
+
+    public bool ClearSeenTeammates()
+    {
+        EnsureTeammateDefaults();
+        if (seen_teammate_ids.Count == 0) return false;
+        seen_teammate_ids.Clear();
         return true;
     }
 
@@ -171,6 +198,12 @@ public partial class UserData
         if (unseen_teammate_ids == null)
         {
             unseen_teammate_ids = new List<string>();
+            changed = true;
+        }
+
+        if (seen_teammate_ids == null)
+        {
+            seen_teammate_ids = new List<string>();
             changed = true;
         }
 

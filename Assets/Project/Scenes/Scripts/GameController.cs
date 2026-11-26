@@ -409,8 +409,11 @@ public class GameController : MonoBehaviour
     float m_LastPlayerShieldTime = -10f;
     float m_LastEnemyShieldTime = -10f;
     int m_BoosterPopupOpenCount;
+    int m_SettingsPopupOpenCount;
+    int m_DebugPopupOpenCount;
 
-    public bool BlocksBoard => Data == null || endGame || m_ShowingStory || m_PendingLines.Count > 0 || m_BoosterPopupOpenCount > 0;
+    public bool BlocksBoard => Data == null || endGame || m_ShowingStory || m_PendingLines.Count > 0 || m_BoosterPopupOpenCount > 0 || m_SettingsPopupOpenCount > 0 || m_DebugPopupOpenCount > 0;
+    public Canvas BattleCanvas => GetBattleCanvas();
 
     public void PushBoosterPopupBlock()
     {
@@ -420,6 +423,57 @@ public class GameController : MonoBehaviour
     public void PopBoosterPopupBlock()
     {
         m_BoosterPopupOpenCount = Mathf.Max(0, m_BoosterPopupOpenCount - 1);
+    }
+
+    public void PushSettingsPopupBlock()
+    {
+        m_SettingsPopupOpenCount++;
+    }
+
+    public void PopSettingsPopupBlock()
+    {
+        m_SettingsPopupOpenCount = Mathf.Max(0, m_SettingsPopupOpenCount - 1);
+    }
+
+    public void PushDebugPopupBlock()
+    {
+        m_DebugPopupOpenCount++;
+    }
+
+    public void PopDebugPopupBlock()
+    {
+        m_DebugPopupOpenCount = Mathf.Max(0, m_DebugPopupOpenCount - 1);
+    }
+
+    public void OnClickSettings()
+    {
+        if (Data == null || endGame || m_ShowingStory || m_SettingsPopupOpenCount > 0)
+            return;
+
+        if (SOManager.instance != null)
+            SOManager.instance.PlayAudio("Click2");
+
+        PushSettingsPopupBlock();
+        SettingsPopupController.OpenForGame(
+            onExitGame: HandleExitGameFromSettings,
+            onClosed: PopSettingsPopupBlock,
+            callerCanvas: GetBattleCanvas());
+    }
+
+    private void HandleExitGameFromSettings()
+    {
+        if (endGame)
+            return;
+
+        endGame = true;
+        m_ResultShown = true;
+        canClick = false;
+        moving = false;
+
+        User.CommitPendingBattleHeartAndSave(1);
+
+        GetGameHeartDisplay()?.RefreshFromUserData();
+        SOManager.LoadHome();
     }
 
     IEnumerator Start()
@@ -439,6 +493,7 @@ public class GameController : MonoBehaviour
             return;
         }
         Data = level;
+        User.BeginBattleHeartReservationAndSave();
         m_PlayerLoadout = playerLoadout ?? (SOManager.instance != null ? SOManager.instance.BuildPlayerBattleLoadout() : new BattleLoadout());
         m_EnemyLoadout = SOManager.instance != null ? SOManager.instance.BuildEnemyBattleLoadout(Data.enemy) : new BattleLoadout();
 
@@ -623,7 +678,7 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            User.data.ConsumeHeart(1);
+            User.data.CommitPendingBattleHeartAndConsume(1);
             User.Save();
         }
 
@@ -748,9 +803,9 @@ public class GameController : MonoBehaviour
     {
         if (Data == null || endGame) return;
 
-        if (m_HasClicked)
+        if (m_HasClicked && !BlocksBoard)
             m_SecondsSinceFirstClick += Time.deltaTime;
-        else if (!BlocksBoard)
+        else if (!m_HasClicked && !BlocksBoard)
             m_HasClicked = Input.GetMouseButtonDown(0);
 
         if (m_HasClicked)
@@ -1071,6 +1126,7 @@ public class GameController : MonoBehaviour
         m_Result = target == Enemy || survivedFinalHit ? resultType.win : resultType.lose;
         if (m_Result == resultType.win)
         {
+            User.ClearPendingBattleHeartAndSave();
             SOManager.instance.AdvanceAfterWin(Data);
             QueueConversations(ConversationTrigger.Victory);
         }

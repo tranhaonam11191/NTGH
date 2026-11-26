@@ -129,6 +129,7 @@ namespace NTGH.Editor
             User.data.unlocked_teammate_ids.Clear();
             User.data.equipped_teammate_ids.Clear();
             User.data.unseen_teammate_ids.Clear();
+            User.data.seen_teammate_ids.Clear();
             User.data.level = 0;
             User.data.EnsureTeammateDefaults(database);
             User.Save();
@@ -199,31 +200,51 @@ namespace NTGH.Editor
                     TeammateCardType.Attack,
                     "Assets/Project/Textures/Characters/TranHaoNam.png",
                     effectValue: 18, priceGold: 0, unlockedByDefault: true,
-                    "Đại ca Đồng La Loan. Tăng mạnh sát thương mỗi đòn tấn công."),
+                    description: "Đại ca Đồng La Loan. Tăng mạnh sát thương mỗi đòn tấn công.",
+                    title: "Đại Ca Đồng La Loan",
+                    faction: "Hồng Hưng",
+                    detail: "Trần Hạo Nam — biểu tượng nghĩa khí của khu Đồng La Loan. Nổi tiếng với phong thái trầm tĩnh, trọng tình huynh đệ nhưng ra tay cực kỳ quyết đoán khi đối mặt kẻ thù.",
+                    skillDetail: "Khi xuất trận, mỗi lượt tấn công của bạn được cộng thêm +18 sát thương trực tiếp, giúp áp đảo đối thủ nhanh chóng."),
                 CreateOrUpdateCard(
                     "Card_ADung", "tm_a_dung", "A Dũng",
                     TeammateCardType.Support,
                     "Assets/Project/Textures/Characters/a_dung_l01_giao_bao.png",
                     effectValue: 8, priceGold: 0, unlockedByDefault: true,
-                    "Huynh đệ trung thành, che chắn giảm sát thương địch gây ra."),
+                    description: "Huynh đệ trung thành, che chắn giảm sát thương địch gây ra.",
+                    title: "Huynh Đệ Giao Báo",
+                    faction: "Đồng La Loan",
+                    detail: "Người anh em luôn sát cánh từ những ngày đầu bôn ba. Tuy không phô trương thanh thế nhưng luôn sẵn sàng lao ra đỡ đòn và bảo vệ đồng đội trong thời khắc nguy cấp.",
+                    skillDetail: "Khi xuất trận, A Dũng chủ động che chắn và giảm 8 sát thương từ mỗi đòn đánh của đối thủ."),
                 CreateOrUpdateCard(
                     "Card_DieuDuong", "tm_dieu_duong", "Diệu Dương",
                     TeammateCardType.Support,
                     "Assets/Project/Textures/Characters/DieuDuong.png",
                     effectValue: 12, priceGold: 350, unlockedByDefault: false,
-                    "Mưu sĩ lạnh lùng, giảm mạnh sát thương từ đòn đánh đối thủ."),
+                    description: "Mưu sĩ lạnh lùng, giảm mạnh sát thương từ đòn đánh đối thủ.",
+                    title: "Mưu Sĩ Lạnh Lùng",
+                    faction: "Đông Anh",
+                    detail: "Kẻ nắm giữ nhiều mưu lược thâm sâu của Đông Anh. Diệu Dương giỏi đọc vị thế trận, hóa giải thế công của địch và duy trì lợi thế bền bỉ cho cả đội hình.",
+                    skillDetail: "Khi xuất trận, Diệu Dương hóa giải thế công và giảm 12 sát thương từ mỗi đòn tấn công của kẻ địch."),
                 CreateOrUpdateCard(
                     "Card_ThaiTu", "tm_thai_tu", "Thái Tử",
                     TeammateCardType.Attack,
                     "Assets/Project/Textures/Characters/ThaiTu.png",
                     effectValue: 25, priceGold: 400, unlockedByDefault: false,
-                    "Chiến thần Hồng Hưng. Cộng thêm sát thương bùng nổ khi ra đòn."),
+                    description: "Chiến thần Hồng Hưng. Cộng thêm sát thương bùng nổ khi ra đòn.",
+                    title: "Chiến Thần Hồng Hưng",
+                    faction: "Hồng Hưng",
+                    detail: "Cao thủ võ học khét tiếng bậc nhất Hồng Hưng. Thái Tử sở hữu lối đánh cương mãnh, tốc độ áp sát chớp nhoáng khiến mọi đối thủ đều phải dè chừng.",
+                    skillDetail: "Khi xuất trận, mỗi đòn tấn công được Thái Tử tiếp lực cộng thêm +25 sát thương bùng nổ."),
                 CreateOrUpdateCard(
                     "Card_QuaDen", "tm_qua_den", "Quạ Đen",
                     TeammateCardType.Attack,
                     "Assets/Project/Textures/Characters/QuaDen.png",
                     effectValue: 35, priceGold: 800, unlockedByDefault: false,
-                    "Mãnh tướng Đông Anh. Sát thương tấn công cực đại.")
+                    description: "Mãnh tướng Đông Anh. Sát thương tấn công cực đại.",
+                    title: "Mãnh Tướng Đông Anh",
+                    faction: "Đông Anh",
+                    detail: "Nhân vật hung hãn khét tiếng giang hồ với lối đánh không khoan nhượng. Một khi Quạ Đen nhập cuộc, áp lực sát thương đè nặng lên đối thủ ở mọi lượt giao tranh.",
+                    skillDetail: "Khi xuất trận, Quạ Đen tung đòn kết liễu tàn bạo, cộng thêm +35 sát thương cho mỗi lượt tấn công.")
             };
 
             var database = GetOrCreateAsset<TeammateCardDatabaseSO>(DatabasePath);
@@ -241,11 +262,15 @@ namespace NTGH.Editor
             int effectValue,
             int priceGold,
             bool unlockedByDefault,
-            string description)
+            string description,
+            string title = null,
+            string faction = null,
+            string detail = null,
+            string skillDetail = null)
         {
             var card = GetOrCreateAsset<TeammateCardSO>($"{CardsFolder}/{assetName}.asset");
             var avatar = AssetDatabase.LoadAssetAtPath<Sprite>(avatarPath);
-            card.Configure(id, displayName, cardType, avatar, effectValue, priceGold, unlockedByDefault, description);
+            card.Configure(id, displayName, cardType, avatar, effectValue, priceGold, unlockedByDefault, description, title, faction, detail, skillDetail);
             EditorUtility.SetDirty(card);
             return card;
         }
@@ -372,6 +397,7 @@ namespace NTGH.Editor
             for (int i = 0; i < 4; i++)
             {
                 var slotRt = BuildReusableCardUI(squadRow, $"SquadSlot_{i + 1}", 142f, 206f, out var view);
+                view.OpenDetailOnClick = false;
                 var btn = slotRt.gameObject.AddComponent<Button>();
                 slotViews[i] = view;
                 slotButtons[i] = btn;
@@ -459,22 +485,6 @@ namespace NTGH.Editor
             var btnActionLbl = CreateUI("Label", btnActionRect);
             StretchFull(btnActionLbl);
             MakeTMP(btnActionLbl, "XUẤT TRẬN", 16f, FontStyles.Bold, TextAlignmentOptions.Center, Color.white);
-
-            // NEW Badge (top-right corner of shop item)
-            var badgeNew = CreateUI("BadgeNew", shopItem);
-            badgeNew.anchorMin = new Vector2(1f, 1f);
-            badgeNew.anchorMax = new Vector2(1f, 1f);
-            badgeNew.pivot = new Vector2(1f, 1f);
-            badgeNew.anchoredPosition = new Vector2(-4f, -4f);
-            badgeNew.sizeDelta = new Vector2(64f, 26f);
-            var badgeNewImg = badgeNew.gameObject.AddComponent<Image>();
-            AssignSliced(badgeNewImg, PanelFillPath, new Color(0.96f, 0.22f, 0.28f, 1f));
-            badgeNewImg.raycastTarget = false;
-            var badgeNewLbl = CreateUI("Label", badgeNew);
-            StretchFull(badgeNewLbl);
-            var badgeNewTmp = MakeTMP(badgeNewLbl, "NEW", 14f, FontStyles.Bold, TextAlignmentOptions.Center, new Color(1f, 0.96f, 0.72f, 1f));
-            badgeNewTmp.raycastTarget = false;
-            badgeNew.gameObject.SetActive(false);
 
             // Pre-Battle Start Battle Button (bottom of panel, hidden in Home mode)
             var btnStartRect = CreateUI("BtnStartBattle", panel);
@@ -708,8 +718,24 @@ namespace NTGH.Editor
             AssignSliced(borderImg, BorderOuterPath, new Color(0.4f, 0.45f, 0.52f, 0.6f), 2.2f);
             borderImg.raycastTarget = false;
 
+            // First-seen NEW badge (top-left corner of card, opposite TypeBadge)
+            var badgeNew = CreateUI("BadgeNew", card);
+            badgeNew.anchorMin = new Vector2(0f, 1f);
+            badgeNew.anchorMax = new Vector2(0f, 1f);
+            badgeNew.pivot = new Vector2(0f, 1f);
+            badgeNew.anchoredPosition = new Vector2(6f, -6f);
+            badgeNew.sizeDelta = new Vector2(48f, 20f);
+            var badgeNewImg = badgeNew.gameObject.AddComponent<Image>();
+            AssignSliced(badgeNewImg, PanelFillPath, new Color(0.96f, 0.22f, 0.28f, 1f), 2.5f);
+            badgeNewImg.raycastTarget = false;
+            var badgeNewLbl = CreateUI("Label", badgeNew);
+            StretchFull(badgeNewLbl);
+            var badgeNewTmp = MakeTMP(badgeNewLbl, "NEW", 11f, FontStyles.Bold, TextAlignmentOptions.Center, new Color(1f, 0.96f, 0.72f, 1f));
+            badgeNewTmp.raycastTarget = false;
+            badgeNew.gameObject.SetActive(false);
+
             view = card.gameObject.AddComponent<TeammateCardView>();
-            view.SetReferences(bgImg, borderImg, pImg, fitter, nameTmp, statTmp, badgeBg, badgeTmp, null);
+            view.SetReferences(bgImg, borderImg, pImg, fitter, nameTmp, statTmp, badgeBg, badgeTmp, null, badgeNew.gameObject);
             return card;
         }
 

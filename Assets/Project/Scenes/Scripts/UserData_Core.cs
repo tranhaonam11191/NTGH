@@ -195,6 +195,7 @@ public static partial class User
     private static void Bootstrap()
     {
         EnsureLoaded();
+        ResolveAbandonedBattleHeartAndSave();
     }
 
     public static void EnsureLoaded()
