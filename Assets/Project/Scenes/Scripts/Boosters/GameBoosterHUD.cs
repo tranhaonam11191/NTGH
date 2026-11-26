@@ -13,8 +13,8 @@ namespace NTGH.Boosters
         [SerializeField] private BoosterDatabaseSO m_database;
         [SerializeField] private ShapesManager m_shapesManager;
 
-        [Header("Slots (Order: Hammer, FreeSwap, LineBlast, Shuffle)")]
-        [SerializeField] private BoosterSlotView[] m_slots;
+        [Header("Booster Prefab Instances (Concrete BoosterBase Subclasses)")]
+        [SerializeField] private BoosterBase[] m_boosters;
 
         [Header("Targeting Banner")]
         [SerializeField] private GameObject m_targetingBanner;
@@ -38,6 +38,11 @@ namespace NTGH.Boosters
             if (m_shapesManager == null)
             {
                 m_shapesManager = FindFirstObjectByType<ShapesManager>();
+            }
+
+            if (m_boosters == null || m_boosters.Length == 0)
+            {
+                m_boosters = GetComponentsInChildren<BoosterBase>(true);
             }
 
             if (m_cancelTargetingButton != null)
@@ -117,16 +122,16 @@ namespace NTGH.Boosters
                 }
             }
 
-            if (m_slots != null)
+            if (m_boosters != null)
             {
-                for (int i = 0; i < m_slots.Length; i++)
+                for (int i = 0; i < m_boosters.Length; i++)
                 {
-                    if (m_slots[i] == null) continue;
-                    m_slots[i].Bind(m_slots[i].BoosterType, HandleSlotClicked);
+                    if (m_boosters[i] == null) continue;
+                    m_boosters[i].Bind(HandleBoosterClicked);
                 }
             }
 
-            RefreshAllSlots();
+            RefreshAllBoosters();
         }
 
         private void Update()
@@ -136,7 +141,7 @@ namespace NTGH.Boosters
             if (busy != m_lastBoardBusy)
             {
                 m_lastBoardBusy = busy;
-                RefreshAllSlots();
+                RefreshAllBoosters();
             }
         }
 
@@ -153,7 +158,7 @@ namespace NTGH.Boosters
 
         private void HandleBoosterCountChanged(BoosterType _, int __)
         {
-            RefreshAllSlots();
+            RefreshAllBoosters();
         }
 
         private void HandleBoosterModeChanged(BoosterType? activeMode)
@@ -171,12 +176,12 @@ namespace NTGH.Boosters
                 }
             }
 
-            RefreshAllSlots();
+            RefreshAllBoosters();
         }
 
         private void HandleBoosterExecuted(BoosterType _)
         {
-            RefreshAllSlots();
+            RefreshAllBoosters();
         }
 
         private void OnClickCancelTargeting()
@@ -185,9 +190,9 @@ namespace NTGH.Boosters
             m_shapesManager?.CancelBoosterMode();
         }
 
-        private void HandleSlotClicked(BoosterType type)
+        private void HandleBoosterClicked(BoosterBase booster)
         {
-            if (GameController.instance != null && GameController.instance.BlocksBoard)
+            if (booster == null || (GameController.instance != null && GameController.instance.BlocksBoard))
             {
                 return;
             }
@@ -199,6 +204,7 @@ namespace NTGH.Boosters
                 m_database = BoosterDatabaseSO.LoadDefault();
             }
 
+            BoosterType type = booster.BoosterType;
             BoosterConfig config = m_database != null ? m_database.GetConfig(type) : null;
             if (config == null)
             {
@@ -227,7 +233,7 @@ namespace NTGH.Boosters
                 Canvas callerCanvas = GetComponentInParent<Canvas>();
                 BuyBoosterPopupController.Open(
                     config,
-                    onPurchased: RefreshAllSlots,
+                    onPurchased: RefreshAllBoosters,
                     callerCanvas: callerCanvas);
                 return;
             }
@@ -242,7 +248,7 @@ namespace NTGH.Boosters
                 return;
             }
 
-            bool activated = m_shapesManager.TryActivateBooster(type, ConsumeBoosterCharge);
+            bool activated = m_shapesManager.TryActivateBooster(booster, ConsumeBoosterCharge);
             if (!activated)
             {
                 ShowToast("Đợi các ô rơi xong nhé!");
@@ -259,26 +265,26 @@ namespace NTGH.Boosters
             return true;
         }
 
-        public void RefreshAllSlots()
+        public void RefreshAllBoosters()
         {
-            if (m_slots == null) return;
+            if (m_boosters == null) return;
 
             User.EnsureLoaded();
             int levelNum = GetCurrentLevelNumber();
-            BoosterType? activeMode = m_shapesManager != null ? m_shapesManager.ActiveBoosterMode : null;
+            BoosterBase activeBooster = m_shapesManager != null ? m_shapesManager.ActiveBooster : null;
             bool isBusy = m_shapesManager != null && m_shapesManager.IsBoardBusy;
 
-            for (int i = 0; i < m_slots.Length; i++)
+            for (int i = 0; i < m_boosters.Length; i++)
             {
-                BoosterSlotView slot = m_slots[i];
-                if (slot == null) continue;
+                BoosterBase booster = m_boosters[i];
+                if (booster == null) continue;
 
-                BoosterConfig config = m_database != null ? m_database.GetConfig(slot.BoosterType) : null;
+                BoosterConfig config = m_database != null ? m_database.GetConfig(booster.BoosterType) : null;
                 bool isUnlocked = config != null && config.IsUnlockedAtLevel(levelNum);
-                int count = User.data != null ? User.data.GetBoosterCount(slot.BoosterType) : 0;
-                bool isTargeting = activeMode.HasValue && activeMode.Value == slot.BoosterType;
+                int count = User.data != null ? User.data.GetBoosterCount(booster.BoosterType) : 0;
+                bool isTargeting = activeBooster == booster;
 
-                slot.RefreshState(config, isUnlocked, count, isTargeting, isBusy);
+                booster.RefreshState(config, isUnlocked, count, isTargeting, isBusy);
             }
         }
 
@@ -309,7 +315,7 @@ namespace NTGH.Boosters
         public void SetEditorReferences(
             BoosterDatabaseSO database,
             ShapesManager shapesManager,
-            BoosterSlotView[] slots,
+            BoosterBase[] boosters,
             GameObject targetingBanner,
             TextMeshProUGUI targetingHintText,
             Button cancelTargetingButton,
@@ -318,7 +324,7 @@ namespace NTGH.Boosters
         {
             m_database = database;
             m_shapesManager = shapesManager;
-            m_slots = slots;
+            m_boosters = boosters;
             m_targetingBanner = targetingBanner;
             m_targetingHintText = targetingHintText;
             m_cancelTargetingButton = cancelTargetingButton;

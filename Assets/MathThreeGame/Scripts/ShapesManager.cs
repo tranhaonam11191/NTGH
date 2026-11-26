@@ -38,27 +38,24 @@ public class ShapesManager : MonoBehaviour
 
     // Booster runtime state & concurrency guards
     private bool m_isBoosterExecuting;
-    private BoosterType? m_activeBooster;
+    private BoosterBase m_activeBooster;
     private Func<BoosterType, bool> m_boosterConsumeCallback;
-    private GameObject m_freeSwapFirstGo;
-    private Vector3 m_freeSwapFirstBaseScale = Vector3.one;
-    private Color m_freeSwapFirstBaseColor = Color.white;
-    private bool m_freeSwapDragging;
 
     public bool IsBoardBusy => state == GameState.Animating || m_isBoosterExecuting;
-    public BoosterType? ActiveBoosterMode => m_activeBooster;
+    public BoosterBase ActiveBooster => m_activeBooster;
+    public BoosterType? ActiveBoosterMode => m_activeBooster != null ? m_activeBooster.BoosterType : (BoosterType?)null;
 
     public event Action<BoosterType?> OnBoosterModeChanged;
     public event Action<BoosterType> OnBoosterExecuted;
 
     private bool IsBoardBlocked => GameController.instance != null && GameController.instance.BlocksBoard;
 
-    private Vector2 GetCellWorldPosition(int row, int column)
+    public Vector2 GetCellWorldPosition(int row, int column)
     {
         return BottomRight + new Vector2(column * Constants.ItemSize.x, row * Constants.ItemSize.y);
     }
 
-    private static bool IsPointerOverUI()
+    public static bool IsPointerOverUI()
     {
         if (EventSystem.current == null) return false;
         if (EventSystem.current.IsPointerOverGameObject()) return true;
@@ -67,18 +64,51 @@ public class ShapesManager : MonoBehaviour
         return false;
     }
 
-    /// <summary>
-    /// Attempts to activate or toggle a booster. Returns false if the board is busy (falling/animating) or blocked.
-    /// </summary>
-    public bool TryActivateBooster(BoosterType type, Func<BoosterType, bool> consumeCallback)
+    public bool TryGetClickedValidTile(out GameObject tileGo)
     {
-        if (IsBoardBlocked || IsBoardBusy || shapes == null)
+        tileGo = null;
+        if (IsPointerOverUI() || shapes == null || Camera.main == null)
+        {
+            return false;
+        }
+
+        var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        if (hit.collider == null)
+        {
+            return false;
+        }
+
+        GameObject candidate = hit.collider.gameObject;
+        Shape shape = candidate.GetComponent<Shape>();
+        if (shape == null)
+        {
+            return false;
+        }
+
+        if (shape.Row < 0 || shape.Row >= Constants.Rows ||
+            shape.Column < 0 || shape.Column >= Constants.Columns ||
+            shapes[shape.Row, shape.Column] != candidate)
+        {
+            return false;
+        }
+
+        tileGo = candidate;
+        return true;
+    }
+
+    /// <summary>
+    /// Attempts to activate or toggle a concrete BoosterBase instance.
+    /// Returns false if the board is busy (falling/animating) or blocked.
+    /// </summary>
+    public bool TryActivateBooster(BoosterBase booster, Func<BoosterType, bool> consumeCallback)
+    {
+        if (booster == null || IsBoardBlocked || IsBoardBusy || shapes == null)
         {
             return false;
         }
 
         // Toggle off if player taps the same active targeting booster again.
-        if (m_activeBooster.HasValue && m_activeBooster.Value == type)
+        if (m_activeBooster == booster)
         {
             CancelBoosterMode();
             return true;
@@ -91,78 +121,96 @@ public class ShapesManager : MonoBehaviour
             state = GameState.None;
         }
 
-        ClearFreeSwapSelection();
-
-        if (type == BoosterType.Shuffle)
+        if (m_activeBooster != null)
         {
-            CancelBoosterMode();
+            m_activeBooster.OnTargetingCancelled(this);
+            m_activeBooster = null;
+            m_boosterConsumeCallback = null;
+        }
 
-            if (consumeCallback != null && !consumeCallback(BoosterType.Shuffle))
+        if (!booster.RequiresTarget)
+        {
+            OnBoosterModeChanged?.Invoke(null);
+
+            if (consumeCallback != null && !consumeCallback(booster.BoosterType))
             {
                 return false;
             }
 
-            // Lock board synchronously before starting coroutine to prevent same-frame double-triggers.
-            m_isBoosterExecuting = true;
-            state = GameState.Animating;
-            StopCheckForPotentialMatches();
-            StartCoroutine(ExecuteShuffleCoroutine());
+            StartBoosterCoroutine(booster.ExecuteImmediate(this), booster.BoosterType);
             return true;
         }
 
-        m_activeBooster = type;
+        m_activeBooster = booster;
         m_boosterConsumeCallback = consumeCallback;
         StopCheckForPotentialMatches();
-        OnBoosterModeChanged?.Invoke(m_activeBooster);
+        m_activeBooster.OnTargetingStarted(this);
+        OnBoosterModeChanged?.Invoke(m_activeBooster.BoosterType);
         return true;
     }
 
     public void CancelBoosterMode()
     {
-        ClearFreeSwapSelection();
-        bool hadActive = m_activeBooster.HasValue;
+        if (m_activeBooster == null)
+        {
+            return;
+        }
+
+        BoosterBase previous = m_activeBooster;
         m_activeBooster = null;
         m_boosterConsumeCallback = null;
 
-        if (hadActive)
+        previous.OnTargetingCancelled(this);
+        OnBoosterModeChanged?.Invoke(null);
+
+        if (!IsBoardBusy && !IsBoardBlocked)
         {
+            StartCheckForPotentialMatches();
+        }
+    }
+
+    public void StartBoosterCoroutine(IEnumerator routine, BoosterType boosterType)
+    {
+        if (routine == null) return;
+
+        if (m_activeBooster != null)
+        {
+            m_activeBooster = null;
+            m_boosterConsumeCallback = null;
             OnBoosterModeChanged?.Invoke(null);
-            if (!IsBoardBusy && !IsBoardBlocked)
-            {
-                StartCheckForPotentialMatches();
-            }
+        }
+
+        // Lock board synchronously before starting coroutine to prevent same-frame double-triggers.
+        m_isBoosterExecuting = true;
+        state = GameState.Animating;
+        StopCheckForPotentialMatches();
+        StartCoroutine(RunGuardedBoosterCoroutine(routine));
+    }
+
+    private IEnumerator RunGuardedBoosterCoroutine(IEnumerator routine)
+    {
+        try
+        {
+            yield return StartCoroutine(routine);
+        }
+        finally
+        {
+            m_isBoosterExecuting = false;
+            hitGo = null;
+            state = GameState.None;
+            StartCheckForPotentialMatches();
         }
     }
 
-    private void ClearFreeSwapSelection()
+    public void NotifyBoosterExecuted(BoosterType boosterType)
     {
-        m_freeSwapDragging = false;
-        if (m_freeSwapFirstGo != null)
-        {
-            m_freeSwapFirstGo.transform.localScale = m_freeSwapFirstBaseScale;
-            SpriteRenderer sr = m_freeSwapFirstGo.GetComponent<SpriteRenderer>();
-            if (sr != null)
-            {
-                sr.color = m_freeSwapFirstBaseColor;
-            }
-            m_freeSwapFirstGo = null;
-        }
+        OnBoosterExecuted?.Invoke(boosterType);
     }
 
-    private void SelectFreeSwapFirst(GameObject targetGo)
+    private bool TryConsumeActiveBoosterCharge()
     {
-        ClearFreeSwapSelection();
-        if (targetGo == null) return;
-
-        m_freeSwapFirstGo = targetGo;
-        m_freeSwapFirstBaseScale = targetGo.transform.localScale;
-        SpriteRenderer sr = targetGo.GetComponent<SpriteRenderer>();
-        if (sr != null)
-        {
-            m_freeSwapFirstBaseColor = sr.color;
-            sr.color = new Color(0.55f, 1f, 1f, 1f);
-        }
-        targetGo.transform.localScale = m_freeSwapFirstBaseScale * 1.12f;
+        if (m_activeBooster == null) return false;
+        return m_boosterConsumeCallback == null || m_boosterConsumeCallback(m_activeBooster.BoosterType);
     }
     void Awake()
     {
@@ -324,7 +372,7 @@ public class ShapesManager : MonoBehaviour
     {
         if (IsBoardBlocked)
         {
-            if (m_activeBooster.HasValue)
+            if (m_activeBooster != null)
             {
                 CancelBoosterMode();
             }
@@ -340,9 +388,9 @@ public class ShapesManager : MonoBehaviour
             return;
         }
 
-        if (m_activeBooster.HasValue)
+        if (m_activeBooster != null)
         {
-            HandleBoosterTargetingInput();
+            m_activeBooster.OnTargetingUpdate(this, TryConsumeActiveBoosterCharge);
             return;
         }
 
@@ -405,167 +453,12 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-    private void HandleBoosterTargetingInput()
-    {
-        if (!m_activeBooster.HasValue || IsBoardBusy || IsBoardBlocked)
-        {
-            return;
-        }
-
-        BoosterType active = m_activeBooster.Value;
-
-        if (active == BoosterType.FreeSwap)
-        {
-            HandleFreeSwapInput();
-            return;
-        }
-
-        if (!Input.GetMouseButtonDown(0) || IsPointerOverUI())
-        {
-            return;
-        }
-
-        var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-        if (hit.collider == null)
-        {
-            return;
-        }
-
-        GameObject targetGo = hit.collider.gameObject;
-        Shape targetShape = targetGo.GetComponent<Shape>();
-        if (targetShape == null || shapes == null)
-        {
-            return;
-        }
-
-        // Verify the clicked object is actually still registered at its grid cell.
-        if (targetShape.Row < 0 || targetShape.Row >= Constants.Rows ||
-            targetShape.Column < 0 || targetShape.Column >= Constants.Columns ||
-            shapes[targetShape.Row, targetShape.Column] != targetGo)
-        {
-            return;
-        }
-
-        var consume = m_boosterConsumeCallback;
-        if (consume != null && !consume(active))
-        {
-            CancelBoosterMode();
-            return;
-        }
-
-        m_activeBooster = null;
-        m_boosterConsumeCallback = null;
-        OnBoosterModeChanged?.Invoke(null);
-
-        // Lock board synchronously before starting coroutine.
-        m_isBoosterExecuting = true;
-        state = GameState.Animating;
-        StopCheckForPotentialMatches();
-
-        if (active == BoosterType.Hammer)
-        {
-            StartCoroutine(ExecuteClearTargetsCoroutine(new List<GameObject> { targetGo }, BoosterType.Hammer));
-        }
-        else if (active == BoosterType.LineBlast)
-        {
-            var targets = new List<GameObject>();
-            targets.AddRange(shapes.GetRow(targetShape.Row));
-            targets.AddRange(shapes.GetColumn(targetShape.Column));
-            StartCoroutine(ExecuteClearTargetsCoroutine(targets, BoosterType.LineBlast));
-        }
-    }
-
-    private void HandleFreeSwapInput()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (IsPointerOverUI()) return;
-
-            var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit.collider == null) return;
-
-            GameObject clickedGo = hit.collider.gameObject;
-            Shape clickedShape = clickedGo.GetComponent<Shape>();
-            if (clickedShape == null) return;
-
-            if (m_freeSwapFirstGo == null)
-            {
-                SelectFreeSwapFirst(clickedGo);
-                m_freeSwapDragging = true;
-                return;
-            }
-
-            if (m_freeSwapFirstGo == clickedGo)
-            {
-                ClearFreeSwapSelection();
-                return;
-            }
-
-            Shape firstShape = m_freeSwapFirstGo.GetComponent<Shape>();
-            if (firstShape != null && Utilities.AreVerticalOrHorizontalNeighbors(firstShape, clickedShape))
-            {
-                CommitFreeSwap(m_freeSwapFirstGo, clickedGo);
-            }
-            else
-            {
-                SelectFreeSwapFirst(clickedGo);
-                m_freeSwapDragging = true;
-            }
-        }
-        else if (m_freeSwapDragging && Input.GetMouseButton(0) && m_freeSwapFirstGo != null)
-        {
-            var hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit.collider == null || hit.collider.gameObject == m_freeSwapFirstGo) return;
-
-            GameObject secondGo = hit.collider.gameObject;
-            Shape firstShape = m_freeSwapFirstGo.GetComponent<Shape>();
-            Shape secondShape = secondGo.GetComponent<Shape>();
-            if (firstShape != null && secondShape != null &&
-                Utilities.AreVerticalOrHorizontalNeighbors(firstShape, secondShape))
-            {
-                CommitFreeSwap(m_freeSwapFirstGo, secondGo);
-            }
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            m_freeSwapDragging = false;
-        }
-    }
-
-    private void CommitFreeSwap(GameObject firstGo, GameObject secondGo)
-    {
-        if (firstGo == null || secondGo == null || IsBoardBusy || IsBoardBlocked)
-        {
-            ClearFreeSwapSelection();
-            return;
-        }
-
-        ClearFreeSwapSelection();
-
-        var consume = m_boosterConsumeCallback;
-        if (consume != null && !consume(BoosterType.FreeSwap))
-        {
-            CancelBoosterMode();
-            return;
-        }
-
-        m_activeBooster = null;
-        m_boosterConsumeCallback = null;
-        OnBoosterModeChanged?.Invoke(null);
-
-        m_isBoosterExecuting = true;
-        state = GameState.Animating;
-        StopCheckForPotentialMatches();
-        FixSortingLayer(firstGo, secondGo);
-        StartCoroutine(ExecuteFreeSwapCoroutine(firstGo, secondGo));
-    }
-
     /// <summary>
     /// Modifies sorting layers for better appearance when dragging/animating
     /// </summary>
     /// <param name="hitGo"></param>
     /// <param name="hitGo2"></param>
-    private void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
+    public void FixSortingLayer(GameObject hitGo, GameObject hitGo2)
     {
         SpriteRenderer sp1 = hitGo.GetComponent<SpriteRenderer>();
         SpriteRenderer sp2 = hitGo2.GetComponent<SpriteRenderer>();
@@ -644,247 +537,136 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-    private IEnumerator ExecuteFreeSwapCoroutine(GameObject firstGo, GameObject secondGo)
+    public IEnumerator ResolveSwapMatchesCoroutine(GameObject firstGo, GameObject secondGo)
     {
-        try
+        if (firstGo == null || secondGo == null || shapes == null)
         {
-            if (firstGo == null || secondGo == null)
-            {
-                yield break;
-            }
-
-            shapes.Swap(firstGo, secondGo);
-
-            Shape s1 = firstGo.GetComponent<Shape>();
-            Shape s2 = secondGo.GetComponent<Shape>();
-            Vector2 target1 = GetCellWorldPosition(s1.Row, s1.Column);
-            Vector2 target2 = GetCellWorldPosition(s2.Row, s2.Column);
-
-            Go.killAllTweensWithTarget(firstGo.transform);
-            Go.killAllTweensWithTarget(secondGo.transform);
-            firstGo.transform.positionTo(Constants.AnimationDuration, target1);
-            secondGo.transform.positionTo(Constants.AnimationDuration, target2);
-            yield return new WaitForSeconds(Constants.AnimationDuration);
-
-            SnapBoardPositions();
-            OnBoosterExecuted?.Invoke(BoosterType.FreeSwap);
-
-            // FreeSwap never undoes! If a match was formed, resolve & cascade normally.
-            var firstMatches = shapes.GetMatches(firstGo);
-            var secondMatches = shapes.GetMatches(secondGo);
-
-            var groups = new List<HashSet<GameObject>>();
-            AddMatchGroup(groups, firstMatches);
-            AddMatchGroup(groups, secondMatches);
-            var totalMatches = groups.SelectMany(group => group).ToList();
-
-            if (totalMatches.Count >= Constants.MinimumMatches)
-            {
-                bool addBonus = totalMatches.Count >= Constants.MinimumMatchesForBonus &&
-                    !BonusTypeUtilities.ContainsDestroyWholeRowColumn(firstMatches.BonusesContained) &&
-                    !BonusTypeUtilities.ContainsDestroyWholeRowColumn(secondMatches.BonusesContained);
-
-                Shape bonusAnchor = null;
-                if (addBonus)
-                {
-                    var sameTypeGo = firstMatches.MatchedCandy.Count() > 0 ? firstGo : secondGo;
-                    bonusAnchor = sameTypeGo.GetComponent<Shape>();
-                }
-
-                yield return StartCoroutine(ResolveMatchesAndCollapseLoop(groups, addBonus, bonusAnchor));
-            }
+            yield break;
         }
-        finally
+
+        var firstMatches = shapes.GetMatches(firstGo);
+        var secondMatches = shapes.GetMatches(secondGo);
+
+        var groups = new List<HashSet<GameObject>>();
+        AddMatchGroup(groups, firstMatches);
+        AddMatchGroup(groups, secondMatches);
+        var totalMatches = groups.SelectMany(group => group).ToList();
+
+        if (totalMatches.Count >= Constants.MinimumMatches)
         {
-            m_isBoosterExecuting = false;
-            hitGo = null;
-            state = GameState.None;
-            StartCheckForPotentialMatches();
+            bool addBonus = totalMatches.Count >= Constants.MinimumMatchesForBonus &&
+                !BonusTypeUtilities.ContainsDestroyWholeRowColumn(firstMatches.BonusesContained) &&
+                !BonusTypeUtilities.ContainsDestroyWholeRowColumn(secondMatches.BonusesContained);
+
+            Shape bonusAnchor = null;
+            if (addBonus)
+            {
+                var sameTypeGo = firstMatches.MatchedCandy.Count() > 0 ? firstGo : secondGo;
+                bonusAnchor = sameTypeGo.GetComponent<Shape>();
+            }
+
+            yield return StartCoroutine(ResolveMatchesAndCollapseLoop(groups, addBonus, bonusAnchor));
         }
     }
 
-    private IEnumerator ExecuteClearTargetsCoroutine(List<GameObject> initialTargets, BoosterType boosterType)
+    public IEnumerator ResolveAllBoardMatchesCoroutine()
     {
-        try
+        if (shapes == null) yield break;
+
+        var cascadeGroups = new List<HashSet<GameObject>>();
+        for (int row = 0; row < Constants.Rows; row++)
         {
-            // Expand chain reactions if any targeted tile carries a DestroyWholeRowColumn bonus.
-            var expanded = new HashSet<GameObject>();
-            var queue = new Queue<GameObject>();
-
-            for (int i = 0; i < initialTargets.Count; i++)
+            for (int col = 0; col < Constants.Columns; col++)
             {
-                GameObject go = initialTargets[i];
-                if (go != null && expanded.Add(go))
+                GameObject tile = shapes[row, col];
+                if (tile != null)
                 {
-                    queue.Enqueue(go);
+                    AddMatchGroup(cascadeGroups, shapes.GetMatches(tile));
                 }
             }
-
-            while (queue.Count > 0)
-            {
-                GameObject current = queue.Dequeue();
-                if (current == null) continue;
-                Shape s = current.GetComponent<Shape>();
-                if (s == null) continue;
-
-                if (BonusTypeUtilities.ContainsDestroyWholeRowColumn(s.Bonus))
-                {
-                    foreach (var extra in shapes.GetRow(s.Row))
-                    {
-                        if (extra != null && expanded.Add(extra)) queue.Enqueue(extra);
-                    }
-                    foreach (var extra in shapes.GetColumn(s.Column))
-                    {
-                        if (extra != null && expanded.Add(extra)) queue.Enqueue(extra);
-                    }
-                }
-            }
-
-            if (expanded.Count == 0)
-            {
-                yield break;
-            }
-
-            if (SoundManager.instance != null)
-            {
-                SoundManager.instance.PlaySfx("ClearSFX");
-            }
-
-            Vector3 center = Vector3.zero;
-            var affectedColumns = new HashSet<int>();
-            foreach (var item in expanded)
-            {
-                if (item == null) continue;
-                center += item.transform.position;
-                Shape shape = item.GetComponent<Shape>();
-                if (shape != null)
-                {
-                    affectedColumns.Add(shape.Column);
-                }
-                SpawnTileExplosion(item.transform.position);
-                Go.killAllTweensWithTarget(item.transform);
-                shapes.Remove(item);
-                Destroy(item);
-            }
-
-            IncreaseScore(expanded.Count * Constants.Match3Score);
-            GameController.instance?.AttackFromBooster(expanded.Count, center / expanded.Count);
-            OnBoosterExecuted?.Invoke(boosterType);
-
-            yield return StartCoroutine(CollapseSpawnAndCascadeCoroutine(affectedColumns));
         }
-        finally
+
+        if (cascadeGroups.Count > 0)
         {
-            m_isBoosterExecuting = false;
-            hitGo = null;
-            state = GameState.None;
-            StartCheckForPotentialMatches();
+            yield return StartCoroutine(ResolveMatchesAndCollapseLoop(cascadeGroups, false, null));
         }
     }
 
-    private IEnumerator ExecuteShuffleCoroutine()
+    public IEnumerator ClearTilesAndCascadeCoroutine(List<GameObject> initialTargets, BoosterType boosterType)
     {
-        try
+        if (initialTargets == null || initialTargets.Count == 0 || shapes == null)
         {
-            var allTiles = new List<GameObject>(Constants.Rows * Constants.Columns);
-            for (int row = 0; row < Constants.Rows; row++)
+            yield break;
+        }
+
+        // Expand chain reactions if any targeted tile carries a DestroyWholeRowColumn bonus.
+        var expanded = new HashSet<GameObject>();
+        var queue = new Queue<GameObject>();
+
+        for (int i = 0; i < initialTargets.Count; i++)
+        {
+            GameObject go = initialTargets[i];
+            if (go != null && expanded.Add(go))
             {
-                for (int col = 0; col < Constants.Columns; col++)
-                {
-                    if (shapes[row, col] != null)
-                    {
-                        allTiles.Add(shapes[row, col]);
-                    }
-                }
-            }
-
-            if (allTiles.Count < 2)
-            {
-                yield break;
-            }
-
-            List<GameObject> bestOrder = null;
-            List<GameObject> fallbackNoMatchOrder = null;
-            const int maxAttempts = 40;
-
-            for (int attempt = 0; attempt < maxAttempts; attempt++)
-            {
-                var candidate = new List<GameObject>(allTiles);
-                for (int i = candidate.Count - 1; i > 0; i--)
-                {
-                    int j = UnityEngine.Random.Range(0, i + 1);
-                    (candidate[i], candidate[j]) = (candidate[j], candidate[i]);
-                }
-
-                ApplyPermutationToArray(candidate);
-                bool hasImmediate = shapes.HasImmediateMatch();
-                bool hasPotential = Utilities.GetPotentialMatches(shapes) != null;
-
-                if (!hasImmediate && hasPotential)
-                {
-                    bestOrder = candidate;
-                    break;
-                }
-
-                if (!hasImmediate && fallbackNoMatchOrder == null)
-                {
-                    fallbackNoMatchOrder = candidate;
-                }
-            }
-
-            List<GameObject> chosen = bestOrder ?? fallbackNoMatchOrder ?? allTiles;
-            ApplyPermutationToArray(chosen);
-
-            if (SoundManager.instance != null)
-            {
-                SoundManager.instance.PlaySfx("ClearSFX");
-            }
-
-            const float shuffleDuration = 0.32f;
-            for (int row = 0; row < Constants.Rows; row++)
-            {
-                for (int col = 0; col < Constants.Columns; col++)
-                {
-                    GameObject tile = shapes[row, col];
-                    if (tile == null) continue;
-                    Go.killAllTweensWithTarget(tile.transform);
-                    tile.transform.positionTo(shuffleDuration, GetCellWorldPosition(row, col));
-                }
-            }
-
-            yield return new WaitForSeconds(shuffleDuration);
-            SnapBoardPositions();
-            OnBoosterExecuted?.Invoke(BoosterType.Shuffle);
-
-            // Safety: if board had too few distinct colors and an immediate match still exists, resolve it cleanly.
-            var cascadeGroups = new List<HashSet<GameObject>>();
-            for (int row = 0; row < Constants.Rows; row++)
-            {
-                for (int col = 0; col < Constants.Columns; col++)
-                {
-                    GameObject tile = shapes[row, col];
-                    if (tile != null)
-                    {
-                        AddMatchGroup(cascadeGroups, shapes.GetMatches(tile));
-                    }
-                }
-            }
-
-            if (cascadeGroups.Count > 0)
-            {
-                yield return StartCoroutine(ResolveMatchesAndCollapseLoop(cascadeGroups, false, null));
+                queue.Enqueue(go);
             }
         }
-        finally
+
+        while (queue.Count > 0)
         {
-            m_isBoosterExecuting = false;
-            hitGo = null;
-            state = GameState.None;
-            StartCheckForPotentialMatches();
+            GameObject current = queue.Dequeue();
+            if (current == null) continue;
+            Shape s = current.GetComponent<Shape>();
+            if (s == null) continue;
+
+            if (BonusTypeUtilities.ContainsDestroyWholeRowColumn(s.Bonus))
+            {
+                foreach (var extra in shapes.GetRow(s.Row))
+                {
+                    if (extra != null && expanded.Add(extra)) queue.Enqueue(extra);
+                }
+                foreach (var extra in shapes.GetColumn(s.Column))
+                {
+                    if (extra != null && expanded.Add(extra)) queue.Enqueue(extra);
+                }
+            }
         }
+
+        if (expanded.Count == 0)
+        {
+            yield break;
+        }
+
+        if (SoundManager.instance != null)
+        {
+            SoundManager.instance.PlaySfx("ClearSFX");
+        }
+
+        Vector3 center = Vector3.zero;
+        var affectedColumns = new HashSet<int>();
+        foreach (var item in expanded)
+        {
+            if (item == null) continue;
+            center += item.transform.position;
+            Shape shape = item.GetComponent<Shape>();
+            if (shape != null)
+            {
+                affectedColumns.Add(shape.Column);
+            }
+            SpawnTileExplosion(item.transform.position);
+            Go.killAllTweensWithTarget(item.transform);
+            shapes.Remove(item);
+            Destroy(item);
+        }
+
+        IncreaseScore(expanded.Count * Constants.Match3Score);
+        GameController.instance?.AttackFromBooster(expanded.Count, center / expanded.Count);
+        OnBoosterExecuted?.Invoke(boosterType);
+
+        yield return StartCoroutine(CollapseSpawnAndCascadeCoroutine(affectedColumns));
     }
 
-    private void ApplyPermutationToArray(List<GameObject> orderedTiles)
+    public void ApplyPermutationToArray(List<GameObject> orderedTiles)
     {
         int idx = 0;
         for (int row = 0; row < Constants.Rows; row++)
@@ -1011,7 +793,7 @@ public class ShapesManager : MonoBehaviour
         }
     }
 
-    private void SnapBoardPositions()
+    public void SnapBoardPositions()
     {
         if (shapes == null) return;
         for (int row = 0; row < Constants.Rows; row++)
@@ -1129,7 +911,7 @@ public class ShapesManager : MonoBehaviour
     /// <returns></returns>
     private GameObject GetRandomCandy()
     {
-        return CandyPrefabs[Random.Range(0, CandyPrefabs.Length)];
+        return CandyPrefabs[UnityEngine.Random.Range(0, CandyPrefabs.Length)];
     }
 
     private void InitializeVariables()

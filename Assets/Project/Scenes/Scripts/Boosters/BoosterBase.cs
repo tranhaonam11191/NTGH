@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -13,33 +14,38 @@ namespace NTGH.Boosters
         Empty
     }
 
+    /// <summary>
+    /// Abstract base class for all Match-3 boosters.
+    /// Each concrete booster prefab inherits from this class and implements its own gameplay logic.
+    /// </summary>
     [DisallowMultipleComponent]
-    public class BoosterSlotView : MonoBehaviour
+    public abstract class BoosterBase : MonoBehaviour
     {
         private static readonly Color GreenBadgeColor = new Color32(34, 197, 94, 255);
         private static readonly Color RedBadgeColor = new Color32(239, 68, 68, 255);
         private static readonly Color LockedIconTint = new Color(0.32f, 0.35f, 0.42f, 0.72f);
         private static readonly Color BusyIconTint = new Color(0.72f, 0.76f, 0.84f, 0.88f);
 
-        [SerializeField] private BoosterType m_boosterType = BoosterType.Hammer;
-        [SerializeField] private Button m_button;
-        [SerializeField] private Image m_iconImage;
-        [SerializeField] private GameObject m_lockOverlay;
-        [SerializeField] private TextMeshProUGUI m_lockLevelText;
-        [SerializeField] private GameObject m_badgeRoot;
-        [SerializeField] private Image m_badgeCircleImage;
-        [SerializeField] private TextMeshProUGUI m_badgeCountText;
-        [SerializeField] private GameObject m_activeHighlight;
+        [Header("Booster UI References")]
+        [SerializeField] protected Button m_button;
+        [SerializeField] protected Image m_iconImage;
+        [SerializeField] protected GameObject m_lockOverlay;
+        [SerializeField] protected TextMeshProUGUI m_lockLevelText;
+        [SerializeField] protected GameObject m_badgeRoot;
+        [SerializeField] protected Image m_badgeCircleImage;
+        [SerializeField] protected TextMeshProUGUI m_badgeCountText;
+        [SerializeField] protected GameObject m_activeHighlight;
 
-        private Action<BoosterType> m_onClicked;
+        private Action<BoosterBase> m_onClicked;
         private Tween m_pulseTween;
         private Vector3 m_baseScale = Vector3.one;
         private bool m_baseScaleCached;
 
-        public BoosterType BoosterType => m_boosterType;
+        public abstract BoosterType BoosterType { get; }
+        public virtual bool RequiresTarget => true;
         public BoosterSlotVisualState CurrentState { get; private set; }
 
-        private void Awake()
+        protected virtual void Awake()
         {
             CacheBaseScale();
             if (m_button == null)
@@ -56,12 +62,12 @@ namespace NTGH.Boosters
             }
         }
 
-        private void OnDisable()
+        protected virtual void OnDisable()
         {
             KillPulseTween(restoreScale: true);
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             KillPulseTween(restoreScale: false);
             if (m_button != null)
@@ -77,9 +83,8 @@ namespace NTGH.Boosters
             m_baseScaleCached = true;
         }
 
-        public void Bind(BoosterType type, Action<BoosterType> onClicked)
+        public void Bind(Action<BoosterBase> onClicked)
         {
-            m_boosterType = type;
             m_onClicked = onClicked;
         }
 
@@ -162,6 +167,31 @@ namespace NTGH.Boosters
             }
         }
 
+        /// <summary>
+        /// Called when this booster enters targeting mode (for RequiresTarget == true boosters).
+        /// </summary>
+        public virtual void OnTargetingStarted(ShapesManager board) { }
+
+        /// <summary>
+        /// Called when targeting mode is cancelled or interrupted before execution.
+        /// </summary>
+        public virtual void OnTargetingCancelled(ShapesManager board) { }
+
+        /// <summary>
+        /// Polled every frame while this booster is actively targeting and the board is idle & unblocked.
+        /// Subclasses must call tryConsumeCharge() right before committing execution.
+        /// </summary>
+        public virtual void OnTargetingUpdate(ShapesManager board, Func<bool> tryConsumeCharge) { }
+
+        /// <summary>
+        /// Executed immediately for boosters with RequiresTarget == false (e.g. Shuffle).
+        /// Board busy lock is already acquired before this coroutine starts.
+        /// </summary>
+        public virtual IEnumerator ExecuteImmediate(ShapesManager board)
+        {
+            yield break;
+        }
+
         private void StartPulseTween()
         {
             if (m_pulseTween != null && m_pulseTween.IsActive()) return;
@@ -185,11 +215,10 @@ namespace NTGH.Boosters
 
         private void HandleClick()
         {
-            m_onClicked?.Invoke(m_boosterType);
+            m_onClicked?.Invoke(this);
         }
 
         public void SetEditorReferences(
-            BoosterType boosterType,
             Button button,
             Image iconImage,
             GameObject lockOverlay,
@@ -199,7 +228,6 @@ namespace NTGH.Boosters
             TextMeshProUGUI badgeCountText,
             GameObject activeHighlight)
         {
-            m_boosterType = boosterType;
             m_button = button;
             m_iconImage = iconImage;
             m_lockOverlay = lockOverlay;
