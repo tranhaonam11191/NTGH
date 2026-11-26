@@ -18,7 +18,7 @@ MonoBehaviour:
     displayName: "B\xFAa Ph\xE1 \xD4"
     description: "Ph\xE1 h\u1EE7y ngay l\u1EADp t\u1EE9c 1 \xF4 b\u1EA5t k\u1EF3 tr\xEAn b\xE0n c\u1EDD v\xE0 g\xE2y s\xE1t th\u01B0\u01A1ng."
     targetingHint: "Ch\u1ECDn 1 \xF4 b\u1EA5t k\u1EF3 \u0111\u1EC3 ph\xE1 h\u1EE7y"
-    icon: {fileID: 21300000, guid: 6267d9a67e954e3cbe3596dd119060a0, type: 3}
+    icon: {fileID: 21300000, guid: 0ba009175809c8d449070614fd20a6ee, type: 3}
     unlockLevel: 1
     initialFreeCount: 2
     pricePack1: 150
@@ -28,7 +28,7 @@ MonoBehaviour:
     displayName: "\u0110\u1ED5i Ch\u1ED7 T\u1EF1 Do"
     description: "Ho\xE1n \u0111\u1ED5i 2 \xF4 k\u1EC1 nhau b\u1EA5t k\u1EF3 m\xE0 kh\xF4ng c\u1EA7n t\u1EA1o match-3."
     targetingHint: "Ch\u1ECDn ho\u1EB7c k\xE9o 2 \xF4 k\u1EC1 nhau \u0111\u1EC3 \u0111\u1ED5i ch\u1ED7"
-    icon: {fileID: 21300000, guid: efbed85d17d84c968db334480a6deab8, type: 3}
+    icon: {fileID: 21300000, guid: 703d053724993a44a81730b0f96ca806, type: 3}
     unlockLevel: 2
     initialFreeCount: 2
     pricePack1: 200
@@ -38,7 +38,7 @@ MonoBehaviour:
     displayName: "Ph\xE1 H\xE0ng & C\u1ED9t"
     description: "Qu\xE9t s\u1EA1ch to\xE0n b\u1ED9 h\xE0ng ngang v\xE0 c\u1ED9t d\u1ECDc \u0111i qua \xF4 \u0111\u01B0\u1EE3c ch\u1ECDn."
     targetingHint: "Ch\u1ECDn 1 \xF4 \u0111\u1EC3 ph\xE1 s\u1EA1ch c\u1EA3 h\xE0ng v\xE0 c\u1ED9t"
-    icon: {fileID: 21300000, guid: bc7787a6ae494bafb392af573183adb2, type: 3}
+    icon: {fileID: 21300000, guid: 82c7f25e8af683d4eb1a627579f2a73d, type: 3}
     unlockLevel: 3
     initialFreeCount: 2
     pricePack1: 300
@@ -48,7 +48,7 @@ MonoBehaviour:
     displayName: "X\xE1o Tr\u1ED9n B\xE0n"
     description: "X\xE1o tr\u1ED9n to\xE0n b\u1ED9 c\xE1c \xF4 tr\xEAn b\xE0n c\u1EDD \u0111\u1EC3 m\u1EDF ra n\u01B0\u1EDBc \u0111i m\u1EDBi."
     targetingHint: 
-    icon: {fileID: 21300000, guid: ba8cff199f3b4c56828b16a94f16ba63, type: 3}
+    icon: {fileID: 21300000, guid: cd536eabf5e199748a85a4fc30b96fd8, type: 3}
     unlockLevel: 4
     initialFreeCount: 2
     pricePack1: 150
